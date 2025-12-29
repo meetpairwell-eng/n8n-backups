@@ -1,0 +1,32 @@
+{
+  "updatedAt": "2025-12-29T02:46:03.304Z",
+  "createdAt": "2025-12-28T00:17:15.143Z",
+  "id": "nvkuqfEuZYaFfjMH",
+  "name": "BACKUP_TEST_STRESS",
+  "active": false,
+  "isArchived": false,
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "f2c592a3-9492-43be-a416-474f8553f7cf",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-28T00:17:15.143Z",
+      "createdAt": "2025-12-28T00:17:15.143Z",
+      "role": "workflow:owner",
+      "workflowId": "nvkuqfEuZYaFfjMH",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
