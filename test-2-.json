@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-29T19:55:40.677Z",
+  "updatedAt": "2025-12-29T20:00:15.579Z",
   "createdAt": "2025-12-29T19:55:40.677Z",
   "id": "dlvkGnyUqOU6waEL",
   "name": "Test 2",
@@ -45,6 +45,40 @@
       ],
       "id": "551bd33c-f455-4dac-998e-8b751910e67f",
       "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "4e26ab7d-6d90-4b7f-96f2-a8abeb3ffde8",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "150ceabf-65f9-44df-b6de-c23d7e9b3d14",
+      "name": "Filter"
     }
   ],
   "connections": {
@@ -58,6 +92,17 @@
           }
         ]
       ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -66,7 +111,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "742a1611-6415-47c4-aab5-102a351f8010",
+  "versionId": "dafc6acb-cf79-4f0f-aa62-15bd737e7802",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
