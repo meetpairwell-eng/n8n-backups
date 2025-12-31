@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2025-12-30T02:22:52.847Z",
+  "updatedAt": "2025-12-30T18:43:07.972Z",
   "createdAt": "2025-12-29T20:57:42.675Z",
   "id": "R4kUsFYE10O51wh9",
   "name": "Lead Capture",
@@ -48,6 +48,12 @@
               "id": "2369ab2c-b77b-4280-af56-9f5022521005",
               "name": "agentNotes",
               "value": "={{ $json.body.extraInfo }}",
+              "type": "string"
+            },
+            {
+              "id": "3b5ed697-f39e-4fe0-9959-2c643df333aa",
+              "name": "email ",
+              "value": "={{ $json.body.email}}",
               "type": "string"
             }
           ]
@@ -305,13 +311,16 @@
     },
     {
       "parameters": {
+        "from": "+18557748160",
+        "to": "={{ $json.phoneClean }}",
+        "message": "=Hey {{ $json.firstName }}, it’s Hector with Pairwell! I’ll be in touch soon to help match you with the right agent in {{ $json.Location }} . Feel free to reply here if you have any questions in the meantime!",
         "options": {}
       },
       "type": "n8n-nodes-base.twilio",
       "typeVersion": 1,
       "position": [
-        976,
-        -80
+        624,
+        208
       ],
       "id": "c221113a-bbe1-4fbc-8b0c-de2aef361237",
       "name": "Send an SMS/MMS/WhatsApp message",
@@ -320,7 +329,694 @@
           "id": "nvfG2dOdB5C32sfv",
           "name": "Twilio account"
         }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ $now.plus({ days: 1 }).set({ hour: 10, minute: 0, second: 0 }) }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        848,
+        208
+      ],
+      "id": "50175423-6722-41e6-b2d2-dec44d338a00",
+      "name": "Wait",
+      "webhookId": "d56e357d-b622-496c-bc03-b23f1d2a6202",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY",
+          "mode": "list",
+          "cachedResultName": "Pairwell Leads ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "RawData",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.Email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        464
+      ],
+      "id": "573d02e2-614c-4e7b-ae4e-67787cfc9935",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c9ad034c-addc-4bd6-a612-5ed31580c082",
+              "leftValue": "={{ $json.OptOut }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        944,
+        464
+      ],
+      "id": "bc16dac7-4714-4294-bfed-28d1810ef32c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1104,
+        32
+      ],
+      "id": "2647bb84-854f-42f1-b022-5813a76c430c",
+      "name": "Send a message",
+      "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        1280,
+        32
+      ],
+      "id": "7539a88b-0749-4277-9227-cfb451ae698c",
+      "name": "Send an SMS/MMS/WhatsApp message1",
+      "credentials": {
+        "twilioApi": {
+          "id": "nvfG2dOdB5C32sfv",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ $now.plus({ days: 1 }).set({ hour: 10, minute: 0, second: 0 }) }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1488,
+        208
+      ],
+      "id": "9149bf98-3a5f-4203-9344-d29e03d2768e",
+      "name": "Wait1",
+      "webhookId": "d56e357d-b622-496c-bc03-b23f1d2a6202",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY",
+          "mode": "list",
+          "cachedResultName": "Pairwell Leads ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "RawData",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.Email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1408,
+        464
+      ],
+      "id": "0a7dca93-c0f8-4dce-932b-70beb389328a",
+      "name": "Get row(s) in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c9ad034c-addc-4bd6-a612-5ed31580c082",
+              "leftValue": "={{ $json.OptOut }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1584,
+        464
+      ],
+      "id": "eb5a4129-f278-4a77-a806-87f5db981881",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ $now.plus({ days: 1 }).set({ hour: 10, minute: 0, second: 0 }) }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2192,
+        224
+      ],
+      "id": "7b4aa028-6bd6-4695-9ffd-42f3d1bd2f63",
+      "name": "Wait2",
+      "webhookId": "d56e357d-b622-496c-bc03-b23f1d2a6202",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY",
+          "mode": "list",
+          "cachedResultName": "Pairwell Leads ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "RawData",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.Email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2112,
+        464
+      ],
+      "id": "e1c30fb1-89ee-4753-bb2e-f8939c236d6f",
+      "name": "Get row(s) in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c9ad034c-addc-4bd6-a612-5ed31580c082",
+              "leftValue": "={{ $json.OptOut }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2288,
+        464
+      ],
+      "id": "56e55660-89a0-4fae-912d-2e4d2d5cb231",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ $now.plus({ days: 1 }).set({ hour: 10, minute: 0, second: 0 }) }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2864,
+        224
+      ],
+      "id": "d4d5ec2e-e216-4afb-ab8b-e67a6d979caa",
+      "name": "Wait3",
+      "webhookId": "d56e357d-b622-496c-bc03-b23f1d2a6202",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY",
+          "mode": "list",
+          "cachedResultName": "Pairwell Leads ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "RawData",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.Email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2784,
+        480
+      ],
+      "id": "cd0fd2e0-afa2-4c47-ba7c-ee58f52f8211",
+      "name": "Get row(s) in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c9ad034c-addc-4bd6-a612-5ed31580c082",
+              "leftValue": "={{ $json.OptOut }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2960,
+        480
+      ],
+      "id": "46e483c8-7fbe-4ba3-83d3-fb6274b0a3ed",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1744,
+        32
+      ],
+      "id": "308a61dc-adc4-430f-9e44-b3dce567957b",
+      "name": "Send a message1",
+      "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        32
+      ],
+      "id": "719dc0b4-9a48-4563-811c-d7e124811606",
+      "name": "Send an SMS/MMS/WhatsApp message2",
+      "credentials": {
+        "twilioApi": {
+          "id": "nvfG2dOdB5C32sfv",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2432,
+        48
+      ],
+      "id": "7de8137d-01b6-4eef-8313-a27309be7798",
+      "name": "Send a message2",
+      "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        2608,
+        48
+      ],
+      "id": "a4edbe4c-d48b-49d8-be33-404858b889d6",
+      "name": "Send an SMS/MMS/WhatsApp message3",
+      "credentials": {
+        "twilioApi": {
+          "id": "nvfG2dOdB5C32sfv",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Follow up 1\n",
+        "height": 80,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1168,
+        -112
+      ],
+      "id": "93978776-e368-488a-badc-8d046ac1d571",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Follow up 2\n",
+        "height": 80,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1808,
+        -112
+      ],
+      "id": "1d009731-a4e6-43e3-9b71-e6cf9125e8c1",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Follow up 3\n",
+        "height": 80,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2496,
+        -96
+      ],
+      "id": "fe24b268-193d-4c8d-a0d9-838f21a6bf85",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "resume": "specificTime",
+        "dateTime": "={{ $now.plus({ days: 1 }).set({ hour: 10, minute: 0, second: 0 }) }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3600,
+        240
+      ],
+      "id": "a4661877-34ad-46c0-8c9e-69798dcd035d",
+      "name": "Wait4",
+      "webhookId": "d56e357d-b622-496c-bc03-b23f1d2a6202",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY",
+          "mode": "list",
+          "cachedResultName": "Pairwell Leads ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "RawData",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Email",
+              "lookupValue": "={{ $json.Email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3520,
+        496
+      ],
+      "id": "3f0ac2f3-248e-4aac-8060-4483d816dec0",
+      "name": "Get row(s) in sheet4",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c9ad034c-addc-4bd6-a612-5ed31580c082",
+              "leftValue": "={{ $json.OptOut }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3696,
+        496
+      ],
+      "id": "34e782de-7e40-4f12-b4d8-411e4e65c542",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        3168,
+        64
+      ],
+      "id": "7691ffa8-ae2c-41df-8a88-575738eac316",
+      "name": "Send a message3",
+      "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        3344,
+        64
+      ],
+      "id": "5d9a52ef-41ef-4463-b51b-678362719f7e",
+      "name": "Send an SMS/MMS/WhatsApp message4",
+      "credentials": {
+        "twilioApi": {
+          "id": "nvfG2dOdB5C32sfv",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Final",
+        "height": 80,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3232,
+        -80
+      ],
+      "id": "750cc515-8006-4a19-8c53-8b1a00b27854",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Welcome",
+        "height": 80,
+        "width": 160
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        592,
+        -304
+      ],
+      "id": "1bdf2948-0b65-45c6-898a-5e9e45879696",
+      "name": "Sticky Note4"
     }
   ],
   "connections": {
@@ -358,6 +1054,11 @@
             "node": "Notification Email",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Send an SMS/MMS/WhatsApp message",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -365,6 +1066,263 @@
     "Welcome Email ": {
       "main": [
         []
+      ]
+    },
+    "Send an SMS/MMS/WhatsApp message": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Send an SMS/MMS/WhatsApp message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an SMS/MMS/WhatsApp message1": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet2": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet3": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Send an SMS/MMS/WhatsApp message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message2": {
+      "main": [
+        [
+          {
+            "node": "Send an SMS/MMS/WhatsApp message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an SMS/MMS/WhatsApp message2": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an SMS/MMS/WhatsApp message3": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet4": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message3": {
+      "main": [
+        [
+          {
+            "node": "Send an SMS/MMS/WhatsApp message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send an SMS/MMS/WhatsApp message4": {
+      "main": [
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send a message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -399,9 +1357,55 @@
           "item": 0
         }
       }
+    ],
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.meetpairwell.com",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36",
+            "content-length": "247",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "en-US,en;q=0.9",
+            "content-type": "application/json",
+            "origin": "https://www.meetpairwell.com",
+            "priority": "u=1, i",
+            "referer": "https://www.meetpairwell.com/",
+            "sec-ch-ua": "\"Google Chrome\";v=\"143\", \"Chromium\";v=\"143\", \"Not A(Brand\";v=\"24\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "x-forwarded-for": "24.178.212.146",
+            "x-forwarded-host": "n8n.meetpairwell.com",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "742ce9633541",
+            "x-real-ip": "24.178.212.146"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "location": "Dallas",
+            "homeType": "Townhome",
+            "budget": "$500k - $750k",
+            "timeline": "3-6 Months",
+            "lenderStatus": "I'm talking to a lender",
+            "extraInfo": "None",
+            "name": "Hector Meza",
+            "phone": "214 686 5641",
+            "email": "mezahector22@yahoo.com",
+            "smsConsent": true
+          },
+          "webhookUrl": "https://n8n.meetpairwell.com/webhook-test/2bb0f23f-78d1-49ac-8ebe-324298dbe5ed",
+          "executionMode": "test"
+        }
+      }
     ]
   },
-  "versionId": "48ea5fe8-ce29-49a4-a13a-34522d3502ad",
+  "versionId": "7be71395-bf27-4018-98fb-76515dced855",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
