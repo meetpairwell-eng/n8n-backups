@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-03T18:32:50.324Z",
+  "updatedAt": "2026-01-03T21:20:44.088Z",
   "createdAt": "2025-12-29T20:57:42.675Z",
   "id": "R4kUsFYE10O51wh9",
   "name": "Follow Up",
@@ -336,22 +336,6 @@
           "name": "Twilio account"
         }
       },
-      "disabled": true
-    },
-    {
-      "parameters": {
-        "resume": "specificTime",
-        "dateTime": "={{ $now.plus({days: 1}).set({hour: 11, minute: 11}).toISO() }}"
-      },
-      "type": "n8n-nodes-base.wait",
-      "typeVersion": 1.1,
-      "position": [
-        848,
-        -1104
-      ],
-      "id": "50175423-6722-41e6-b2d2-dec44d338a00",
-      "name": "Wait",
-      "webhookId": "d56e357d-b622-496c-bc03-b23f1d2a6202",
       "disabled": true
     },
     {
@@ -1170,11 +1154,6 @@
         ]
       ]
     },
-    "Wait": {
-      "main": [
-        []
-      ]
-    },
     "Get row(s) in sheet": {
       "main": [
         [
@@ -1645,7 +1624,7 @@
       }
     ]
   },
-  "versionId": "34054ab7-1fd9-4211-93d1-b353c9eee05f",
+  "versionId": "93105547-f935-4d47-85cd-9fcd30e869af",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
