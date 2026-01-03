@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-03T21:25:41.199Z",
+  "updatedAt": "2026-01-03T23:52:27.222Z",
   "createdAt": "2026-01-03T21:08:42.083Z",
   "id": "FVgFc7qgcDdDPXKU",
   "name": "Automated daily workflow backup to GitHub",
@@ -174,27 +174,6 @@
     },
     {
       "parameters": {
-        "conditions": {
-          "string": [
-            {
-              "value1": "={{ $('Aggregate').item.json.name }}",
-              "operation": "contains",
-              "value2": "={{ $('Retrieve workflows').item.json.name.replace(/\\s+/g, '-').toLowerCase() }}-{{ $('Retrieve workflows').item.json.tags[0].name }}.json"
-            }
-          ]
-        }
-      },
-      "id": "70cda678-53c1-498d-b2a0-f4905789bdbe",
-      "name": "Check if file exists",
-      "type": "n8n-nodes-base.if",
-      "position": [
-        768,
-        48
-      ],
-      "typeVersion": 1
-    },
-    {
-      "parameters": {
         "operation": "toJson",
         "mode": "each",
         "options": {
@@ -300,6 +279,27 @@
         -80
       ],
       "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $('Aggregate').item.json.name }}",
+              "operation": "contains",
+              "value2": "={{ $('Aggregate').first().json.name }}"
+            }
+          ]
+        }
+      },
+      "id": "70cda678-53c1-498d-b2a0-f4905789bdbe",
+      "name": "Check if file exists",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        768,
+        48
+      ],
+      "typeVersion": 1
     }
   ],
   "connections": {
@@ -358,24 +358,6 @@
         ]
       ]
     },
-    "Check if file exists": {
-      "main": [
-        [
-          {
-            "node": "Update file",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Upload file",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "List files from repo": {
       "main": [
         [
@@ -407,6 +389,24 @@
       "main": [
         []
       ]
+    },
+    "Check if file exists": {
+      "main": [
+        [
+          {
+            "node": "Update file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -421,7 +421,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "d6192067-8f4e-495a-bf2d-2936d025e3f6",
+  "versionId": "4df8ac25-bbdf-4f52-a665-a36bd2fcfe0c",
   "activeVersionId": "d6192067-8f4e-495a-bf2d-2936d025e3f6",
   "triggerCount": 1,
   "shared": [
