@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-03T21:18:24.456Z",
+  "updatedAt": "2026-01-03T21:20:16.981Z",
   "createdAt": "2026-01-03T12:06:29.508Z",
   "id": "bVWQMw6pBgQbbJZW",
   "name": "Lead Capture",
@@ -352,19 +352,6 @@
       ],
       "id": "dde70e5b-fa03-435d-926a-295f3e4720ce",
       "name": "Sticky Note4"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3,
-      "position": [
-        416,
-        160
-      ],
-      "id": "b739181b-7726-4870-bd41-475ca29e7f2c",
-      "name": "AI Agent"
     }
   ],
   "connections": {
@@ -413,13 +400,7 @@
     },
     "Send an SMS/MMS/WhatsApp message": {
       "main": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "main",
-            "index": 0
-          }
-        ]
+        []
       ]
     }
   },
@@ -429,7 +410,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "d89351aa-9082-4d45-9ee8-0b65b4e6d56a",
+  "versionId": "0db7be1e-1ed9-46e6-8d19-be5de260ce77",
   "activeVersionId": "30dc79df-0c4f-41d0-9dbb-c145f950cf65",
   "triggerCount": 1,
   "shared": [
