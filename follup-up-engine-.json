@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-04T20:37:08.619Z",
+  "updatedAt": "2026-01-04T21:42:35.938Z",
   "createdAt": "2026-01-03T22:56:20.789Z",
   "id": "XjBaDlA2OZiGksRJ",
   "name": "Follup Up Engine",
@@ -506,33 +506,7 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {
-    "Get row(s) in sheet": [
-      {
-        "json": {
-          "row_number": 11,
-          "Sign Up Date": "2026-01-03 11:43",
-          "firstName": "Hector",
-          "lastName ": "Meza",
-          "phoneClean": 12146865641,
-          "Email": "mezahector22@yahoo.com",
-          "Location": "Dallas",
-          "homeType": "Condo",
-          "Budget": "Under $500k",
-          "Timeline": "ASAP",
-          "lenderStatus": "I'm pre-approved",
-          "agentNotes": "None",
-          "SMSConsent": "yes",
-          "OptOut": "no",
-          "Phone": 2146865641,
-          "Name": "Hector Meza"
-        },
-        "pairedItem": {
-          "item": 0
-        }
-      }
-    ]
-  },
+  "pinData": {},
   "versionId": "04b3001a-6f84-4b08-bf72-4a3bc723042a",
   "activeVersionId": null,
   "triggerCount": 0,
