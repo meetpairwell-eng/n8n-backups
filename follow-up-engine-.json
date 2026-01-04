@@ -1,0 +1,139 @@
+{
+  "updatedAt": "2026-01-04T00:03:03.840Z",
+  "createdAt": "2026-01-03T22:56:20.789Z",
+  "id": "XjBaDlA2OZiGksRJ",
+  "name": "Follow Up Engine",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10,
+              "triggerAtMinute": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "dd60b084-3ba2-436d-b639-e4dfa5315932",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY",
+          "mode": "list",
+          "cachedResultName": "Pairwell Leads ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "RawData",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "OptOut",
+              "lookupValue": "no"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "1335f627-93e9-48ca-be75-5324dd8c7e39",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getTimeBetweenDates",
+        "startDate": "={{ $json['Sign Up Date'] }}",
+        "endDate": "={{ $now }}",
+        "outputFieldName": "daysSinceSignup",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "3f3dcb03-7d6a-4ba9-b2d1-f70894885876",
+      "name": "Date & Time"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "307da0ef-45e2-4030-ae5c-13f938629799",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-03T22:56:20.789Z",
+      "createdAt": "2026-01-03T22:56:20.789Z",
+      "role": "workflow:owner",
+      "workflowId": "XjBaDlA2OZiGksRJ",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
