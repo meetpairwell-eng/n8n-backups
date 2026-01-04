@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-04T00:03:03.840Z",
+  "updatedAt": "2026-01-04T18:37:33.610Z",
   "createdAt": "2026-01-03T22:56:20.789Z",
   "id": "XjBaDlA2OZiGksRJ",
   "name": "Follow Up Engine",
@@ -83,6 +83,112 @@
       ],
       "id": "3f3dcb03-7d6a-4ba9-b2d1-f70894885876",
       "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "17948a95-4463-4108-8d7e-fe98b5dbd744",
+                    "leftValue": "={{ Math.floor($json.daysSinceSignup) }}",
+                    "rightValue": 1,
+                    "operator": {
+                      "type": "number",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0bc43256-e1b6-4902-be9f-4450a8a0de71",
+                    "leftValue": "={{ Math.floor($json.daysSinceSignup) }}",
+                    "rightValue": 3,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fcec654d-e34f-4aa2-bb29-430a2e93b145",
+                    "leftValue": "={{ Math.floor($json.daysSinceSignup) }}",
+                    "rightValue": 7,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e0260203-19fd-4e50-b515-0b70978b6e3b",
+                    "leftValue": "={{ Math.floor($json.daysSinceSignup) }}",
+                    "rightValue": 10,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        -32
+      ],
+      "id": "74b4236c-844c-400a-9d94-4fd8c323c93a",
+      "name": "Switch"
     }
   ],
   "connections": {
@@ -110,7 +216,13 @@
     },
     "Date & Time": {
       "main": [
-        []
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
@@ -122,7 +234,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "307da0ef-45e2-4030-ae5c-13f938629799",
+  "versionId": "fbc4364f-c8ff-460b-9352-bce73cd0e062",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
