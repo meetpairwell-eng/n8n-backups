@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-03T23:52:27.222Z",
+  "updatedAt": "2026-01-04T00:02:26.836Z",
   "createdAt": "2026-01-03T21:08:42.083Z",
   "id": "FVgFc7qgcDdDPXKU",
   "name": "Automated daily workflow backup to GitHub",
@@ -152,7 +152,7 @@
           "cachedResultName": "n8n-backups",
           "cachedResultUrl": "https://github.com/meetpairwell-eng/n8n-backups"
         },
-        "filePath": "={{ $('Retrieve workflows').item.json.name.replace(/\\s+/g, '-').toLowerCase() }}-{{ $('Retrieve workflows').item.json.tags[0].name }}.json",
+        "filePath": "={{ $node[\"Commit date & file name\"].json[\"fileName\"] }}",
         "fileContent": "={{ $('To base64').item.json.data }}",
         "commitMessage": "=backup-{{ $node['Commit date & file name'].json.commitDate }}"
       },
@@ -285,9 +285,9 @@
         "conditions": {
           "string": [
             {
-              "value1": "={{ $('Aggregate').item.json.name }}",
+              "value1": "={{ $json.fileName }}",
               "operation": "contains",
-              "value2": "={{ $('Aggregate').first().json.name }}"
+              "value2": "={{ $('Aggregate').item.json.name }}"
             }
           ]
         }
@@ -421,7 +421,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "4df8ac25-bbdf-4f52-a665-a36bd2fcfe0c",
+  "versionId": "39c52248-3fbd-4b65-9677-553a0e323416",
   "activeVersionId": "d6192067-8f4e-495a-bf2d-2936d025e3f6",
   "triggerCount": 1,
   "shared": [
