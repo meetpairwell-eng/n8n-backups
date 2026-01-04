@@ -1,10 +1,10 @@
 {
-  "updatedAt": "2026-01-04T00:02:46.726Z",
+  "updatedAt": "2026-01-04T00:47:52.596Z",
   "createdAt": "2025-12-29T20:57:42.675Z",
   "id": "R4kUsFYE10O51wh9",
   "name": "xyz",
   "active": false,
-  "isArchived": false,
+  "isArchived": true,
   "nodes": [
     {
       "parameters": {
@@ -1624,7 +1624,7 @@
       }
     ]
   },
-  "versionId": "93105547-f935-4d47-85cd-9fcd30e869af",
+  "versionId": "e51d7489-a1d1-4c2e-861f-37f5206c589d",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
