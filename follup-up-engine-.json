@@ -1,0 +1,550 @@
+{
+  "updatedAt": "2026-01-04T20:37:08.619Z",
+  "createdAt": "2026-01-03T22:56:20.789Z",
+  "id": "XjBaDlA2OZiGksRJ",
+  "name": "Follup Up Engine",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 10,
+              "triggerAtMinute": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -2912,
+        -960
+      ],
+      "id": "dd60b084-3ba2-436d-b639-e4dfa5315932",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY",
+          "mode": "list",
+          "cachedResultName": "Pairwell Leads ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "RawData",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "OptOut",
+              "lookupValue": "no"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2688,
+        -960
+      ],
+      "id": "1335f627-93e9-48ca-be75-5324dd8c7e39",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getTimeBetweenDates",
+        "startDate": "={{ $json['Sign Up Date'] }}",
+        "endDate": "={{ $now }}",
+        "outputFieldName": "daysSinceSignup",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        -2464,
+        -960
+      ],
+      "id": "3f3dcb03-7d6a-4ba9-b2d1-f70894885876",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "17948a95-4463-4108-8d7e-fe98b5dbd744",
+                    "leftValue": "={{ Math.floor($json.daysSinceSignup) }}",
+                    "rightValue": 1,
+                    "operator": {
+                      "type": "number",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0bc43256-e1b6-4902-be9f-4450a8a0de71",
+                    "leftValue": "={{ Math.floor($json.daysSinceSignup) }}",
+                    "rightValue": 3,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "fcec654d-e34f-4aa2-bb29-430a2e93b145",
+                    "leftValue": "={{ Math.floor($json.daysSinceSignup) }}",
+                    "rightValue": 7,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "e0260203-19fd-4e50-b515-0b70978b6e3b",
+                    "leftValue": "={{ Math.floor($json.daysSinceSignup) }}",
+                    "rightValue": 10,
+                    "operator": {
+                      "type": "number",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        -2240,
+        -992
+      ],
+      "id": "74b4236c-844c-400a-9d94-4fd8c323c93a",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
+        "subject": "=We are here to help, {{ $('Get row(s) in sheet').item.json.firstName }}! 🏠",
+        "message": "=<p>Hey  {{ $('Get row(s) in sheet').item.json.firstName }}— just popping back in!</p>  <p>I know life gets busy, but if you're still thinking about buying in {{ $('Get row(s) in sheet').item.json.Location }}, I’d love to help you start smarter.</p>  <p>At Pairwell, we don’t just match you with any agent, we introduce you to someone great who's already proven themselves in your specific area. No pressure. Just smart guidance from the start.</p>  <p>If you’re ready to take the next step, I’ve got your back. Just reply here or call me directly.</p>  <p>Talk soon,<br> Hector</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2016,
+        -1248
+      ],
+      "id": "1eb96999-c61b-4c07-9c68-6d70464cfeec",
+      "name": "FU1 Email",
+      "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "+18557748160",
+        "to": "={{ $('Get row(s) in sheet').item.json.phoneClean }}",
+        "message": "=Hi {{ $('Get row(s) in sheet').item.json.firstName }}, Hector here! Just checking in. Any must-haves for your home in {{ $('Get row(s) in sheet').item.json.Location }}?",
+        "options": {
+          "statusCallback": ""
+        }
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        -1792,
+        -1248
+      ],
+      "id": "907690bd-a077-449f-a8c7-725d22583643",
+      "name": "FU1 Text",
+      "credentials": {
+        "twilioApi": {
+          "id": "nvfG2dOdB5C32sfv",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
+        "subject": "Just checking in (no pressure)",
+        "message": "=<p>Hey {{ $('Get row(s) in sheet').item.json.firstName }},</p>\n\n<p>Just popping back in — I’m not sure where you are in your search, but I didn’t want you to miss out on a better way to get started.</p>\n\n<p>Most people don’t realize that in {{ $('Get row(s) in sheet').item.json.Location }}, many of the best agents (and \"coming soon\" listings) don’t show up in a typical online search.</p>\n \n<p>That’s where Pairwell comes in. We match you with an expert who is already in the know.</p>\n\n<p>If you're still exploring, I’d love to make this easier!\n\n<p>Best,<br>\nHector</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2016,
+        -1056
+      ],
+      "id": "043f5f27-6846-4d2e-9365-715d85688038",
+      "name": "FU2 Email",
+      "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "+18557748160",
+        "to": "={{ $('Get row(s) in sheet').item.json.phoneClean }}",
+        "message": "=Hey {{ $('Get row(s) in sheet').item.json.firstName }}, still looking for agent matches. Have you been pre-approved yet or do you need a local lender?",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        -1792,
+        -1056
+      ],
+      "id": "00e51b55-006f-4a4b-935f-2c60a748a3a0",
+      "name": "FU2 Text",
+      "credentials": {
+        "twilioApi": {
+          "id": "nvfG2dOdB5C32sfv",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
+        "subject": "=Still looking for the right agent in {{ $('Get row(s) in sheet').item.json.Location }}?",
+        "message": "=<p>Hi {{ $('Get row(s) in sheet').item.json.firstName }}, just following up again. I haven’t forgotten about you!</p>\n\n<p>If you’re still thinking about moving, we’d love to help you do it with someone you can actually trust. There are a lot of agents in {{ $('Get row(s) in sheet').item.json.Location }}, but only a few who consistently deliver the results you deserve.</p>\n\n<p>At Pairwell, we personally vet every agent. No algorithms, no paid placements, just honest matches based on your specific needs.</p>\n\n<p>If you’re ready to explore your options, just hit reply and I’ll take care of the rest.</p>\n\n<p>Talk soon,<br>\nHector</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2016,
+        -864
+      ],
+      "id": "f245687a-8d41-4419-bcc6-518270a84d3b",
+      "name": "FU3 Email",
+      "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "+18557748160",
+        "to": "={{ $('Get row(s) in sheet').item.json.phoneClean }}",
+        "message": "=\"Quick check-in {{ $('Get row(s) in sheet').item.json.firstName }}. Still exploring {{ $('Get row(s) in sheet').item.json.Location }} or have plans changed? Just being helpful! - Hector",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        -1792,
+        -864
+      ],
+      "id": "e4426143-ed3c-4e34-b2f5-f0d075c40c77",
+      "name": "FU3 Text",
+      "credentials": {
+        "twilioApi": {
+          "id": "nvfG2dOdB5C32sfv",
+          "name": "Twilio account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
+        "subject": "One last check-in from Pairwell",
+        "message": "=<p>Hey {{ $('Get row(s) in sheet').item.json.firstName }}, checking in one last time.</p>\n\n<p>If you’re still looking for a place or planning to soon, I don’t want you to miss this. We connect buyers with top-tier local experts. No guesswork and no generic matches, just a better starting point.</p>\n\n<p>Even if you’re not ready to move today, getting paired with the right expert now can save you time and stress down the road.</p>\n\n<p>If that sounds helpful, just reply here. If not, no worries. We’re always here when you’re ready!</p>\n\n<p>Wishing you the best,<br>\nHector</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -2016,
+        -672
+      ],
+      "id": "e2d5e534-5360-4f39-ba4c-e0a76e4eafd9",
+      "name": "FU4 Email1",
+      "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "from": "+18557748160",
+        "to": "={{ $('Get row(s) in sheet').item.json.phoneClean }}",
+        "message": "=Hi {{ $('Get row(s) in sheet').item.json.firstName }}, just checking in one last time. If you still need a top-tier agent in {{ $('Get row(s) in sheet').item.json.Location }} let me know. Best of luck with the move!",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        -1792,
+        -672
+      ],
+      "id": "db8e7364-9369-47bf-b836-7e3068db139c",
+      "name": "FU4 Text1",
+      "credentials": {
+        "twilioApi": {
+          "id": "nvfG2dOdB5C32sfv",
+          "name": "Twilio account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "FU1 Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "FU2 Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "FU3 Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "FU4 Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FU1 Email": {
+      "main": [
+        [
+          {
+            "node": "FU1 Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FU1 Text": {
+      "main": [
+        []
+      ]
+    },
+    "FU2 Email": {
+      "main": [
+        [
+          {
+            "node": "FU2 Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FU2 Text": {
+      "main": [
+        []
+      ]
+    },
+    "FU3 Email": {
+      "main": [
+        [
+          {
+            "node": "FU3 Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FU3 Text": {
+      "main": [
+        []
+      ]
+    },
+    "FU4 Email1": {
+      "main": [
+        [
+          {
+            "node": "FU4 Text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Get row(s) in sheet": [
+      {
+        "json": {
+          "row_number": 11,
+          "Sign Up Date": "2026-01-03 11:43",
+          "firstName": "Hector",
+          "lastName ": "Meza",
+          "phoneClean": 12146865641,
+          "Email": "mezahector22@yahoo.com",
+          "Location": "Dallas",
+          "homeType": "Condo",
+          "Budget": "Under $500k",
+          "Timeline": "ASAP",
+          "lenderStatus": "I'm pre-approved",
+          "agentNotes": "None",
+          "SMSConsent": "yes",
+          "OptOut": "no",
+          "Phone": 2146865641,
+          "Name": "Hector Meza"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "04b3001a-6f84-4b08-bf72-4a3bc723042a",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-03T22:56:20.789Z",
+      "createdAt": "2026-01-03T22:56:20.789Z",
+      "role": "workflow:owner",
+      "workflowId": "XjBaDlA2OZiGksRJ",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
