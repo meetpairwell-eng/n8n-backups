@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-05T19:54:11.483Z",
+  "updatedAt": "2026-01-06T17:57:19.071Z",
   "createdAt": "2026-01-03T12:06:29.508Z",
   "id": "bVWQMw6pBgQbbJZW",
   "name": "Lead Capture Engine",
@@ -79,7 +79,7 @@
       "parameters": {
         "sendTo": "={{ $json.Email }}",
         "subject": "Welcome to Pairwell!",
-        "message": "=<p>Hi {{ $json.firstName }},</p>\n\n<p>Thanks so much for reaching out! I’m excited to help you get connected with the right agent in <strong>{{ $json.Location }}</strong>.</p>\n\n<p>Whether you’re buying, selling, or just exploring your options, you deserve someone who’s not only experienced but also a great fit for you. At Pairwell, we match you with a top-performing agent who actually listens, communicates well, and knows your market inside and out.</p>\n\n<p>We’ll be reaching out shortly with a few quick questions to make sure we find the best possible match, nothing overwhelming, just enough to get it right.</p>\n\n<p>If you ever have questions or want to update anything, feel free to hit reply.</p>\n\n<p>Can’t wait to chat with you!</p>\n\n<br>\n<p>Best regards,</p>\n<p><strong>Hector Meza</strong><br>\nFounder, Pairwell<br>\n<a href=\"https://meetpairwell.com\" target=\"_blank\" style=\"color: #1d39ff; text-decoration: underline;\">meetpairwell.com</a></p>\n\n<br>\n<hr>\n<p style=\"font-size: 11px; color: #6B7280;\">\n    Don't want to receive these emails? \n    <a href=\"https://n8n.meetpairwell.com/webhook/unsubscribe?email={{ $json.Email }}\">Unsubscribe</a>\n</p>",
+        "message": "=<p>Hi {{ $json.firstName }},</p>\n\n<p>Thanks so much for reaching out! I’m excited to help you get connected with the right agent in {{ $json.Location }}.</p>\n\n<p>Whether you’re buying, selling, or just exploring your options, you deserve someone who’s not only experienced but also a great fit for you. At Pairwell, we match you with a top-performing agent who actually listens, communicates well, and knows your market inside and out.</p>\n\n<p>We’ll be reaching out shortly with a few quick questions to make sure we find the best possible match, nothing overwhelming, just enough to get it right.</p>\n\n<p>If you ever have questions or want to update anything, feel free to hit reply.</p>\n\n<p>Can’t wait to chat with you!</p>\n\n<br>\n<p>Best regards,</p>\n<p><strong>Hector Meza</strong><br>\nFounder, Pairwell<br>\n<a href=\"https://meetpairwell.com\" target=\"_blank\" style=\"color: #1d39ff; text-decoration: underline;\">meetpairwell.com</a></p>\n\n<br>\n<hr>\n<p style=\"font-size: 11px; color: #6B7280;\">\n    Don't want to receive these emails? \n    <a href=\"https://n8n.meetpairwell.com/webhook/unsubscribe?email={{ $json.Email }}\">Unsubscribe</a>\n</p>",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
@@ -400,7 +400,7 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "27b555cb-e37a-428f-a1a1-d8c3e616510f",
+  "versionId": "c4267109-2389-499c-9bf6-c875ad4095d6",
   "activeVersionId": "27b555cb-e37a-428f-a1a1-d8c3e616510f",
   "triggerCount": 1,
   "shared": [
