@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-04T22:26:41.250Z",
+  "updatedAt": "2026-01-06T17:55:24.629Z",
   "createdAt": "2026-01-03T22:56:20.789Z",
   "id": "XjBaDlA2OZiGksRJ",
   "name": "Follup Up Engine",
@@ -99,7 +99,7 @@
                 "conditions": [
                   {
                     "id": "17948a95-4463-4108-8d7e-fe98b5dbd744",
-                    "leftValue": "={{ Math.floor($json.daysSinceSignup.days) }}",
+                    "leftValue": "={{ Math.round($json.daysSinceSignup.days) }}",
                     "rightValue": 1,
                     "operator": {
                       "type": "number",
@@ -121,11 +121,11 @@
                 "conditions": [
                   {
                     "id": "0bc43256-e1b6-4902-be9f-4450a8a0de71",
-                    "leftValue": "={{ Math.floor($json.daysSinceSignup.days) }}",
+                    "leftValue": "={{ Math.round($json.daysSinceSignup.days) }}",
                     "rightValue": "3",
                     "operator": {
-                      "type": "string",
-                      "operation": "contains"
+                      "type": "dateTime",
+                      "operation": "equals"
                     }
                   }
                 ],
@@ -143,11 +143,11 @@
                 "conditions": [
                   {
                     "id": "fcec654d-e34f-4aa2-bb29-430a2e93b145",
-                    "leftValue": "={{ Math.floor($json.daysSinceSignup.days) }}",
-                    "rightValue": "7",
+                    "leftValue": "={{ Math.round($json.daysSinceSignup.days) }}",
+                    "rightValue": 7,
                     "operator": {
-                      "type": "string",
-                      "operation": "contains"
+                      "type": "number",
+                      "operation": "equals"
                     }
                   }
                 ],
@@ -165,11 +165,11 @@
                 "conditions": [
                   {
                     "id": "e0260203-19fd-4e50-b515-0b70978b6e3b",
-                    "leftValue": "={{ $json.daysSinceSignup.days }}",
-                    "rightValue": "10",
+                    "leftValue": "={{ Math.round($json.daysSinceSignup.days) }}",
+                    "rightValue": 10,
                     "operator": {
-                      "type": "string",
-                      "operation": "contains"
+                      "type": "number",
+                      "operation": "equals"
                     }
                   }
                 ],
@@ -511,7 +511,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "ad7a6a03-87fe-499a-b5b5-da6f5b3d491b",
+  "versionId": "5199a6ad-f0a9-4966-bb13-81bbb1600795",
   "activeVersionId": "ad7a6a03-87fe-499a-b5b5-da6f5b3d491b",
   "triggerCount": 1,
   "shared": [
