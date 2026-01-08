@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-06T17:55:24.629Z",
+  "updatedAt": "2026-01-07T23:21:23.095Z",
   "createdAt": "2026-01-03T22:56:20.789Z",
   "id": "XjBaDlA2OZiGksRJ",
   "name": "Follup Up Engine",
@@ -195,7 +195,9 @@
         "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
         "subject": "=We are here to help, {{ $('Get row(s) in sheet').item.json.firstName }}! 🏠",
         "message": "=<p>Hey  {{ $('Get row(s) in sheet').item.json.firstName }}— just popping back in!</p>  <p>I know life gets busy, but if you're still thinking about buying in {{ $('Get row(s) in sheet').item.json.Location }}, I’d love to help you start smarter.</p>  <p>At Pairwell, we don’t just match you with any agent, we introduce you to someone great who's already proven themselves in your specific area. No pressure. Just smart guidance from the start.</p>  <p>If you’re ready to take the next step, I’ve got your back. Just reply here or call me directly.</p>  <p>Talk soon,<br> Hector</p>",
-        "options": {}
+        "options": {
+          "appendAttribution": false
+        }
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
@@ -242,7 +244,9 @@
         "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
         "subject": "Just checking in (no pressure)",
         "message": "=<p>Hey {{ $('Get row(s) in sheet').item.json.firstName }},</p>\n\n<p>Just popping back in — I’m not sure where you are in your search, but I didn’t want you to miss out on a better way to get started.</p>\n\n<p>Most people don’t realize that in {{ $('Get row(s) in sheet').item.json.Location }}, many of the best agents (and \"coming soon\" listings) don’t show up in a typical online search.</p>\n \n<p>That’s where Pairwell comes in. We match you with an expert who is already in the know.</p>\n\n<p>If you're still exploring, I’d love to make this easier!\n\n<p>Best,<br>\nHector</p>",
-        "options": {}
+        "options": {
+          "appendAttribution": false
+        }
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
@@ -287,7 +291,9 @@
         "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
         "subject": "=Still looking for the right agent in {{ $('Get row(s) in sheet').item.json.Location }}?",
         "message": "=<p>Hi {{ $('Get row(s) in sheet').item.json.firstName }}, just following up again. I haven’t forgotten about you!</p>\n\n<p>If you’re still thinking about moving, we’d love to help you do it with someone you can actually trust. There are a lot of agents in {{ $('Get row(s) in sheet').item.json.Location }}, but only a few who consistently deliver the results you deserve.</p>\n\n<p>At Pairwell, we personally vet every agent. No algorithms, no paid placements, just honest matches based on your specific needs.</p>\n\n<p>If you’re ready to explore your options, just hit reply and I’ll take care of the rest.</p>\n\n<p>Talk soon,<br>\nHector</p>",
-        "options": {}
+        "options": {
+          "appendAttribution": false
+        }
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
@@ -332,7 +338,9 @@
         "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
         "subject": "One last check-in from Pairwell",
         "message": "=<p>Hey {{ $('Get row(s) in sheet').item.json.firstName }}, checking in one last time.</p>\n\n<p>If you’re still looking for a place or planning to soon, I don’t want you to miss this. We connect buyers with top-tier local experts. No guesswork and no generic matches, just a better starting point.</p>\n\n<p>Even if you’re not ready to move today, getting paired with the right expert now can save you time and stress down the road.</p>\n\n<p>If that sounds helpful, just reply here. If not, no worries. We’re always here when you’re ready!</p>\n\n<p>Wishing you the best,<br>\nHector</p>",
-        "options": {}
+        "options": {
+          "appendAttribution": false
+        }
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
@@ -511,7 +519,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "5199a6ad-f0a9-4966-bb13-81bbb1600795",
+  "versionId": "22d4664e-e096-4c67-9d32-86e051b229ac",
   "activeVersionId": "ad7a6a03-87fe-499a-b5b5-da6f5b3d491b",
   "triggerCount": 1,
   "shared": [
