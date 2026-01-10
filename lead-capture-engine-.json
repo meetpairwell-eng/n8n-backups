@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-06T17:57:19.071Z",
+  "updatedAt": "2026-01-09T18:58:56.808Z",
   "createdAt": "2026-01-03T12:06:29.508Z",
   "id": "bVWQMw6pBgQbbJZW",
   "name": "Lead Capture Engine",
@@ -145,9 +145,8 @@
             "lastName ": "={{ $json.lastName }}",
             "Phone": "={{ $('Webhook').item.json.body.phone }}",
             "phoneClean": "={{ $json.phoneClean }}",
-            "agentNotes": "={{ $('Webhook').item.json.body.extraInfo }}",
+            "agentNotes": "={{ $('Webhook').item.json.body.agentNotes }}",
             "Email": "={{ $('Webhook').item.json.body.email }}",
-            "Location": "={{ $('Webhook').item.json.body.location }}",
             "homeType": "={{ $('Webhook').item.json.body.homeType }}",
             "Budget": "={{ $('Webhook').item.json.body.budget }}",
             "Timeline": "={{ $('Webhook').item.json.body.timeline }}",
@@ -155,7 +154,11 @@
             "Name": "={{ $('Webhook').item.json.body.name }}",
             "SMSConsent": "={{ $json.SMSConsent }}",
             "Sign Up Date": "={{ $json['Sign Up Date'] }}",
-            "OptOut": "={{ $json.OptOut }}"
+            "OptOut": "={{ $json.OptOut }}",
+            "Marketing Source": "={{ $('Webhook').item.json.body.utm_source }}",
+            "Umami ID": "={{ $('Webhook').item.json.body.umami_id }}",
+            "Campaign Name": "={{ $('Webhook').item.json.body.utm_campaign }}",
+            "City": "={{ $('Webhook').item.json.body.city }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -206,13 +209,14 @@
               "canBeUsedToMatch": true
             },
             {
-              "id": "Location",
-              "displayName": "Location",
+              "id": "City",
+              "displayName": "City",
               "required": false,
               "defaultMatch": false,
               "display": true,
               "type": "string",
-              "canBeUsedToMatch": true
+              "canBeUsedToMatch": true,
+              "removed": false
             },
             {
               "id": "homeType",
@@ -294,6 +298,36 @@
               "display": true,
               "type": "string",
               "canBeUsedToMatch": true
+            },
+            {
+              "id": "Marketing Source",
+              "displayName": "Marketing Source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Campaign Name",
+              "displayName": "Campaign Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Umami ID",
+              "displayName": "Umami ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
             }
           ],
           "attemptToConvertTypes": false,
@@ -400,8 +434,8 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "c4267109-2389-499c-9bf6-c875ad4095d6",
-  "activeVersionId": "27b555cb-e37a-428f-a1a1-d8c3e616510f",
+  "versionId": "f05dc3ca-f2f3-4858-a928-7c5c5cee8fb9",
+  "activeVersionId": "f05dc3ca-f2f3-4858-a928-7c5c5cee8fb9",
   "triggerCount": 1,
   "shared": [
     {
@@ -413,9 +447,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-05T21:50:31.107Z",
-    "createdAt": "2026-01-05T19:54:11.485Z",
-    "versionId": "27b555cb-e37a-428f-a1a1-d8c3e616510f",
+    "updatedAt": "2026-01-09T18:58:59.743Z",
+    "createdAt": "2026-01-09T18:58:56.810Z",
+    "versionId": "f05dc3ca-f2f3-4858-a928-7c5c5cee8fb9",
     "workflowId": "bVWQMw6pBgQbbJZW",
     "nodes": [
       {
@@ -491,7 +525,7 @@
         "parameters": {
           "sendTo": "={{ $json.Email }}",
           "subject": "Welcome to Pairwell!",
-          "message": "=<p>Hi {{ $json.firstName }},</p>\n\n<p>Thanks so much for reaching out! I’m excited to help you get connected with the right agent in <strong>{{ $json.Location }}</strong>.</p>\n\n<p>Whether you’re buying, selling, or just exploring your options, you deserve someone who’s not only experienced but also a great fit for you. At Pairwell, we match you with a top-performing agent who actually listens, communicates well, and knows your market inside and out.</p>\n\n<p>We’ll be reaching out shortly with a few quick questions to make sure we find the best possible match, nothing overwhelming, just enough to get it right.</p>\n\n<p>If you ever have questions or want to update anything, feel free to hit reply.</p>\n\n<p>Can’t wait to chat with you!</p>\n\n<br>\n<p>Best regards,</p>\n<p><strong>Hector Meza</strong><br>\nFounder, Pairwell<br>\n<a href=\"https://meetpairwell.com\" target=\"_blank\" style=\"color: #1d39ff; text-decoration: underline;\">meetpairwell.com</a></p>\n\n<br>\n<hr>\n<p style=\"font-size: 11px; color: #6B7280;\">\n    Don't want to receive these emails? \n    <a href=\"https://n8n.meetpairwell.com/webhook/unsubscribe?email={{ $json.Email }}\">Unsubscribe</a>\n</p>",
+          "message": "=<p>Hi {{ $json.firstName }},</p>\n\n<p>Thanks so much for reaching out! I’m excited to help you get connected with the right agent in {{ $json.Location }}.</p>\n\n<p>Whether you’re buying, selling, or just exploring your options, you deserve someone who’s not only experienced but also a great fit for you. At Pairwell, we match you with a top-performing agent who actually listens, communicates well, and knows your market inside and out.</p>\n\n<p>We’ll be reaching out shortly with a few quick questions to make sure we find the best possible match, nothing overwhelming, just enough to get it right.</p>\n\n<p>If you ever have questions or want to update anything, feel free to hit reply.</p>\n\n<p>Can’t wait to chat with you!</p>\n\n<br>\n<p>Best regards,</p>\n<p><strong>Hector Meza</strong><br>\nFounder, Pairwell<br>\n<a href=\"https://meetpairwell.com\" target=\"_blank\" style=\"color: #1d39ff; text-decoration: underline;\">meetpairwell.com</a></p>\n\n<br>\n<hr>\n<p style=\"font-size: 11px; color: #6B7280;\">\n    Don't want to receive these emails? \n    <a href=\"https://n8n.meetpairwell.com/webhook/unsubscribe?email={{ $json.Email }}\">Unsubscribe</a>\n</p>",
           "options": {}
         },
         "type": "n8n-nodes-base.gmail",
@@ -557,9 +591,8 @@
               "lastName ": "={{ $json.lastName }}",
               "Phone": "={{ $('Webhook').item.json.body.phone }}",
               "phoneClean": "={{ $json.phoneClean }}",
-              "agentNotes": "={{ $('Webhook').item.json.body.extraInfo }}",
+              "agentNotes": "={{ $('Webhook').item.json.body.agentNotes }}",
               "Email": "={{ $('Webhook').item.json.body.email }}",
-              "Location": "={{ $('Webhook').item.json.body.location }}",
               "homeType": "={{ $('Webhook').item.json.body.homeType }}",
               "Budget": "={{ $('Webhook').item.json.body.budget }}",
               "Timeline": "={{ $('Webhook').item.json.body.timeline }}",
@@ -567,7 +600,11 @@
               "Name": "={{ $('Webhook').item.json.body.name }}",
               "SMSConsent": "={{ $json.SMSConsent }}",
               "Sign Up Date": "={{ $json['Sign Up Date'] }}",
-              "OptOut": "={{ $json.OptOut }}"
+              "OptOut": "={{ $json.OptOut }}",
+              "Marketing Source": "={{ $('Webhook').item.json.body.utm_source }}",
+              "Umami ID": "={{ $('Webhook').item.json.body.umami_id }}",
+              "Campaign Name": "={{ $('Webhook').item.json.body.utm_campaign }}",
+              "City": "={{ $('Webhook').item.json.body.city }}"
             },
             "matchingColumns": [],
             "schema": [
@@ -618,13 +655,14 @@
                 "canBeUsedToMatch": true
               },
               {
-                "id": "Location",
-                "displayName": "Location",
+                "id": "City",
+                "displayName": "City",
                 "required": false,
                 "defaultMatch": false,
                 "display": true,
                 "type": "string",
-                "canBeUsedToMatch": true
+                "canBeUsedToMatch": true,
+                "removed": false
               },
               {
                 "id": "homeType",
@@ -706,6 +744,36 @@
                 "display": true,
                 "type": "string",
                 "canBeUsedToMatch": true
+              },
+              {
+                "id": "Marketing Source",
+                "displayName": "Marketing Source",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Campaign Name",
+                "displayName": "Campaign Name",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Umami ID",
+                "displayName": "Umami ID",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
               }
             ],
             "attemptToConvertTypes": false,
@@ -807,7 +875,7 @@
       }
     },
     "authors": "Hector Meza",
-    "name": "Version 27b555cb",
+    "name": "Version f05dc3ca",
     "description": ""
   },
   "tags": []
