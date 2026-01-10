@@ -3,7 +3,7 @@
   "createdAt": "2026-01-07T18:22:35.620Z",
   "id": "MbnwmMzZ7Pf8hKad",
   "name": "Email Unsubscribe",
-  "active": false,
+  "active": true,
   "isArchived": false,
   "nodes": [
     {
@@ -352,8 +352,8 @@
   },
   "pinData": {},
   "versionId": "0f7d6e8b-1f78-4239-9773-98911c830b89",
-  "activeVersionId": null,
-  "triggerCount": 0,
+  "activeVersionId": "0f7d6e8b-1f78-4239-9773-98911c830b89",
+  "triggerCount": 1,
   "shared": [
     {
       "updatedAt": "2026-01-07T18:22:35.620Z",
@@ -363,6 +363,352 @@
       "projectId": "EwZFwcRPsRQcg8Kx"
     }
   ],
-  "activeVersion": null,
+  "activeVersion": {
+    "updatedAt": "2026-01-09T18:18:15.466Z",
+    "createdAt": "2026-01-07T23:20:30.638Z",
+    "versionId": "0f7d6e8b-1f78-4239-9773-98911c830b89",
+    "workflowId": "MbnwmMzZ7Pf8hKad",
+    "nodes": [
+      {
+        "parameters": {
+          "path": "unsubscribe",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "id": "40a8999e-e89e-4ecc-a577-8015771a98b2",
+        "name": "Webhook",
+        "webhookId": "47e5a3ae-dad8-4b3b-89ae-e150dead40fa"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "documentId": {
+            "__rl": true,
+            "value": "1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY",
+            "mode": "list",
+            "cachedResultName": "Pairwell Leads ",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "RawData",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit#gid=0"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Email": "={{ $json.query.email }}",
+              "OptOut": "yes"
+            },
+            "matchingColumns": [
+              "Email"
+            ],
+            "schema": [
+              {
+                "id": "Sign Up Date",
+                "displayName": "Sign Up Date",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "firstName",
+                "displayName": "firstName",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "lastName ",
+                "displayName": "lastName ",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "phoneClean",
+                "displayName": "phoneClean",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Email",
+                "displayName": "Email",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Location",
+                "displayName": "Location",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "homeType",
+                "displayName": "homeType",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Budget",
+                "displayName": "Budget",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Timeline",
+                "displayName": "Timeline",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "lenderStatus",
+                "displayName": "lenderStatus",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "agentNotes",
+                "displayName": "agentNotes",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "SMSConsent",
+                "displayName": "SMSConsent",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "OptOut",
+                "displayName": "OptOut",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Phone",
+                "displayName": "Phone",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Name",
+                "displayName": "Name",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "row_number",
+                "displayName": "row_number",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "number",
+                "canBeUsedToMatch": true,
+                "readOnly": true,
+                "removed": true
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          208,
+          0
+        ],
+        "id": "a52bc394-5eeb-40bb-8ead-b56ee05e608b",
+        "name": "Update row in sheet",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "<div style=\"font-family: Arial, sans-serif; text-align: center; margin-top: 50px; color: #333;\">\n  <h1 style=\"color: #2c3e50;\">Pairwell</h1>\n  <p>We're sad to see you go, but your request has been processed.</p>\n  <hr style=\"width: 50%; margin: 20px auto; border: 0; border-top: 1px solid #eee;\">\n  <p>If your home search journey ever brings you back our way, we’ll be here to help.</p>\n  <p><strong>Wishing you the best on your next move!</strong></p>\n</div>",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.5,
+        "position": [
+          416,
+          0
+        ],
+        "id": "3a815c7a-a918-415a-b9ba-a421a82674b6",
+        "name": "Respond to Webhook"
+      },
+      {
+        "parameters": {
+          "sendTo": "meetpairwell@gmail.com",
+          "subject": "Unsubscribed 🚫",
+          "message": "={{ $json.Name }} has unsubscribed <p><p>\n\nEmail - {{ $json.Email }}\nNumber - {{ $json.Phone }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.2,
+        "position": [
+          768,
+          0
+        ],
+        "id": "f763fecf-d0f5-4819-bcbe-012ef9fe98c8",
+        "name": "Send a message",
+        "webhookId": "393380b8-ddd8-4de7-8b74-292146b14729",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "bsAbfRmGUOzzryvM",
+            "name": "Gmail account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY",
+            "mode": "list",
+            "cachedResultName": "Pairwell Leads ",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit?usp=drivesdk"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "gid=0",
+            "mode": "list",
+            "cachedResultName": "RawData",
+            "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EKtnQWrNE6mn_lFUx3Yr2NOqAifFvdTPW9t84z7eHyY/edit#gid=0"
+          },
+          "filtersUI": {
+            "values": [
+              {
+                "lookupColumn": "Email",
+                "lookupValue": "={{ $json.Email }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          592,
+          0
+        ],
+        "id": "82ae9331-5d3b-46bd-8308-c0c2e387a8ba",
+        "name": "Get row(s) in sheet",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Update row in sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update row in sheet": {
+        "main": [
+          [
+            {
+              "node": "Respond to Webhook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Respond to Webhook": {
+        "main": [
+          [
+            {
+              "node": "Get row(s) in sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get row(s) in sheet": {
+        "main": [
+          [
+            {
+              "node": "Send a message",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Hector Meza",
+    "name": "Version 0f7d6e8b",
+    "description": ""
+  },
   "tags": []
 }
