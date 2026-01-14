@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-09T19:00:02.990Z",
+  "updatedAt": "2026-01-13T16:33:14.758Z",
   "createdAt": "2026-01-03T22:56:20.789Z",
   "id": "XjBaDlA2OZiGksRJ",
   "name": "Follup Up Engine",
@@ -289,7 +289,7 @@
     {
       "parameters": {
         "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
-        "subject": "=Still looking for the right agent in {{ $('Get row(s) in sheet').item.json.Location }}?",
+        "subject": "=Still looking for the right agent in {{ $('Get row(s) in sheet').item.json.City }}?",
         "message": "=<p>Hi {{ $('Get row(s) in sheet').item.json.firstName }}, just following up again. I haven’t forgotten about you!</p>\n\n<p>If you’re still thinking about moving, we’d love to help you do it with someone you can actually trust. There are a lot of agents in {{ $('Get row(s) in sheet').item.json.Location }}, but only a few who consistently deliver the results you deserve.</p>\n\n<p>At Pairwell, we personally vet every agent. No algorithms, no paid placements, just honest matches based on your specific needs.</p>\n\n<p>If you’re ready to explore your options, just hit reply and I’ll take care of the rest.</p>\n\n<p>Talk soon,<br>\nHector</p>",
         "options": {
           "appendAttribution": false
@@ -519,7 +519,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "22d4664e-e096-4c67-9d32-86e051b229ac",
+  "versionId": "6981112c-a8a6-4d70-9e74-6b32f133d071",
   "activeVersionId": "ad7a6a03-87fe-499a-b5b5-da6f5b3d491b",
   "triggerCount": 1,
   "shared": [
