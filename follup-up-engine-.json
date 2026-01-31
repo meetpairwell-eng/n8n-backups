@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-13T16:33:14.758Z",
+  "updatedAt": "2026-01-30T21:22:36.013Z",
   "createdAt": "2026-01-03T22:56:20.789Z",
   "id": "XjBaDlA2OZiGksRJ",
   "name": "Follup Up Engine",
@@ -122,9 +122,9 @@
                   {
                     "id": "0bc43256-e1b6-4902-be9f-4450a8a0de71",
                     "leftValue": "={{ Math.round($json.daysSinceSignup.days) }}",
-                    "rightValue": "3",
+                    "rightValue": 3,
                     "operator": {
-                      "type": "dateTime",
+                      "type": "number",
                       "operation": "equals"
                     }
                   }
@@ -518,8 +518,18 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {},
-  "versionId": "6981112c-a8a6-4d70-9e74-6b32f133d071",
+  "pinData": {
+    "Date & Time": [
+      {
+        "json": {
+          "daysSinceSignup": {
+            "days": 13.172822615740742
+          }
+        }
+      }
+    ]
+  },
+  "versionId": "810299a1-6810-41fa-8b02-50fa60f8d566",
   "activeVersionId": "ad7a6a03-87fe-499a-b5b5-da6f5b3d491b",
   "triggerCount": 1,
   "shared": [
