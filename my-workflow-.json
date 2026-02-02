@@ -1,0 +1,78 @@
+{
+  "updatedAt": "2026-02-01T21:09:22.410Z",
+  "createdAt": "2026-02-01T21:09:22.410Z",
+  "id": "JhkQ546q7FmGysmu",
+  "name": "My workflow",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f60982ec-0068-41e3-bf46-6d280616aef7",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "sendTo": "hmeza@briggsfreeman.com",
+        "message": "=<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">\n<html xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n  <meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\n  <title>5610 Lobello Dr | Luxury Real Estate</title>\n  <link href=\"https://fonts.googleapis.com/css2?family=Marcellus&family=Outfit:wght@300;400;600&display=swap\" rel=\"stylesheet\">\n  <style type=\"text/css\">\n    /* For email clients that support @font-face */\n    h1, h2, h3, .serif {\n      font-family: 'Marcellus', Georgia, 'Times New Roman', serif !important;\n    }\n    body, p, td, .sans {\n      font-family: 'Outfit', Arial, sans-serif !important;\n    }\n    /* Mobile focus */\n    @media only screen and (max-width: 620px) {\n      .container {\n        width: 100% !important;\n      }\n      .stack {\n        display: block !important;\n        width: 100% !important;\n      }\n    }\n  </style>\n</head>\n<body style=\"margin: 0; padding: 0; background-color: #F8F8F8; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%;\">\n  <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"background-color: #F8F8F8;\">\n    <tr>\n      <td align=\"center\" style=\"padding: 40px 0;\">\n        <!--[if (gte mso 9)|(IE)]>\n        <table align=\"center\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" width=\"600\">\n        <tr>\n        <td align=\"center\" valign=\"top\" width=\"600\">\n        <![endif]-->\n        <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"600\" class=\"container\" style=\"background-color: #FFFFFF; border: 1px solid #EEEEEE; max-width: 600px;\">\n          \n          <!-- Header Logo -->\n          <tr>\n            <td align=\"center\" style=\"padding: 30px 20px;\">\n              <div style=\"font-family: 'Marcellus', Georgia, serif; font-size: 24px; color: #111111; letter-spacing: 2px; text-transform: uppercase; border-bottom: 1px solid #C7A17A; padding-bottom: 10px; display: inline-block;\">\n                Briggs Freeman | Sotheby's\n              </div>\n            </td>\n          </tr>\n          <!-- Hero Image -->\n          <tr>\n            <td align=\"center\" style=\"padding: 0;\">\n              <a href=\"https://5610lobellodr.com/\" target=\"_blank\" style=\"text-decoration: none;\">\n                <img src=\"https://pub-0a14d2bf83cc482ab589da588a45c6b0.r2.dev/5610Lobello/5610Lobello-1.webp\" alt=\"5610 Lobello Dr Exterior\" width=\"600\" style=\"display: block; width: 100%; max-width: 600px; border: 0;\" />\n              </a>\n            </td>\n          </tr>\n          <!-- Property Header -->\n          <tr>\n            <td align=\"center\" style=\"padding: 40px 40px 20px 40px;\">\n              <h1 style=\"margin: 0; font-family: 'Marcellus', Georgia, serif; font-size: 32px; color: #111111; font-weight: normal; letter-spacing: 1px;\">5610 Lobello Dr.</h1>\n              <div style=\"width: 40px; height: 1px; background-color: #C7A17A; margin: 15px auto;\"></div>\n              <p style=\"margin: 0; font-family: 'Marcellus', Georgia, serif; font-size: 20px; color: #666666; letter-spacing: 1px;\">$6,650,000</p>\n            </td>\n          </tr>\n          <!-- Property Stats Table -->\n          <tr>\n            <td align=\"center\" style=\"padding: 0 40px 40px 40px;\">\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\" style=\"border-top: 1px solid #F0F0F0; border-bottom: 1px solid #F0F0F0; padding: 20px 0;\">\n                <tr>\n                  <td align=\"center\" width=\"33%\" style=\"padding: 10px 0;\">\n                    <div style=\"font-family: 'Outfit', Arial, sans-serif; font-size: 11px; color: #C7A17A; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;\">Beds</div>\n                    <div style=\"font-family: 'Marcellus', Georgia, serif; font-size: 18px; color: #111111;\">5</div>\n                  </td>\n                  <td align=\"center\" width=\"33%\" style=\"padding: 10px 0; border-left: 1px solid #F0F0F0; border-right: 1px solid #F0F0F0;\">\n                    <div style=\"font-family: 'Outfit', Arial, sans-serif; font-size: 11px; color: #C7A17A; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;\">Baths</div>\n                    <div style=\"font-family: 'Marcellus', Georgia, serif; font-size: 18px; color: #111111;\">6</div>\n                  </td>\n                  <td align=\"center\" width=\"33%\" style=\"padding: 10px 0;\">\n                    <div style=\"font-family: 'Outfit', Arial, sans-serif; font-size: 11px; color: #C7A17A; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;\">Square Feet</div>\n                    <div style=\"font-family: 'Marcellus', Georgia, serif; font-size: 18px; color: #111111;\">7,890</div>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n          <!-- Gallery Headline -->\n          <tr>\n            <td align=\"center\" style=\"padding: 0 40px 20px 40px;\">\n              <h2 style=\"margin: 0; font-family: 'Marcellus', Georgia, serif; font-size: 18px; color: #111111; font-weight: normal; text-transform: uppercase; letter-spacing: 2px;\">Property Gallery</h2>\n            </td>\n          </tr>\n          <!-- Gallery Grid -->\n          <tr>\n            <td align=\"center\" style=\"padding: 0 20px 20px 20px;\">\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\" width=\"100%\">\n                <tr>\n                  <td align=\"center\" width=\"50%\" style=\"padding: 5px;\">\n                    <a href=\"https://5610lobellodr.com/\" target=\"_blank\">\n                      <img src=\"https://pub-0a14d2bf83cc482ab589da588a45c6b0.r2.dev/5610Lobello/5610Lobello-10.webp\" alt=\"Living Area\" width=\"270\" style=\"display: block; width: 100%; border: 0;\" />\n                    </a>\n                  </td>\n                  <td align=\"center\" width=\"50%\" style=\"padding: 5px;\">\n                    <a href=\"https://5610lobellodr.com/\" target=\"_blank\">\n                      <img src=\"https://pub-0a14d2bf83cc482ab589da588a45c6b0.r2.dev/5610Lobello/5610Lobello-17.webp\" alt=\"Kitchen\" width=\"270\" style=\"display: block; width: 100%; border: 0;\" />\n                    </a>\n                  </td>\n                </tr>\n                <tr>\n                  <td align=\"center\" width=\"50%\" style=\"padding: 5px;\">\n                    <a href=\"https://5610lobellodr.com/\" target=\"_blank\">\n                      <img src=\"https://pub-0a14d2bf83cc482ab589da588a45c6b0.r2.dev/5610Lobello/5610Lobello-20.webp\" alt=\"Primary Bedroom\" width=\"270\" style=\"display: block; width: 100%; border: 0;\" />\n                    </a>\n                  </td>\n                  <td align=\"center\" width=\"50%\" style=\"padding: 5px;\">\n                    <a href=\"https://5610lobellodr.com/\" target=\"_blank\">\n                      <img src=\"https://pub-0a14d2bf83cc482ab589da588a45c6b0.r2.dev/5610Lobello/5610Lobello-25.webp\" alt=\"Pool Area\" width=\"270\" style=\"display: block; width: 100%; border: 0;\" />\n                    </a>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n          <!-- CTA Button -->\n          <tr>\n            <td align=\"center\" style=\"padding: 30px 40px 50px 40px;\">\n              <table border=\"0\" cellpadding=\"0\" cellspacing=\"0\">\n                <tr>\n                  <td align=\"center\" bgcolor=\"#111111\" style=\"padding: 15px 35px;\">\n                    <a href=\"https://5610lobellodr.com/\" target=\"_blank\" style=\"font-family: 'Outfit', Arial, sans-serif; font-size: 14px; color: #FFFFFF; text-decoration: none; text-transform: uppercase; font-weight: 600; letter-spacing: 2px;\">View Full Property Site</a>\n                  </td>\n                </tr>\n              </table>\n            </td>\n          </tr>\n          <!-- Footer -->\n          <tr>\n            <td align=\"center\" bgcolor=\"#F8F8F8\" style=\"padding: 40px 40px;\">\n              <p style=\"margin: 0; font-family: 'Outfit', Arial, sans-serif; font-size: 12px; color: #666666; letter-spacing: 0.5px; line-height: 1.5;\">\n                Exclusively represented by<br />\n                <strong style=\"color: #111111;\">Briggs Freeman | Sotheby's International Realty</strong><br />\n                5610 Lobello Dr, Dallas, TX 75229\n              </p>\n              <div style=\"padding-top: 20px;\">\n                <a href=\"https://5610lobellodr.com/\" target=\"_blank\" style=\"font-family: 'Outfit', Arial, sans-serif; font-size: 11px; color: #C7A17A; text-decoration: none; text-transform: uppercase; border-bottom: 1px solid #C7A17A;\">Visit Website</a>\n              </div>\n            </td>\n          </tr>\n        </table>\n        <!--[if (gte mso 9)|(IE)]>\n        </td>\n        </tr>\n        </table>\n        <![endif]-->\n      </td>\n    </tr>\n  </table>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "fd6d26b4-7b77-4b38-b8ec-87d057ca6e4e",
+      "name": "Send a message",
+      "webhookId": "5dbd36ea-d948-4bc8-91cd-0c9d6005bdf6",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "81fb1824-4033-4008-a642-c920f1a67755",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-02-01T21:09:22.410Z",
+      "createdAt": "2026-02-01T21:09:22.410Z",
+      "role": "workflow:owner",
+      "workflowId": "JhkQ546q7FmGysmu",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
