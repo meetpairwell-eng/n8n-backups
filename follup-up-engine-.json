@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-30T21:22:36.013Z",
+  "updatedAt": "2026-02-05T23:02:48.892Z",
   "createdAt": "2026-01-03T22:56:20.789Z",
   "id": "XjBaDlA2OZiGksRJ",
   "name": "Follup Up Engine",
@@ -93,7 +93,7 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "loose",
+                  "typeValidation": "strict",
                   "version": 3
                 },
                 "conditions": [
@@ -115,7 +115,7 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "loose",
+                  "typeValidation": "strict",
                   "version": 3
                 },
                 "conditions": [
@@ -137,7 +137,7 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "loose",
+                  "typeValidation": "strict",
                   "version": 3
                 },
                 "conditions": [
@@ -159,7 +159,7 @@
                 "options": {
                   "caseSensitive": true,
                   "leftValue": "",
-                  "typeValidation": "loose",
+                  "typeValidation": "strict",
                   "version": 3
                 },
                 "conditions": [
@@ -178,7 +178,6 @@
             }
           ]
         },
-        "looseTypeValidation": true,
         "options": {}
       },
       "type": "n8n-nodes-base.switch",
@@ -529,7 +528,7 @@
       }
     ]
   },
-  "versionId": "810299a1-6810-41fa-8b02-50fa60f8d566",
+  "versionId": "09bd82fb-f8c0-45fd-81a2-2bdf04b71902",
   "activeVersionId": "ad7a6a03-87fe-499a-b5b5-da6f5b3d491b",
   "triggerCount": 1,
   "shared": [
