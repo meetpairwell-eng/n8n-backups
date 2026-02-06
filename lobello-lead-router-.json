@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-31T23:10:22.723Z",
+  "updatedAt": "2026-02-05T22:43:31.771Z",
   "createdAt": "2026-01-30T21:23:15.831Z",
   "id": "1m1hv1NdgOm8CIG7",
   "name": "Lobello Lead Router",
@@ -168,8 +168,8 @@
     {
       "parameters": {
         "sendTo": "={{ $node['Lookup Agent (Master Sheet)'].json.Agent_Email }}",
-        "subject": "=New Lead for {{ $json['Agent_First_Name '] }}",
-        "message": "=<h3>Hey {{ $json['Agent_First_Name '] }}, you have a new lead! </h3>\n<p><strong>Property:</strong> {{ $node['Lookup Agent (Master Sheet)'].json.Property_Address }}</p>\n<ul>\n<li><strong>Client Name:</strong> {{ $('Webhook').item.json.body.name }}</li>\n<li><strong>Client Email:</strong> {{ $('Webhook').item.json.body.email }}</li>\n<li><strong>Client Phone:</strong> {{ $('Webhook').item.json.body.phone }}</li>\n</ul>\n<p><strong>Message:</strong><br>\n{{ $('Webhook').item.json.body.message }}</p>",
+        "subject": "=New Lead - {{ $json.Property_Address }}",
+        "message": "=<h3>Hey {{ $('Lookup Agent (Master Sheet)').item.json['Agent_First_Name '] }}, you have a new lead! </h3>\n<p><strong>Property:</strong> {{ $json.Property_Address }}</p>\n<ul>\n<li><strong>Client Name:</strong> {{ $('Webhook').item.json.body.name }}</li>\n<li><strong>Client Email:</strong> {{ $('Webhook').item.json.body.email }}</li>\n<li><strong>Client Phone:</strong> {{ $('Webhook').item.json.body.phone }}</li>\n</ul>\n<p><strong>Message:</strong><br>\n{{ $('Webhook').item.json.body.message }}</p>",
         "options": {
           "bccList": "meetpairwell@gmail.com"
         }
@@ -233,9 +233,78 @@
   "meta": {
     "templateCredsSetupCompleted": true
   },
-  "pinData": {},
-  "versionId": "7eb1908b-71f4-45f7-ba51-c32527de5bb7",
-  "activeVersionId": "7eb1908b-71f4-45f7-ba51-c32527de5bb7",
+  "pinData": {
+    "Log Lead (Second Sheet)": [
+      {
+        "json": {
+          "Timestamp": "2026-01-31T23:08:59.012Z",
+          "Property_Address": "5610 Lobello Drive",
+          "Client_Name": "Hector Meza",
+          "Client_Email": "mezahector22@yahoo.com",
+          "Client_Phone": "2146865641",
+          "Message": "I am interested in scheduling a private tour of 5610 Lobello Drive."
+        }
+      }
+    ],
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "n8n.meetpairwell.com",
+            "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+            "content-length": "259",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "en-US,en;q=0.9",
+            "content-type": "application/json",
+            "origin": "http://localhost:5173",
+            "priority": "u=1, i",
+            "referer": "http://localhost:5173/",
+            "sec-ch-ua": "\"Not(A:Brand\";v=\"8\", \"Chromium\";v=\"144\", \"Google Chrome\";v=\"144\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"macOS\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "76.185.107.242",
+            "x-forwarded-host": "n8n.meetpairwell.com",
+            "x-forwarded-port": "443",
+            "x-forwarded-proto": "https",
+            "x-forwarded-server": "742ce9633541",
+            "x-real-ip": "76.185.107.242"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "name": "Hector Meza",
+            "email": "mezahector22@yahoo.com",
+            "phone": "2146865641",
+            "message": "I am interested in scheduling a private tour of 5610 Lobello Drive.",
+            "property": "5610 Lobello Drive",
+            "source": "Website Tour Request",
+            "timestamp": "2026-01-31T23:08:59.012Z"
+          },
+          "webhookUrl": "https://n8n.meetpairwell.com/webhook-test/lobello-lead",
+          "executionMode": "test"
+        }
+      }
+    ],
+    "Lookup Agent (Master Sheet)": [
+      {
+        "json": {
+          "row_number": 2,
+          "Property_Address": "5610 Lobello Drive",
+          "Agent_Tab": "Cole",
+          "Agent_First_Name ": "Cole",
+          "Agent_Last_Name": "Swearingen",
+          "Agent_Email": "mezahector22@yahoo.com",
+          "Agent_Phone": 9729719586
+        }
+      }
+    ]
+  },
+  "versionId": "486effc9-4d44-4826-a06a-7e1d4cbee14c",
+  "activeVersionId": "486effc9-4d44-4826-a06a-7e1d4cbee14c",
   "triggerCount": 1,
   "shared": [
     {
@@ -247,9 +316,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-31T23:10:28.948Z",
-    "createdAt": "2026-01-31T23:10:22.728Z",
-    "versionId": "7eb1908b-71f4-45f7-ba51-c32527de5bb7",
+    "updatedAt": "2026-02-05T22:43:38.239Z",
+    "createdAt": "2026-02-05T22:43:31.773Z",
+    "versionId": "486effc9-4d44-4826-a06a-7e1d4cbee14c",
     "workflowId": "1m1hv1NdgOm8CIG7",
     "nodes": [
       {
@@ -414,8 +483,8 @@
       {
         "parameters": {
           "sendTo": "={{ $node['Lookup Agent (Master Sheet)'].json.Agent_Email }}",
-          "subject": "=New Lead for {{ $json['Agent_First_Name '] }}",
-          "message": "=<h3>Hey {{ $json['Agent_First_Name '] }}, you have a new lead! </h3>\n<p><strong>Property:</strong> {{ $node['Lookup Agent (Master Sheet)'].json.Property_Address }}</p>\n<ul>\n<li><strong>Client Name:</strong> {{ $('Webhook').item.json.body.name }}</li>\n<li><strong>Client Email:</strong> {{ $('Webhook').item.json.body.email }}</li>\n<li><strong>Client Phone:</strong> {{ $('Webhook').item.json.body.phone }}</li>\n</ul>\n<p><strong>Message:</strong><br>\n{{ $('Webhook').item.json.body.message }}</p>",
+          "subject": "=New Lead - {{ $json.Property_Address }}",
+          "message": "=<h3>Hey {{ $('Lookup Agent (Master Sheet)').item.json['Agent_First_Name '] }}, you have a new lead! </h3>\n<p><strong>Property:</strong> {{ $json.Property_Address }}</p>\n<ul>\n<li><strong>Client Name:</strong> {{ $('Webhook').item.json.body.name }}</li>\n<li><strong>Client Email:</strong> {{ $('Webhook').item.json.body.email }}</li>\n<li><strong>Client Phone:</strong> {{ $('Webhook').item.json.body.phone }}</li>\n</ul>\n<p><strong>Message:</strong><br>\n{{ $('Webhook').item.json.body.message }}</p>",
           "options": {
             "bccList": "meetpairwell@gmail.com"
           }
@@ -473,7 +542,7 @@
       }
     },
     "authors": "Hector Meza",
-    "name": "Version 7eb1908b",
+    "name": "Version 486effc9",
     "description": ""
   },
   "tags": []
