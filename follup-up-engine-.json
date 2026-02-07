@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-05T23:02:48.892Z",
+  "updatedAt": "2026-02-06T16:16:54.617Z",
   "createdAt": "2026-01-03T22:56:20.789Z",
   "id": "XjBaDlA2OZiGksRJ",
   "name": "Follup Up Engine",
@@ -120,7 +120,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "0bc43256-e1b6-4902-be9f-4450a8a0de71",
+                    "id": "f3e3e800-017b-489d-9edc-cc0fabbd592f",
                     "leftValue": "={{ Math.round($json.daysSinceSignup.days) }}",
                     "rightValue": 3,
                     "operator": {
@@ -142,7 +142,7 @@
                 },
                 "conditions": [
                   {
-                    "id": "fcec654d-e34f-4aa2-bb29-430a2e93b145",
+                    "id": "85553e50-da04-4db2-8753-4787671df00d",
                     "leftValue": "={{ Math.round($json.daysSinceSignup.days) }}",
                     "rightValue": 7,
                     "operator": {
@@ -164,12 +164,12 @@
                 },
                 "conditions": [
                   {
-                    "id": "e0260203-19fd-4e50-b515-0b70978b6e3b",
+                    "id": "7bd99764-8d49-4ae6-8f9d-8021e07682dc",
                     "leftValue": "={{ Math.round($json.daysSinceSignup.days) }}",
                     "rightValue": 10,
                     "operator": {
                       "type": "number",
-                      "operation": "equals"
+                      "operation": "notEquals"
                     }
                   }
                 ],
@@ -528,7 +528,7 @@
       }
     ]
   },
-  "versionId": "09bd82fb-f8c0-45fd-81a2-2bdf04b71902",
+  "versionId": "ba8b9f5b-608d-48fb-95ac-07013e30d0bc",
   "activeVersionId": "ad7a6a03-87fe-499a-b5b5-da6f5b3d491b",
   "triggerCount": 1,
   "shared": [
