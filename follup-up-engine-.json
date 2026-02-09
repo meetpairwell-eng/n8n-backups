@@ -1,7 +1,7 @@
 {
-  "updatedAt": "2026-02-06T16:16:54.617Z",
-  "createdAt": "2026-01-03T22:56:20.789Z",
-  "id": "XjBaDlA2OZiGksRJ",
+  "updatedAt": "2026-02-09T17:08:40.119Z",
+  "createdAt": "2026-02-09T17:07:35.322Z",
+  "id": "J8w2rLGoJhI0TFSw",
   "name": "Follup Up Engine",
   "active": true,
   "isArchived": false,
@@ -23,7 +23,7 @@
         -2912,
         -960
       ],
-      "id": "dd60b084-3ba2-436d-b639-e4dfa5315932",
+      "id": "9c119f53-2aa2-4f84-9305-b0c969b41e00",
       "name": "Schedule Trigger"
     },
     {
@@ -58,7 +58,7 @@
         -2688,
         -960
       ],
-      "id": "1335f627-93e9-48ca-be75-5324dd8c7e39",
+      "id": "50cd3a76-43e4-4192-9e85-c04c245455b1",
       "name": "Get row(s) in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
@@ -81,7 +81,7 @@
         -2464,
         -960
       ],
-      "id": "3f3dcb03-7d6a-4ba9-b2d1-f70894885876",
+      "id": "9af25289-2afd-4739-8e6e-fe761b30b88d",
       "name": "Date & Time"
     },
     {
@@ -169,7 +169,7 @@
                     "rightValue": 10,
                     "operator": {
                       "type": "number",
-                      "operation": "notEquals"
+                      "operation": "equals"
                     }
                   }
                 ],
@@ -186,7 +186,7 @@
         -2240,
         -992
       ],
-      "id": "74b4236c-844c-400a-9d94-4fd8c323c93a",
+      "id": "254eaaea-9c41-455d-a479-685f47fbae7b",
       "name": "Switch"
     },
     {
@@ -204,9 +204,9 @@
         -2016,
         -1248
       ],
-      "id": "1eb96999-c61b-4c07-9c68-6d70464cfeec",
+      "id": "e13fda54-65a6-4890-9ad4-37474f8b375b",
       "name": "FU1 Email",
-      "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+      "webhookId": "a3c6b08b-e404-4c71-9830-dc323577eb3c",
       "credentials": {
         "gmailOAuth2": {
           "id": "bsAbfRmGUOzzryvM",
@@ -229,7 +229,7 @@
         -1792,
         -1248
       ],
-      "id": "907690bd-a077-449f-a8c7-725d22583643",
+      "id": "b9c0ced8-6e49-4a33-8753-128b0cb3ad6d",
       "name": "FU1 Text",
       "credentials": {
         "twilioApi": {
@@ -253,9 +253,9 @@
         -2016,
         -1056
       ],
-      "id": "043f5f27-6846-4d2e-9365-715d85688038",
+      "id": "366c6dc7-e767-45a9-9d2d-8e01e9a1a4a1",
       "name": "FU2 Email",
-      "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+      "webhookId": "ff197146-7651-46ae-a902-2aecbcc2c73f",
       "credentials": {
         "gmailOAuth2": {
           "id": "bsAbfRmGUOzzryvM",
@@ -276,7 +276,7 @@
         -1792,
         -1056
       ],
-      "id": "00e51b55-006f-4a4b-935f-2c60a748a3a0",
+      "id": "029c084f-db5c-47ce-8604-4bfb0911d487",
       "name": "FU2 Text",
       "credentials": {
         "twilioApi": {
@@ -300,9 +300,9 @@
         -2016,
         -864
       ],
-      "id": "f245687a-8d41-4419-bcc6-518270a84d3b",
+      "id": "eabf3d9b-5d20-478c-a253-098010abc9d6",
       "name": "FU3 Email",
-      "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+      "webhookId": "8b644ec8-6426-4e1d-b563-982c752907ec",
       "credentials": {
         "gmailOAuth2": {
           "id": "bsAbfRmGUOzzryvM",
@@ -323,7 +323,7 @@
         -1792,
         -864
       ],
-      "id": "e4426143-ed3c-4e34-b2f5-f0d075c40c77",
+      "id": "4536f8d9-c602-4bbe-8694-64dd6746893f",
       "name": "FU3 Text",
       "credentials": {
         "twilioApi": {
@@ -347,9 +347,9 @@
         -2016,
         -672
       ],
-      "id": "e2d5e534-5360-4f39-ba4c-e0a76e4eafd9",
+      "id": "496e82a6-e94e-47e8-a016-cee672bb2c00",
       "name": "FU4 Email1",
-      "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+      "webhookId": "76ef5f4c-5983-4f08-81d7-835984da3ade",
       "credentials": {
         "gmailOAuth2": {
           "id": "bsAbfRmGUOzzryvM",
@@ -370,7 +370,7 @@
         -1792,
         -672
       ],
-      "id": "db8e7364-9369-47bf-b836-7e3068db139c",
+      "id": "dbbc7b62-d5f8-4a04-989d-00998c32a4c4",
       "name": "FU4 Text1",
       "credentials": {
         "twilioApi": {
@@ -528,23 +528,23 @@
       }
     ]
   },
-  "versionId": "ba8b9f5b-608d-48fb-95ac-07013e30d0bc",
-  "activeVersionId": "ad7a6a03-87fe-499a-b5b5-da6f5b3d491b",
+  "versionId": "5802dd0c-3250-40f7-8daf-7c5bb151920b",
+  "activeVersionId": "5802dd0c-3250-40f7-8daf-7c5bb151920b",
   "triggerCount": 1,
   "shared": [
     {
-      "updatedAt": "2026-01-03T22:56:20.789Z",
-      "createdAt": "2026-01-03T22:56:20.789Z",
+      "updatedAt": "2026-02-09T17:07:35.322Z",
+      "createdAt": "2026-02-09T17:07:35.322Z",
       "role": "workflow:owner",
-      "workflowId": "XjBaDlA2OZiGksRJ",
+      "workflowId": "J8w2rLGoJhI0TFSw",
       "projectId": "EwZFwcRPsRQcg8Kx"
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-01-04T22:26:46.797Z",
-    "createdAt": "2026-01-04T22:26:41.251Z",
-    "versionId": "ad7a6a03-87fe-499a-b5b5-da6f5b3d491b",
-    "workflowId": "XjBaDlA2OZiGksRJ",
+    "updatedAt": "2026-02-09T17:08:44.037Z",
+    "createdAt": "2026-02-09T17:08:40.120Z",
+    "versionId": "5802dd0c-3250-40f7-8daf-7c5bb151920b",
+    "workflowId": "J8w2rLGoJhI0TFSw",
     "nodes": [
       {
         "parameters": {
@@ -563,7 +563,7 @@
           -2912,
           -960
         ],
-        "id": "dd60b084-3ba2-436d-b639-e4dfa5315932",
+        "id": "9c119f53-2aa2-4f84-9305-b0c969b41e00",
         "name": "Schedule Trigger"
       },
       {
@@ -598,7 +598,7 @@
           -2688,
           -960
         ],
-        "id": "1335f627-93e9-48ca-be75-5324dd8c7e39",
+        "id": "50cd3a76-43e4-4192-9e85-c04c245455b1",
         "name": "Get row(s) in sheet",
         "credentials": {
           "googleSheetsOAuth2Api": {
@@ -621,7 +621,7 @@
           -2464,
           -960
         ],
-        "id": "3f3dcb03-7d6a-4ba9-b2d1-f70894885876",
+        "id": "9af25289-2afd-4739-8e6e-fe761b30b88d",
         "name": "Date & Time"
       },
       {
@@ -633,13 +633,13 @@
                   "options": {
                     "caseSensitive": true,
                     "leftValue": "",
-                    "typeValidation": "loose",
+                    "typeValidation": "strict",
                     "version": 3
                   },
                   "conditions": [
                     {
                       "id": "17948a95-4463-4108-8d7e-fe98b5dbd744",
-                      "leftValue": "={{ Math.floor($json.daysSinceSignup.days) }}",
+                      "leftValue": "={{ Math.round($json.daysSinceSignup.days) }}",
                       "rightValue": 1,
                       "operator": {
                         "type": "number",
@@ -655,17 +655,17 @@
                   "options": {
                     "caseSensitive": true,
                     "leftValue": "",
-                    "typeValidation": "loose",
+                    "typeValidation": "strict",
                     "version": 3
                   },
                   "conditions": [
                     {
-                      "id": "0bc43256-e1b6-4902-be9f-4450a8a0de71",
-                      "leftValue": "={{ Math.floor($json.daysSinceSignup.days) }}",
-                      "rightValue": "3",
+                      "id": "f3e3e800-017b-489d-9edc-cc0fabbd592f",
+                      "leftValue": "={{ Math.round($json.daysSinceSignup.days) }}",
+                      "rightValue": 3,
                       "operator": {
-                        "type": "string",
-                        "operation": "contains"
+                        "type": "number",
+                        "operation": "equals"
                       }
                     }
                   ],
@@ -677,17 +677,17 @@
                   "options": {
                     "caseSensitive": true,
                     "leftValue": "",
-                    "typeValidation": "loose",
+                    "typeValidation": "strict",
                     "version": 3
                   },
                   "conditions": [
                     {
-                      "id": "fcec654d-e34f-4aa2-bb29-430a2e93b145",
-                      "leftValue": "={{ Math.floor($json.daysSinceSignup.days) }}",
-                      "rightValue": "7",
+                      "id": "85553e50-da04-4db2-8753-4787671df00d",
+                      "leftValue": "={{ Math.round($json.daysSinceSignup.days) }}",
+                      "rightValue": 7,
                       "operator": {
-                        "type": "string",
-                        "operation": "contains"
+                        "type": "number",
+                        "operation": "equals"
                       }
                     }
                   ],
@@ -699,17 +699,17 @@
                   "options": {
                     "caseSensitive": true,
                     "leftValue": "",
-                    "typeValidation": "loose",
+                    "typeValidation": "strict",
                     "version": 3
                   },
                   "conditions": [
                     {
-                      "id": "e0260203-19fd-4e50-b515-0b70978b6e3b",
-                      "leftValue": "={{ $json.daysSinceSignup.days }}",
-                      "rightValue": "10",
+                      "id": "7bd99764-8d49-4ae6-8f9d-8021e07682dc",
+                      "leftValue": "={{ Math.round($json.daysSinceSignup.days) }}",
+                      "rightValue": 10,
                       "operator": {
-                        "type": "string",
-                        "operation": "contains"
+                        "type": "number",
+                        "operation": "equals"
                       }
                     }
                   ],
@@ -718,7 +718,6 @@
               }
             ]
           },
-          "looseTypeValidation": true,
           "options": {}
         },
         "type": "n8n-nodes-base.switch",
@@ -727,7 +726,7 @@
           -2240,
           -992
         ],
-        "id": "74b4236c-844c-400a-9d94-4fd8c323c93a",
+        "id": "254eaaea-9c41-455d-a479-685f47fbae7b",
         "name": "Switch"
       },
       {
@@ -735,7 +734,9 @@
           "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
           "subject": "=We are here to help, {{ $('Get row(s) in sheet').item.json.firstName }}! 🏠",
           "message": "=<p>Hey  {{ $('Get row(s) in sheet').item.json.firstName }}— just popping back in!</p>  <p>I know life gets busy, but if you're still thinking about buying in {{ $('Get row(s) in sheet').item.json.Location }}, I’d love to help you start smarter.</p>  <p>At Pairwell, we don’t just match you with any agent, we introduce you to someone great who's already proven themselves in your specific area. No pressure. Just smart guidance from the start.</p>  <p>If you’re ready to take the next step, I’ve got your back. Just reply here or call me directly.</p>  <p>Talk soon,<br> Hector</p>",
-          "options": {}
+          "options": {
+            "appendAttribution": false
+          }
         },
         "type": "n8n-nodes-base.gmail",
         "typeVersion": 2.2,
@@ -743,9 +744,9 @@
           -2016,
           -1248
         ],
-        "id": "1eb96999-c61b-4c07-9c68-6d70464cfeec",
+        "id": "e13fda54-65a6-4890-9ad4-37474f8b375b",
         "name": "FU1 Email",
-        "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+        "webhookId": "a3c6b08b-e404-4c71-9830-dc323577eb3c",
         "credentials": {
           "gmailOAuth2": {
             "id": "bsAbfRmGUOzzryvM",
@@ -768,7 +769,7 @@
           -1792,
           -1248
         ],
-        "id": "907690bd-a077-449f-a8c7-725d22583643",
+        "id": "b9c0ced8-6e49-4a33-8753-128b0cb3ad6d",
         "name": "FU1 Text",
         "credentials": {
           "twilioApi": {
@@ -782,7 +783,9 @@
           "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
           "subject": "Just checking in (no pressure)",
           "message": "=<p>Hey {{ $('Get row(s) in sheet').item.json.firstName }},</p>\n\n<p>Just popping back in — I’m not sure where you are in your search, but I didn’t want you to miss out on a better way to get started.</p>\n\n<p>Most people don’t realize that in {{ $('Get row(s) in sheet').item.json.Location }}, many of the best agents (and \"coming soon\" listings) don’t show up in a typical online search.</p>\n \n<p>That’s where Pairwell comes in. We match you with an expert who is already in the know.</p>\n\n<p>If you're still exploring, I’d love to make this easier!\n\n<p>Best,<br>\nHector</p>",
-          "options": {}
+          "options": {
+            "appendAttribution": false
+          }
         },
         "type": "n8n-nodes-base.gmail",
         "typeVersion": 2.2,
@@ -790,9 +793,9 @@
           -2016,
           -1056
         ],
-        "id": "043f5f27-6846-4d2e-9365-715d85688038",
+        "id": "366c6dc7-e767-45a9-9d2d-8e01e9a1a4a1",
         "name": "FU2 Email",
-        "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+        "webhookId": "ff197146-7651-46ae-a902-2aecbcc2c73f",
         "credentials": {
           "gmailOAuth2": {
             "id": "bsAbfRmGUOzzryvM",
@@ -813,7 +816,7 @@
           -1792,
           -1056
         ],
-        "id": "00e51b55-006f-4a4b-935f-2c60a748a3a0",
+        "id": "029c084f-db5c-47ce-8604-4bfb0911d487",
         "name": "FU2 Text",
         "credentials": {
           "twilioApi": {
@@ -825,9 +828,11 @@
       {
         "parameters": {
           "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
-          "subject": "=Still looking for the right agent in {{ $('Get row(s) in sheet').item.json.Location }}?",
+          "subject": "=Still looking for the right agent in {{ $('Get row(s) in sheet').item.json.City }}?",
           "message": "=<p>Hi {{ $('Get row(s) in sheet').item.json.firstName }}, just following up again. I haven’t forgotten about you!</p>\n\n<p>If you’re still thinking about moving, we’d love to help you do it with someone you can actually trust. There are a lot of agents in {{ $('Get row(s) in sheet').item.json.Location }}, but only a few who consistently deliver the results you deserve.</p>\n\n<p>At Pairwell, we personally vet every agent. No algorithms, no paid placements, just honest matches based on your specific needs.</p>\n\n<p>If you’re ready to explore your options, just hit reply and I’ll take care of the rest.</p>\n\n<p>Talk soon,<br>\nHector</p>",
-          "options": {}
+          "options": {
+            "appendAttribution": false
+          }
         },
         "type": "n8n-nodes-base.gmail",
         "typeVersion": 2.2,
@@ -835,9 +840,9 @@
           -2016,
           -864
         ],
-        "id": "f245687a-8d41-4419-bcc6-518270a84d3b",
+        "id": "eabf3d9b-5d20-478c-a253-098010abc9d6",
         "name": "FU3 Email",
-        "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+        "webhookId": "8b644ec8-6426-4e1d-b563-982c752907ec",
         "credentials": {
           "gmailOAuth2": {
             "id": "bsAbfRmGUOzzryvM",
@@ -858,7 +863,7 @@
           -1792,
           -864
         ],
-        "id": "e4426143-ed3c-4e34-b2f5-f0d075c40c77",
+        "id": "4536f8d9-c602-4bbe-8694-64dd6746893f",
         "name": "FU3 Text",
         "credentials": {
           "twilioApi": {
@@ -872,7 +877,9 @@
           "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
           "subject": "One last check-in from Pairwell",
           "message": "=<p>Hey {{ $('Get row(s) in sheet').item.json.firstName }}, checking in one last time.</p>\n\n<p>If you’re still looking for a place or planning to soon, I don’t want you to miss this. We connect buyers with top-tier local experts. No guesswork and no generic matches, just a better starting point.</p>\n\n<p>Even if you’re not ready to move today, getting paired with the right expert now can save you time and stress down the road.</p>\n\n<p>If that sounds helpful, just reply here. If not, no worries. We’re always here when you’re ready!</p>\n\n<p>Wishing you the best,<br>\nHector</p>",
-          "options": {}
+          "options": {
+            "appendAttribution": false
+          }
         },
         "type": "n8n-nodes-base.gmail",
         "typeVersion": 2.2,
@@ -880,9 +887,9 @@
           -2016,
           -672
         ],
-        "id": "e2d5e534-5360-4f39-ba4c-e0a76e4eafd9",
+        "id": "496e82a6-e94e-47e8-a016-cee672bb2c00",
         "name": "FU4 Email1",
-        "webhookId": "d517abe0-5a38-4e1e-8472-3b8e54627635",
+        "webhookId": "76ef5f4c-5983-4f08-81d7-835984da3ade",
         "credentials": {
           "gmailOAuth2": {
             "id": "bsAbfRmGUOzzryvM",
@@ -903,7 +910,7 @@
           -1792,
           -672
         ],
-        "id": "db8e7364-9369-47bf-b836-7e3068db139c",
+        "id": "dbbc7b62-d5f8-4a04-989d-00998c32a4c4",
         "name": "FU4 Text1",
         "credentials": {
           "twilioApi": {
@@ -1040,7 +1047,7 @@
       }
     },
     "authors": "Hector Meza",
-    "name": "Version ad7a6a03",
+    "name": "Version 5802dd0c",
     "description": ""
   },
   "tags": []
