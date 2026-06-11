@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-06T18:51:58.355Z",
+  "updatedAt": "2026-06-10T15:52:40.417Z",
   "createdAt": "2026-01-30T21:23:15.831Z",
   "id": "1m1hv1NdgOm8CIG7",
   "name": "Website Lead Router",
@@ -38,7 +38,15 @@
           "cachedResultName": "Properties",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1a6CrdT1HaVY2jg8TPoQGLCDgyZUs5-skqv_DOpU0g8A/edit#gid=528686066"
         },
-        "options": {}
+        "options": {},
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Property_Address",
+              "lookupValue": "={{ $json.body.property }}"
+            }
+          ]
+        }
       },
       "name": "Lookup Agent (Master Sheet)",
       "type": "n8n-nodes-base.googleSheets",
@@ -79,7 +87,10 @@
             "Client_Name": "={{ $('Webhook').item.json.body.name }}",
             "Client_Email": "={{ $('Webhook').item.json.body.email }}",
             "Client_Phone": "={{ $('Webhook').item.json.body.phone }}",
-            "Message": "={{ $('Webhook').item.json.body.message }}"
+            "Message": "={{ $('Webhook').item.json.body.message }}",
+            "Lead Source": "={{ $('Webhook').item.json.body.utm_source }}",
+            "Medium": "={{ $('Webhook').item.json.body.utm_medium }}",
+            "Campaign": "={{ $('Webhook').item.json.body.utm_campaign }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -136,6 +147,36 @@
             {
               "id": "Message",
               "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lead Source",
+              "displayName": "Lead Source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Medium",
+              "displayName": "Medium",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Campaign",
+              "displayName": "Campaign",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -227,7 +268,9 @@
     }
   },
   "settings": {
-    "executionOrder": "v1"
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "staticData": null,
   "meta": {
@@ -303,8 +346,8 @@
       }
     ]
   },
-  "versionId": "486effc9-4d44-4826-a06a-7e1d4cbee14c",
-  "activeVersionId": "486effc9-4d44-4826-a06a-7e1d4cbee14c",
+  "versionId": "2868b8d9-6165-4320-8bc7-f47f96f53015",
+  "activeVersionId": "2868b8d9-6165-4320-8bc7-f47f96f53015",
   "triggerCount": 1,
   "shared": [
     {
@@ -316,9 +359,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-02-05T22:43:38.239Z",
-    "createdAt": "2026-02-05T22:43:31.773Z",
-    "versionId": "486effc9-4d44-4826-a06a-7e1d4cbee14c",
+    "updatedAt": "2026-06-10T15:52:40.419Z",
+    "createdAt": "2026-06-10T15:52:40.419Z",
+    "versionId": "2868b8d9-6165-4320-8bc7-f47f96f53015",
     "workflowId": "1m1hv1NdgOm8CIG7",
     "nodes": [
       {
@@ -353,7 +396,15 @@
             "cachedResultName": "Properties",
             "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1a6CrdT1HaVY2jg8TPoQGLCDgyZUs5-skqv_DOpU0g8A/edit#gid=528686066"
           },
-          "options": {}
+          "options": {},
+          "filtersUI": {
+            "values": [
+              {
+                "lookupColumn": "Property_Address",
+                "lookupValue": "={{ $json.body.property }}"
+              }
+            ]
+          }
         },
         "name": "Lookup Agent (Master Sheet)",
         "type": "n8n-nodes-base.googleSheets",
@@ -394,7 +445,10 @@
               "Client_Name": "={{ $('Webhook').item.json.body.name }}",
               "Client_Email": "={{ $('Webhook').item.json.body.email }}",
               "Client_Phone": "={{ $('Webhook').item.json.body.phone }}",
-              "Message": "={{ $('Webhook').item.json.body.message }}"
+              "Message": "={{ $('Webhook').item.json.body.message }}",
+              "Lead Source": "={{ $('Webhook').item.json.body.utm_source }}",
+              "Medium": "={{ $('Webhook').item.json.body.utm_medium }}",
+              "Campaign": "={{ $('Webhook').item.json.body.utm_campaign }}"
             },
             "matchingColumns": [],
             "schema": [
@@ -451,6 +505,36 @@
               {
                 "id": "Message",
                 "displayName": "Message",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Lead Source",
+                "displayName": "Lead Source",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Medium",
+                "displayName": "Medium",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Campaign",
+                "displayName": "Campaign",
                 "required": false,
                 "defaultMatch": false,
                 "display": true,
@@ -542,8 +626,8 @@
       }
     },
     "authors": "Hector Meza",
-    "name": "Version 486effc9",
-    "description": ""
+    "name": null,
+    "description": null
   },
   "tags": []
 }
