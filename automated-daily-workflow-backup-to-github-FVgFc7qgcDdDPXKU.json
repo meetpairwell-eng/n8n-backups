@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-17T18:52:28.808Z",
+  "updatedAt": "2026-07-07T20:06:14.626Z",
   "createdAt": "2026-01-03T21:08:42.083Z",
   "id": "FVgFc7qgcDdDPXKU",
   "name": "Automated daily workflow backup to GitHub",
@@ -306,6 +306,22 @@
         688
       ],
       "typeVersion": 1
+    },
+    {
+      "name": "TempManualRun",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -300,
+        300
+      ],
+      "webhookId": "1c6c14a0-c1ec-46b2-9116-2649b204a482",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "backup-run-now-tmp",
+        "options": {}
+      },
+      "id": "45d6a6c0-1a05-46e2-a7e7-1fd605c71cd1"
     }
   ],
   "connections": {
@@ -403,6 +419,17 @@
           }
         ]
       ]
+    },
+    "TempManualRun": {
+      "main": [
+        [
+          {
+            "node": "List files from repo1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -423,9 +450,9 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "0be9200a-7764-4079-8898-e8ed08aac795",
-  "activeVersionId": "0be9200a-7764-4079-8898-e8ed08aac795",
-  "triggerCount": 1,
+  "versionId": "13f482fe-95f0-4366-88ba-443c45042edf",
+  "activeVersionId": "13f482fe-95f0-4366-88ba-443c45042edf",
+  "triggerCount": 2,
   "shared": [
     {
       "updatedAt": "2026-01-03T21:08:42.083Z",
@@ -436,9 +463,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-17T18:52:28.812Z",
-    "createdAt": "2026-06-17T18:52:28.812Z",
-    "versionId": "0be9200a-7764-4079-8898-e8ed08aac795",
+    "updatedAt": "2026-07-07T20:06:14.630Z",
+    "createdAt": "2026-07-07T20:06:14.630Z",
+    "versionId": "13f482fe-95f0-4366-88ba-443c45042edf",
     "workflowId": "FVgFc7qgcDdDPXKU",
     "nodes": [
       {
@@ -741,6 +768,22 @@
           688
         ],
         "typeVersion": 1
+      },
+      {
+        "name": "TempManualRun",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -300,
+          300
+        ],
+        "webhookId": "1c6c14a0-c1ec-46b2-9116-2649b204a482",
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "backup-run-now-tmp",
+          "options": {}
+        },
+        "id": "45d6a6c0-1a05-46e2-a7e7-1fd605c71cd1"
       }
     ],
     "connections": {
@@ -833,6 +876,17 @@
           [
             {
               "node": "Check if file exists1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TempManualRun": {
+        "main": [
+          [
+            {
+              "node": "List files from repo1",
               "type": "main",
               "index": 0
             }
