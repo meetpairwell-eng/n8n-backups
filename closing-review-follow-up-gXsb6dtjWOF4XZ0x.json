@@ -1,0 +1,407 @@
+{
+  "updatedAt": "2026-07-07T19:29:40.171Z",
+  "createdAt": "2026-07-07T18:14:28.138Z",
+  "id": "gXsb6dtjWOF4XZ0x",
+  "name": "Closing Review Follow-Up",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "name": "Closing Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        -100
+      ],
+      "webhookId": "f440ef89-2ae4-4b9c-b31f-84eeaf7ea661",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "closing-review-hm-x7k2q9",
+        "options": {}
+      },
+      "id": "f25b7eac-0f01-4da6-948d-eb82c7bca752"
+    },
+    {
+      "name": "Closing Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2,
+      "position": [
+        0,
+        100
+      ],
+      "webhookId": "ac3cf94d-e6bd-4e54-b999-e9327e453123",
+      "parameters": {
+        "path": "closing-desk-hm-9t4w2",
+        "formTitle": "New Closing",
+        "formDescription": "Sends each client a personal review request and logs them for follow-up.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Client 1 first name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Client 1 email",
+              "fieldType": "email",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Client 2 first name"
+            },
+            {
+              "fieldLabel": "Client 2 email",
+              "fieldType": "email"
+            },
+            {
+              "fieldLabel": "Neighborhood"
+            },
+            {
+              "fieldLabel": "Bought or sold",
+              "fieldType": "dropdown",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "bought"
+                  },
+                  {
+                    "option": "sold"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b7c4883a-29cf-48ed-a315-030c9e9d668f"
+    },
+    {
+      "name": "One Email Per Client",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "function buildRaw(to, subject, html) {\n  const mime = [\n    'From: Hector Meza <h.mezarealty@gmail.com>',\n    `To: ${to}`,\n    'Reply-To: hmeza@briggsfreeman.com',\n    `Subject: ${subject}`,\n    'MIME-Version: 1.0',\n    'Content-Type: text/html; charset=UTF-8',\n    '',\n    html\n  ].join('\\r\\n');\n  return Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nconst raw = $input.first().json;\nconst link = 'https://g.page/r/CabJGOEHci6qEBM/review';\nlet clients = [], hood = '', closing = 'bought';\n\nif (raw.body && Array.isArray(raw.body.clients)) {\n  clients = raw.body.clients; hood = (raw.body.neighborhood || '').trim();\n  closing = (raw.body.closing || 'bought').toLowerCase();\n} else if (raw['Client 1 first name']) {\n  clients.push({ first: raw['Client 1 first name'], email: raw['Client 1 email'] });\n  if (raw['Client 2 first name'] && raw['Client 2 email']) {\n    clients.push({ first: raw['Client 2 first name'], email: raw['Client 2 email'] });\n  }\n  hood = (raw['Neighborhood'] || '').trim();\n  closing = (raw['Bought or sold'] || 'bought').toLowerCase();\n}\nclients = clients.filter(c => c && c.first && c.email);\nif (!clients.length) { throw new Error('No clients in payload'); }\n\nconst sig = `<p style=\"margin:24px 0 0;\">With gratitude,<br><strong>Hector Meza</strong><br>Briggs Freeman Sotheby's International Realty<br>(214) 686-5641 &middot; <a href=\"https://hectormeza.com\" style=\"color:#1a3c34;\">hectormeza.com</a></p>`;\nreturn clients.map((c, i) => {\n  const partner = clients.length > 1 ? clients.find((x, j) => j !== i) : null;\n  const opener = closing === 'sold'\n    ? `Now that everything is signed and your sale${hood ? ' in ' + hood : ''} is officially complete, I wanted to take a moment to say thank you.`\n    : `Now that everything is signed and the ${hood ? 'home in ' + hood : 'home'} is officially yours, I wanted to take a moment to say thank you.`;\n  const partnerPara = partner\n    ? `<p style=\"margin:0 0 16px;\">One small note: Google reviews are tied to each person's account, so if ${partner.first} would like to share their side as well, each voice counts on its own. No pressure whatsoever.</p>`\n    : '';\n  const html = [\n    `<div style=\"font-family:'Aptos','Segoe UI',Calibri,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#222;max-width:560px;\">`,\n    `<p style=\"margin:0 0 16px;\">Hi ${c.first},</p>`,\n    `<p style=\"margin:0 0 16px;\">${opener} Being trusted with something this big is never lost on me, and working with you made it a genuine pleasure.</p>`,\n    `<p style=\"margin:0 0 16px;\">If I may ask one small favor: would you share a few words about your experience on Google? It takes about two minutes, and it means more than you might think. A few honest sentences from you carry more weight than anything I could say about myself.</p>`,\n    `<p style=\"margin:0 0 20px;\"><a href=\"${link}\" style=\"display:inline-block;background:#1a3c34;color:#ffffff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;\">Leave a review</a></p>`,\n    `<p style=\"margin:0 0 16px;font-size:13px;color:#777;\">Or copy this link: ${link}</p>`,\n    partnerPara,\n    `<p style=\"margin:0 0 16px;\">I'm here for the long haul. Contractor recommendations, market questions, or just to catch up, my door is always open. Congratulations again.</p>`,\n    sig,\n    `</div>`\n  ].join('');\n  return { json: {\n    first: c.first, email: c.email, partner: partner ? partner.first : '',\n    neighborhood: hood, closing, sent_at: new Date().toISOString(),\n    subject: `Congratulations again, ${c.first}`, html, raw: buildRaw(c.email, `Congratulations again, ${c.first}`, html)\n  }};\n});"
+      },
+      "id": "ce4a4461-cd5e-4003-b721-92b69fdf881e"
+    },
+    {
+      "name": "Log to Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1hINfEPp2TVfakuKflie609CfYZccvPoxeXGNV6KwngI/values/Closings!A1:append?valueInputOption=RAW",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({values: [[$('One Email Per Client').item.json.first, $('One Email Per Client').item.json.email, $('One Email Per Client').item.json.partner, $('One Email Per Client').item.json.neighborhood, $('One Email Per Client').item.json.closing, $('One Email Per Client').item.json.sent_at, '', '', '', '']]}) }}",
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      },
+      "id": "eabebbb7-679f-40ef-8373-83b590b20463"
+    },
+    {
+      "name": "Send Review Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({raw: $json.raw}) }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      },
+      "id": "aa1255e5-8c56-4713-aa9f-f3f42be7edff"
+    }
+  ],
+  "connections": {
+    "Closing Webhook": {
+      "main": [
+        [
+          {
+            "node": "One Email Per Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Closing Form": {
+      "main": [
+        [
+          {
+            "node": "One Email Per Client",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One Email Per Client": {
+      "main": [
+        [
+          {
+            "node": "Send Review Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Review Email": {
+      "main": [
+        [
+          {
+            "node": "Log to Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": "mem3eZSwpX10Xmdr",
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "d00b4e55-866c-4432-9efe-d1b832724ddf",
+  "activeVersionId": "d00b4e55-866c-4432-9efe-d1b832724ddf",
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2026-07-07T18:14:28.138Z",
+      "createdAt": "2026-07-07T18:14:28.138Z",
+      "role": "workflow:owner",
+      "workflowId": "gXsb6dtjWOF4XZ0x",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-07-07T19:29:40.173Z",
+    "createdAt": "2026-07-07T19:29:40.173Z",
+    "versionId": "d00b4e55-866c-4432-9efe-d1b832724ddf",
+    "workflowId": "gXsb6dtjWOF4XZ0x",
+    "nodes": [
+      {
+        "name": "Closing Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          -100
+        ],
+        "webhookId": "f440ef89-2ae4-4b9c-b31f-84eeaf7ea661",
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "closing-review-hm-x7k2q9",
+          "options": {}
+        },
+        "id": "f25b7eac-0f01-4da6-948d-eb82c7bca752"
+      },
+      {
+        "name": "Closing Form",
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2,
+        "position": [
+          0,
+          100
+        ],
+        "webhookId": "ac3cf94d-e6bd-4e54-b999-e9327e453123",
+        "parameters": {
+          "path": "closing-desk-hm-9t4w2",
+          "formTitle": "New Closing",
+          "formDescription": "Sends each client a personal review request and logs them for follow-up.",
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "Client 1 first name",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Client 1 email",
+                "fieldType": "email",
+                "requiredField": true
+              },
+              {
+                "fieldLabel": "Client 2 first name"
+              },
+              {
+                "fieldLabel": "Client 2 email",
+                "fieldType": "email"
+              },
+              {
+                "fieldLabel": "Neighborhood"
+              },
+              {
+                "fieldLabel": "Bought or sold",
+                "fieldType": "dropdown",
+                "fieldOptions": {
+                  "values": [
+                    {
+                      "option": "bought"
+                    },
+                    {
+                      "option": "sold"
+                    }
+                  ]
+                },
+                "requiredField": true
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "b7c4883a-29cf-48ed-a315-030c9e9d668f"
+      },
+      {
+        "name": "One Email Per Client",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "jsCode": "function buildRaw(to, subject, html) {\n  const mime = [\n    'From: Hector Meza <h.mezarealty@gmail.com>',\n    `To: ${to}`,\n    'Reply-To: hmeza@briggsfreeman.com',\n    `Subject: ${subject}`,\n    'MIME-Version: 1.0',\n    'Content-Type: text/html; charset=UTF-8',\n    '',\n    html\n  ].join('\\r\\n');\n  return Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nconst raw = $input.first().json;\nconst link = 'https://g.page/r/CabJGOEHci6qEBM/review';\nlet clients = [], hood = '', closing = 'bought';\n\nif (raw.body && Array.isArray(raw.body.clients)) {\n  clients = raw.body.clients; hood = (raw.body.neighborhood || '').trim();\n  closing = (raw.body.closing || 'bought').toLowerCase();\n} else if (raw['Client 1 first name']) {\n  clients.push({ first: raw['Client 1 first name'], email: raw['Client 1 email'] });\n  if (raw['Client 2 first name'] && raw['Client 2 email']) {\n    clients.push({ first: raw['Client 2 first name'], email: raw['Client 2 email'] });\n  }\n  hood = (raw['Neighborhood'] || '').trim();\n  closing = (raw['Bought or sold'] || 'bought').toLowerCase();\n}\nclients = clients.filter(c => c && c.first && c.email);\nif (!clients.length) { throw new Error('No clients in payload'); }\n\nconst sig = `<p style=\"margin:24px 0 0;\">With gratitude,<br><strong>Hector Meza</strong><br>Briggs Freeman Sotheby's International Realty<br>(214) 686-5641 &middot; <a href=\"https://hectormeza.com\" style=\"color:#1a3c34;\">hectormeza.com</a></p>`;\nreturn clients.map((c, i) => {\n  const partner = clients.length > 1 ? clients.find((x, j) => j !== i) : null;\n  const opener = closing === 'sold'\n    ? `Now that everything is signed and your sale${hood ? ' in ' + hood : ''} is officially complete, I wanted to take a moment to say thank you.`\n    : `Now that everything is signed and the ${hood ? 'home in ' + hood : 'home'} is officially yours, I wanted to take a moment to say thank you.`;\n  const partnerPara = partner\n    ? `<p style=\"margin:0 0 16px;\">One small note: Google reviews are tied to each person's account, so if ${partner.first} would like to share their side as well, each voice counts on its own. No pressure whatsoever.</p>`\n    : '';\n  const html = [\n    `<div style=\"font-family:'Aptos','Segoe UI',Calibri,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#222;max-width:560px;\">`,\n    `<p style=\"margin:0 0 16px;\">Hi ${c.first},</p>`,\n    `<p style=\"margin:0 0 16px;\">${opener} Being trusted with something this big is never lost on me, and working with you made it a genuine pleasure.</p>`,\n    `<p style=\"margin:0 0 16px;\">If I may ask one small favor: would you share a few words about your experience on Google? It takes about two minutes, and it means more than you might think. A few honest sentences from you carry more weight than anything I could say about myself.</p>`,\n    `<p style=\"margin:0 0 20px;\"><a href=\"${link}\" style=\"display:inline-block;background:#1a3c34;color:#ffffff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;\">Leave a review</a></p>`,\n    `<p style=\"margin:0 0 16px;font-size:13px;color:#777;\">Or copy this link: ${link}</p>`,\n    partnerPara,\n    `<p style=\"margin:0 0 16px;\">I'm here for the long haul. Contractor recommendations, market questions, or just to catch up, my door is always open. Congratulations again.</p>`,\n    sig,\n    `</div>`\n  ].join('');\n  return { json: {\n    first: c.first, email: c.email, partner: partner ? partner.first : '',\n    neighborhood: hood, closing, sent_at: new Date().toISOString(),\n    subject: `Congratulations again, ${c.first}`, html, raw: buildRaw(c.email, `Congratulations again, ${c.first}`, html)\n  }};\n});"
+        },
+        "id": "ce4a4461-cd5e-4003-b721-92b69fdf881e"
+      },
+      {
+        "name": "Log to Sheet",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          660,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://sheets.googleapis.com/v4/spreadsheets/1hINfEPp2TVfakuKflie609CfYZccvPoxeXGNV6KwngI/values/Closings!A1:append?valueInputOption=RAW",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleSheetsOAuth2Api",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({values: [[$('One Email Per Client').item.json.first, $('One Email Per Client').item.json.email, $('One Email Per Client').item.json.partner, $('One Email Per Client').item.json.neighborhood, $('One Email Per Client').item.json.closing, $('One Email Per Client').item.json.sent_at, '', '', '', '']]}) }}",
+          "options": {}
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        },
+        "id": "eabebbb7-679f-40ef-8373-83b590b20463"
+      },
+      {
+        "name": "Send Review Email",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "gmailOAuth2",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({raw: $json.raw}) }}",
+          "options": {}
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "bsAbfRmGUOzzryvM",
+            "name": "Gmail account"
+          }
+        },
+        "id": "aa1255e5-8c56-4713-aa9f-f3f42be7edff"
+      }
+    ],
+    "connections": {
+      "Closing Webhook": {
+        "main": [
+          [
+            {
+              "node": "One Email Per Client",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Closing Form": {
+        "main": [
+          [
+            {
+              "node": "One Email Per Client",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "One Email Per Client": {
+        "main": [
+          [
+            {
+              "node": "Send Review Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Review Email": {
+        "main": [
+          [
+            {
+              "node": "Log to Sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Hector Meza",
+    "name": null,
+    "description": null
+  },
+  "tags": []
+}
