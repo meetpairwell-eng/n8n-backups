@@ -1,0 +1,411 @@
+{
+  "updatedAt": "2026-07-07T19:29:40.635Z",
+  "createdAt": "2026-07-07T19:00:35.941Z",
+  "id": "rVHel64ErKdNVYPL",
+  "name": "Closing Nudge Engine",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "name": "Daily",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        -100
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 16,
+              "triggerAtMinute": 15
+            }
+          ]
+        }
+      },
+      "id": "e2964d1a-d467-4373-8ab3-dfbc0b765395"
+    },
+    {
+      "name": "Manual Run",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        100
+      ],
+      "webhookId": "cf3a9be5-f5dd-4e10-b092-646d3a81cac5",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "nudge-run-hm-manual",
+        "options": {}
+      },
+      "id": "880e3ac3-5b6f-485e-b016-cee8712d2011"
+    },
+    {
+      "name": "Read Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1hINfEPp2TVfakuKflie609CfYZccvPoxeXGNV6KwngI/values/Closings!A2:J?majorDimension=ROWS",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      },
+      "id": "383b6f38-8618-442a-99d3-c6040e001bd6"
+    },
+    {
+      "name": "Who Is Due",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "jsCode": "function buildRaw(to, subject, html) {\n  const mime = [\n    'From: Hector Meza <h.mezarealty@gmail.com>',\n    `To: ${to}`,\n    'Reply-To: hmeza@briggsfreeman.com',\n    `Subject: ${subject}`,\n    'MIME-Version: 1.0',\n    'Content-Type: text/html; charset=UTF-8',\n    '',\n    html\n  ].join('\\r\\n');\n  return Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nconst link = 'https://g.page/r/CabJGOEHci6qEBM/review';\nconst v = ($input.first().json.values) || [];\nconst now = Date.now();\nconst DAY = 86400000;\n\nfunction shell(inner, first) {\n  return [\n    `<div style=\"font-family:'Aptos','Segoe UI',Calibri,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#222;max-width:560px;\">`,\n    `<p style=\"margin:0 0 16px;\">Hi ${first},</p>`,\n    inner,\n    `<p style=\"margin:0 0 20px;\"><a href=\"${link}\" style=\"display:inline-block;background:#1a3c34;color:#ffffff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;\">Leave a review</a></p>`,\n    `<p style=\"margin:24px 0 0;\">With gratitude,<br><strong>Hector Meza</strong><br>Briggs Freeman Sotheby's International Realty<br>(214) 686-5641 &middot; <a href=\"https://hectormeza.com\" style=\"color:#1a3c34;\">hectormeza.com</a></p>`,\n    `</div>`\n  ].join('');\n}\n\nconst out = [];\nv.forEach((r, i) => {\n  const row = i + 2;\n  const g = k => ((r[k] === undefined || r[k] === null) ? '' : String(r[k])).trim();\n  const first = g(0), email = g(1), sent = g(5), n1 = g(6), n2 = g(7), reviewed = g(8);\n  if (!first || !email || !sent || reviewed) return;\n  if (!n1 && now - Date.parse(sent) >= 2 * DAY) {\n    const inner = `<p style=\"margin:0 0 16px;\">I hope you're settling in well. Just a quick reminder about the Google review, in case life got in the way. It usually does. It takes about two minutes and it genuinely helps.</p>`;\n    out.push({ json: { row, col: 'G', ts: new Date().toISOString(), email,\n      subject: `Quick reminder, ${first}`, html: shell(inner, first), raw: buildRaw(email, `Quick reminder, ${first}`, shell(inner, first)) }});\n  } else if (n1 && !n2 && now - Date.parse(n1) >= 3 * DAY) {\n    const inner = `<p style=\"margin:0 0 16px;\">I promise this is my last note about it. If you can spare two minutes for a quick Google review, it would mean a lot. And if it is not your thing, no worries at all. It was a pleasure either way.</p>`;\n    out.push({ json: { row, col: 'H', ts: new Date().toISOString(), email,\n      subject: `Last note from me, ${first}`, html: shell(inner, first), raw: buildRaw(email, `Last note from me, ${first}`, shell(inner, first)) }});\n  }\n});\nreturn out;"
+      },
+      "id": "742a20ef-0e7b-42e6-8efa-92ce5691829a"
+    },
+    {
+      "name": "Mark Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        0
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/1hINfEPp2TVfakuKflie609CfYZccvPoxeXGNV6KwngI/values/Closings!{{ $('Who Is Due').item.json.col }}{{ $('Who Is Due').item.json.row }}?valueInputOption=RAW",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({values: [[ $('Who Is Due').item.json.ts ]]}) }}",
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      },
+      "id": "6e258dc5-0b63-4e2e-b9fd-703786aa86ab"
+    },
+    {
+      "name": "Send Nudge",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({raw: $json.raw}) }}",
+        "options": {}
+      },
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      },
+      "id": "cd7eac37-af8f-470c-9aec-95f67295b967"
+    }
+  ],
+  "connections": {
+    "Daily": {
+      "main": [
+        [
+          {
+            "node": "Read Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Run": {
+      "main": [
+        [
+          {
+            "node": "Read Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Sheet": {
+      "main": [
+        [
+          {
+            "node": "Who Is Due",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Who Is Due": {
+      "main": [
+        [
+          {
+            "node": "Send Nudge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Nudge": {
+      "main": [
+        [
+          {
+            "node": "Mark Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "errorWorkflow": "mem3eZSwpX10Xmdr",
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Daily": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "9baeabb6-6d4f-4125-b068-efd50ac9c109",
+  "activeVersionId": "9baeabb6-6d4f-4125-b068-efd50ac9c109",
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2026-07-07T19:00:35.941Z",
+      "createdAt": "2026-07-07T19:00:35.941Z",
+      "role": "workflow:owner",
+      "workflowId": "rVHel64ErKdNVYPL",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-07-07T19:29:40.637Z",
+    "createdAt": "2026-07-07T19:29:40.637Z",
+    "versionId": "9baeabb6-6d4f-4125-b068-efd50ac9c109",
+    "workflowId": "rVHel64ErKdNVYPL",
+    "nodes": [
+      {
+        "name": "Daily",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          -100
+        ],
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "days",
+                "triggerAtHour": 16,
+                "triggerAtMinute": 15
+              }
+            ]
+          }
+        },
+        "id": "e2964d1a-d467-4373-8ab3-dfbc0b765395"
+      },
+      {
+        "name": "Manual Run",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          100
+        ],
+        "webhookId": "cf3a9be5-f5dd-4e10-b092-646d3a81cac5",
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "nudge-run-hm-manual",
+          "options": {}
+        },
+        "id": "880e3ac3-5b6f-485e-b016-cee8712d2011"
+      },
+      {
+        "name": "Read Sheet",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "method": "GET",
+          "url": "https://sheets.googleapis.com/v4/spreadsheets/1hINfEPp2TVfakuKflie609CfYZccvPoxeXGNV6KwngI/values/Closings!A2:J?majorDimension=ROWS",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleSheetsOAuth2Api",
+          "options": {}
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        },
+        "id": "383b6f38-8618-442a-99d3-c6040e001bd6"
+      },
+      {
+        "name": "Who Is Due",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ],
+        "parameters": {
+          "jsCode": "function buildRaw(to, subject, html) {\n  const mime = [\n    'From: Hector Meza <h.mezarealty@gmail.com>',\n    `To: ${to}`,\n    'Reply-To: hmeza@briggsfreeman.com',\n    `Subject: ${subject}`,\n    'MIME-Version: 1.0',\n    'Content-Type: text/html; charset=UTF-8',\n    '',\n    html\n  ].join('\\r\\n');\n  return Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nconst link = 'https://g.page/r/CabJGOEHci6qEBM/review';\nconst v = ($input.first().json.values) || [];\nconst now = Date.now();\nconst DAY = 86400000;\n\nfunction shell(inner, first) {\n  return [\n    `<div style=\"font-family:'Aptos','Segoe UI',Calibri,Helvetica,Arial,sans-serif;font-size:16px;line-height:1.6;color:#222;max-width:560px;\">`,\n    `<p style=\"margin:0 0 16px;\">Hi ${first},</p>`,\n    inner,\n    `<p style=\"margin:0 0 20px;\"><a href=\"${link}\" style=\"display:inline-block;background:#1a3c34;color:#ffffff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold;\">Leave a review</a></p>`,\n    `<p style=\"margin:24px 0 0;\">With gratitude,<br><strong>Hector Meza</strong><br>Briggs Freeman Sotheby's International Realty<br>(214) 686-5641 &middot; <a href=\"https://hectormeza.com\" style=\"color:#1a3c34;\">hectormeza.com</a></p>`,\n    `</div>`\n  ].join('');\n}\n\nconst out = [];\nv.forEach((r, i) => {\n  const row = i + 2;\n  const g = k => ((r[k] === undefined || r[k] === null) ? '' : String(r[k])).trim();\n  const first = g(0), email = g(1), sent = g(5), n1 = g(6), n2 = g(7), reviewed = g(8);\n  if (!first || !email || !sent || reviewed) return;\n  if (!n1 && now - Date.parse(sent) >= 2 * DAY) {\n    const inner = `<p style=\"margin:0 0 16px;\">I hope you're settling in well. Just a quick reminder about the Google review, in case life got in the way. It usually does. It takes about two minutes and it genuinely helps.</p>`;\n    out.push({ json: { row, col: 'G', ts: new Date().toISOString(), email,\n      subject: `Quick reminder, ${first}`, html: shell(inner, first), raw: buildRaw(email, `Quick reminder, ${first}`, shell(inner, first)) }});\n  } else if (n1 && !n2 && now - Date.parse(n1) >= 3 * DAY) {\n    const inner = `<p style=\"margin:0 0 16px;\">I promise this is my last note about it. If you can spare two minutes for a quick Google review, it would mean a lot. And if it is not your thing, no worries at all. It was a pleasure either way.</p>`;\n    out.push({ json: { row, col: 'H', ts: new Date().toISOString(), email,\n      subject: `Last note from me, ${first}`, html: shell(inner, first), raw: buildRaw(email, `Last note from me, ${first}`, shell(inner, first)) }});\n  }\n});\nreturn out;"
+        },
+        "id": "742a20ef-0e7b-42e6-8efa-92ce5691829a"
+      },
+      {
+        "name": "Mark Sheet",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          880,
+          0
+        ],
+        "parameters": {
+          "method": "PUT",
+          "url": "=https://sheets.googleapis.com/v4/spreadsheets/1hINfEPp2TVfakuKflie609CfYZccvPoxeXGNV6KwngI/values/Closings!{{ $('Who Is Due').item.json.col }}{{ $('Who Is Due').item.json.row }}?valueInputOption=RAW",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleSheetsOAuth2Api",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({values: [[ $('Who Is Due').item.json.ts ]]}) }}",
+          "options": {}
+        },
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        },
+        "id": "6e258dc5-0b63-4e2e-b9fd-703786aa86ab"
+      },
+      {
+        "name": "Send Nudge",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          660,
+          0
+        ],
+        "parameters": {
+          "method": "POST",
+          "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "gmailOAuth2",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({raw: $json.raw}) }}",
+          "options": {}
+        },
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "bsAbfRmGUOzzryvM",
+            "name": "Gmail account"
+          }
+        },
+        "id": "cd7eac37-af8f-470c-9aec-95f67295b967"
+      }
+    ],
+    "connections": {
+      "Daily": {
+        "main": [
+          [
+            {
+              "node": "Read Sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual Run": {
+        "main": [
+          [
+            {
+              "node": "Read Sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Sheet": {
+        "main": [
+          [
+            {
+              "node": "Who Is Due",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Who Is Due": {
+        "main": [
+          [
+            {
+              "node": "Send Nudge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Send Nudge": {
+        "main": [
+          [
+            {
+              "node": "Mark Sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Hector Meza",
+    "name": null,
+    "description": null
+  },
+  "tags": []
+}
