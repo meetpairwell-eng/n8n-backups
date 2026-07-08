@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-17T18:39:52.121Z",
+  "updatedAt": "2026-07-07T20:51:59.186Z",
   "createdAt": "2026-01-30T21:23:15.831Z",
   "id": "1m1hv1NdgOm8CIG7",
   "name": "Website Lead Router",
@@ -38,7 +38,6 @@
           "cachedResultName": "Properties",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1a6CrdT1HaVY2jg8TPoQGLCDgyZUs5-skqv_DOpU0g8A/edit#gid=528686066"
         },
-        "options": {},
         "filtersUI": {
           "values": [
             {
@@ -46,7 +45,8 @@
               "lookupValue": "={{ $json.body.property }}"
             }
           ]
-        }
+        },
+        "options": {}
       },
       "name": "Lookup Agent (Master Sheet)",
       "type": "n8n-nodes-base.googleSheets",
@@ -90,7 +90,10 @@
             "Message": "={{ $('Webhook').item.json.body.message }}",
             "Lead Source": "={{ $('Webhook').item.json.body.utm_source }}",
             "Medium": "={{ $('Webhook').item.json.body.utm_medium }}",
-            "Campaign": "={{ $('Webhook').item.json.body.utm_campaign }}"
+            "Campaign": "={{ $('Webhook').item.json.body.utm_campaign }}",
+            "Content": "={{  $('Webhook').item.json.body.utm_content }}",
+            "Event_ID": "={{  $('Webhook').item.json.body.eventId }}",
+            "Searched_Address": "={{  $('Webhook').item.json.body.searchedAddress }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -177,6 +180,36 @@
             {
               "id": "Campaign",
               "displayName": "Campaign",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Content",
+              "displayName": "Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Searched_Address",
+              "displayName": "Searched_Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Event_ID",
+              "displayName": "Event_ID",
               "required": false,
               "defaultMatch": false,
               "display": true,
@@ -347,8 +380,8 @@
       }
     ]
   },
-  "versionId": "2868b8d9-6165-4320-8bc7-f47f96f53015",
-  "activeVersionId": "2868b8d9-6165-4320-8bc7-f47f96f53015",
+  "versionId": "053f4967-f27c-46ff-ab90-2e819482dbca",
+  "activeVersionId": "053f4967-f27c-46ff-ab90-2e819482dbca",
   "triggerCount": 1,
   "shared": [
     {
@@ -360,9 +393,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-06-10T15:52:40.419Z",
-    "createdAt": "2026-06-10T15:52:40.419Z",
-    "versionId": "2868b8d9-6165-4320-8bc7-f47f96f53015",
+    "updatedAt": "2026-07-07T20:52:30.963Z",
+    "createdAt": "2026-07-07T20:51:59.187Z",
+    "versionId": "053f4967-f27c-46ff-ab90-2e819482dbca",
     "workflowId": "1m1hv1NdgOm8CIG7",
     "nodes": [
       {
@@ -397,7 +430,6 @@
             "cachedResultName": "Properties",
             "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1a6CrdT1HaVY2jg8TPoQGLCDgyZUs5-skqv_DOpU0g8A/edit#gid=528686066"
           },
-          "options": {},
           "filtersUI": {
             "values": [
               {
@@ -405,7 +437,8 @@
                 "lookupValue": "={{ $json.body.property }}"
               }
             ]
-          }
+          },
+          "options": {}
         },
         "name": "Lookup Agent (Master Sheet)",
         "type": "n8n-nodes-base.googleSheets",
@@ -449,7 +482,10 @@
               "Message": "={{ $('Webhook').item.json.body.message }}",
               "Lead Source": "={{ $('Webhook').item.json.body.utm_source }}",
               "Medium": "={{ $('Webhook').item.json.body.utm_medium }}",
-              "Campaign": "={{ $('Webhook').item.json.body.utm_campaign }}"
+              "Campaign": "={{ $('Webhook').item.json.body.utm_campaign }}",
+              "Content": "={{  $('Webhook').item.json.body.utm_content }}",
+              "Event_ID": "={{  $('Webhook').item.json.body.eventId }}",
+              "Searched_Address": "={{  $('Webhook').item.json.body.searchedAddress }}"
             },
             "matchingColumns": [],
             "schema": [
@@ -542,6 +578,36 @@
                 "type": "string",
                 "canBeUsedToMatch": true,
                 "removed": false
+              },
+              {
+                "id": "Content",
+                "displayName": "Content",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Searched_Address",
+                "displayName": "Searched_Address",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Event_ID",
+                "displayName": "Event_ID",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
               }
             ],
             "attemptToConvertTypes": false,
@@ -627,8 +693,8 @@
       }
     },
     "authors": "Hector Meza",
-    "name": null,
-    "description": null
+    "name": "Version 053f4967",
+    "description": "Add Content (utm_content), Searched_Address, Event_ID column mappings for ad-variant attribution + CAPI dedup (hectormeza campaign)"
   },
   "tags": []
 }
