@@ -1,0 +1,151 @@
+{
+  "updatedAt": "2026-07-09T22:35:43.727Z",
+  "createdAt": "2026-07-09T21:58:26.164Z",
+  "id": "0JspwtJih7VqYosx",
+  "name": "Review Desk Page",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "name": "Page Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "1d8b18a0-2489-45c9-a63c-f1a20e5318a7",
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "review-desk-hm-w5r9k2",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "31bbc450-8bf0-4828-b9b0-d1a3de9b9601"
+    },
+    {
+      "name": "Serve Page",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!doctype html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<meta name=\"robots\" content=\"noindex, nofollow\">\n<title>Review Desk</title>\n<style>\n  * { box-sizing: border-box; }\n  body { margin:0; padding:40px 16px; background:#f6f5f2; font-family:'Aptos','Segoe UI',Calibri,Helvetica,Arial,sans-serif; color:#222; }\n  .card { max-width:480px; margin:0 auto; background:#fff; border:1px solid #e5e4e0; border-radius:12px; padding:36px 32px; }\n  h1 { font-size:20px; margin:0 0 4px; color:#1a3c34; text-align:center; }\n  .sub { font-size:13px; color:#888; text-align:center; margin:0 0 28px; }\n  .tabs { display:flex; border-bottom:1px solid #e5e4e0; margin-bottom:24px; }\n  .tab { flex:1; text-align:center; padding:10px 0; font-size:14px; font-weight:600; color:#999; cursor:pointer; border-bottom:2px solid transparent; }\n  .tab.active { color:#1a3c34; border-bottom-color:#1a3c34; }\n  label { display:block; font-size:13px; font-weight:600; margin:16px 0 6px; }\n  input, select { width:100%; padding:10px 12px; border:1px solid #d7d6d1; border-radius:6px; font-size:14px; font-family:inherit; }\n  .panel { display:none; }\n  .panel.active { display:block; }\n  button[type=submit] { width:100%; margin-top:24px; padding:13px; background:#1a3c34; color:#fff; border:none; border-radius:6px; font-size:15px; font-weight:600; cursor:pointer; }\n  button[type=submit]:disabled { opacity:.6; cursor:default; }\n  .msg { text-align:center; font-size:14px; margin-top:16px; }\n  .msg.ok { color:#1a6b3c; }\n  .msg.err { color:#b3261e; }\n</style>\n</head>\n<body>\n<div class=\"card\">\n  <h1>Review Desk</h1>\n  <p class=\"sub\">Send a personal review request</p>\n  <div class=\"tabs\">\n    <div class=\"tab active\" data-tab=\"client\">Client Closing</div>\n    <div class=\"tab\" data-tab=\"vendor\">Vendor / Partner</div>\n  </div>\n\n  <form id=\"clientForm\" class=\"panel active\">\n    <label>Client 1 first name *</label>\n    <input name=\"c1first\" required>\n    <label>Client 1 email *</label>\n    <input name=\"c1email\" type=\"email\" required>\n    <label>Client 2 first name</label>\n    <input name=\"c2first\">\n    <label>Client 2 email</label>\n    <input name=\"c2email\" type=\"email\">\n    <label>Neighborhood</label>\n    <input name=\"neighborhood\">\n    <label>Bought or sold *</label>\n    <select name=\"closing\" required>\n      <option value=\"bought\">Bought</option>\n      <option value=\"sold\">Sold</option>\n    </select>\n    <button type=\"submit\">Send Review Request</button>\n    <div class=\"msg\" id=\"clientMsg\"></div>\n  </form>\n\n  <form id=\"vendorForm\" class=\"panel\">\n    <label>Name *</label>\n    <input name=\"vname\" required>\n    <label>Email *</label>\n    <input name=\"vemail\" type=\"email\" required>\n    <label>Type *</label>\n    <select name=\"vtype\" required>\n      <option value=\"lender\">Lender</option>\n      <option value=\"title\">Title company</option>\n      <option value=\"other\">Other</option>\n    </select>\n    <label>Property address (optional)</label>\n    <input name=\"dealNote\" placeholder=\"e.g. 123 Main St\">\n    <label>Client name(s) (optional)</label>\n    <input name=\"clientNames\" placeholder=\"e.g. Matt and Michelle\">\n    <button type=\"submit\">Send Review Request</button>\n    <div class=\"msg\" id=\"vendorMsg\"></div>\n  </form>\n</div>\n\n<script>\ndocument.querySelectorAll('.tab').forEach(function(tab) {\n  tab.addEventListener('click', function() {\n    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });\n    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });\n    tab.classList.add('active');\n    document.getElementById(tab.dataset.tab + 'Form').classList.add('active');\n  });\n});\n\nfunction handleSubmit(formId, msgId, buildPayload, url) {\n  var form = document.getElementById(formId);\n  form.addEventListener('submit', function(e) {\n    e.preventDefault();\n    var msg = document.getElementById(msgId);\n    var btn = form.querySelector('button');\n    btn.disabled = true;\n    msg.textContent = 'Sending...';\n    msg.className = 'msg';\n    fetch(url, {\n      method: 'POST',\n      headers: {'Content-Type': 'application/json'},\n      body: JSON.stringify(buildPayload(new FormData(form)))\n    }).then(function(res) {\n      if (!res.ok) throw new Error('Request failed');\n      msg.textContent = 'Sent!';\n      msg.className = 'msg ok';\n      form.reset();\n    }).catch(function() {\n      msg.textContent = 'Something went wrong, try again.';\n      msg.className = 'msg err';\n    }).finally(function() {\n      btn.disabled = false;\n    });\n  });\n}\n\nhandleSubmit('clientForm', 'clientMsg', function(fd) {\n  var clients = [{first: fd.get('c1first'), email: fd.get('c1email')}];\n  if (fd.get('c2first') && fd.get('c2email')) {\n    clients.push({first: fd.get('c2first'), email: fd.get('c2email')});\n  }\n  return { clients: clients, neighborhood: fd.get('neighborhood'), closing: fd.get('closing') };\n}, 'https://n8n.meetpairwell.com/webhook/closing-review-hm-x7k2q9');\n\nhandleSubmit('vendorForm', 'vendorMsg', function(fd) {\n  return { name: fd.get('vname'), email: fd.get('vemail'), vendorType: fd.get('vtype'), dealNote: fd.get('dealNote'), clientNames: fd.get('clientNames') };\n}, 'https://n8n.meetpairwell.com/webhook/vendor-review-hm-p9k3m7');\n</script>\n</body>\n</html>\n",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "0b45a467-625f-42b2-9562-84bcfe6b06a1"
+    }
+  ],
+  "connections": {
+    "Page Webhook": {
+      "main": [
+        [
+          {
+            "node": "Serve Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "mem3eZSwpX10Xmdr",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "51665967-dd64-4fdf-8feb-a2553e8eb234",
+  "activeVersionId": "51665967-dd64-4fdf-8feb-a2553e8eb234",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-07-09T21:58:26.164Z",
+      "createdAt": "2026-07-09T21:58:26.164Z",
+      "role": "workflow:owner",
+      "workflowId": "0JspwtJih7VqYosx",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-07-09T22:35:43.731Z",
+    "createdAt": "2026-07-09T22:35:43.731Z",
+    "versionId": "51665967-dd64-4fdf-8feb-a2553e8eb234",
+    "workflowId": "0JspwtJih7VqYosx",
+    "nodes": [
+      {
+        "name": "Page Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "1d8b18a0-2489-45c9-a63c-f1a20e5318a7",
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "review-desk-hm-w5r9k2",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "31bbc450-8bf0-4828-b9b0-d1a3de9b9601"
+      },
+      {
+        "name": "Serve Page",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.4,
+        "position": [
+          220,
+          0
+        ],
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "<!doctype html>\n<html>\n<head>\n<meta charset=\"utf-8\">\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n<meta name=\"robots\" content=\"noindex, nofollow\">\n<title>Review Desk</title>\n<style>\n  * { box-sizing: border-box; }\n  body { margin:0; padding:40px 16px; background:#f6f5f2; font-family:'Aptos','Segoe UI',Calibri,Helvetica,Arial,sans-serif; color:#222; }\n  .card { max-width:480px; margin:0 auto; background:#fff; border:1px solid #e5e4e0; border-radius:12px; padding:36px 32px; }\n  h1 { font-size:20px; margin:0 0 4px; color:#1a3c34; text-align:center; }\n  .sub { font-size:13px; color:#888; text-align:center; margin:0 0 28px; }\n  .tabs { display:flex; border-bottom:1px solid #e5e4e0; margin-bottom:24px; }\n  .tab { flex:1; text-align:center; padding:10px 0; font-size:14px; font-weight:600; color:#999; cursor:pointer; border-bottom:2px solid transparent; }\n  .tab.active { color:#1a3c34; border-bottom-color:#1a3c34; }\n  label { display:block; font-size:13px; font-weight:600; margin:16px 0 6px; }\n  input, select { width:100%; padding:10px 12px; border:1px solid #d7d6d1; border-radius:6px; font-size:14px; font-family:inherit; }\n  .panel { display:none; }\n  .panel.active { display:block; }\n  button[type=submit] { width:100%; margin-top:24px; padding:13px; background:#1a3c34; color:#fff; border:none; border-radius:6px; font-size:15px; font-weight:600; cursor:pointer; }\n  button[type=submit]:disabled { opacity:.6; cursor:default; }\n  .msg { text-align:center; font-size:14px; margin-top:16px; }\n  .msg.ok { color:#1a6b3c; }\n  .msg.err { color:#b3261e; }\n</style>\n</head>\n<body>\n<div class=\"card\">\n  <h1>Review Desk</h1>\n  <p class=\"sub\">Send a personal review request</p>\n  <div class=\"tabs\">\n    <div class=\"tab active\" data-tab=\"client\">Client Closing</div>\n    <div class=\"tab\" data-tab=\"vendor\">Vendor / Partner</div>\n  </div>\n\n  <form id=\"clientForm\" class=\"panel active\">\n    <label>Client 1 first name *</label>\n    <input name=\"c1first\" required>\n    <label>Client 1 email *</label>\n    <input name=\"c1email\" type=\"email\" required>\n    <label>Client 2 first name</label>\n    <input name=\"c2first\">\n    <label>Client 2 email</label>\n    <input name=\"c2email\" type=\"email\">\n    <label>Neighborhood</label>\n    <input name=\"neighborhood\">\n    <label>Bought or sold *</label>\n    <select name=\"closing\" required>\n      <option value=\"bought\">Bought</option>\n      <option value=\"sold\">Sold</option>\n    </select>\n    <button type=\"submit\">Send Review Request</button>\n    <div class=\"msg\" id=\"clientMsg\"></div>\n  </form>\n\n  <form id=\"vendorForm\" class=\"panel\">\n    <label>Name *</label>\n    <input name=\"vname\" required>\n    <label>Email *</label>\n    <input name=\"vemail\" type=\"email\" required>\n    <label>Type *</label>\n    <select name=\"vtype\" required>\n      <option value=\"lender\">Lender</option>\n      <option value=\"title\">Title company</option>\n      <option value=\"other\">Other</option>\n    </select>\n    <label>Property address (optional)</label>\n    <input name=\"dealNote\" placeholder=\"e.g. 123 Main St\">\n    <label>Client name(s) (optional)</label>\n    <input name=\"clientNames\" placeholder=\"e.g. Matt and Michelle\">\n    <button type=\"submit\">Send Review Request</button>\n    <div class=\"msg\" id=\"vendorMsg\"></div>\n  </form>\n</div>\n\n<script>\ndocument.querySelectorAll('.tab').forEach(function(tab) {\n  tab.addEventListener('click', function() {\n    document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('active'); });\n    document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });\n    tab.classList.add('active');\n    document.getElementById(tab.dataset.tab + 'Form').classList.add('active');\n  });\n});\n\nfunction handleSubmit(formId, msgId, buildPayload, url) {\n  var form = document.getElementById(formId);\n  form.addEventListener('submit', function(e) {\n    e.preventDefault();\n    var msg = document.getElementById(msgId);\n    var btn = form.querySelector('button');\n    btn.disabled = true;\n    msg.textContent = 'Sending...';\n    msg.className = 'msg';\n    fetch(url, {\n      method: 'POST',\n      headers: {'Content-Type': 'application/json'},\n      body: JSON.stringify(buildPayload(new FormData(form)))\n    }).then(function(res) {\n      if (!res.ok) throw new Error('Request failed');\n      msg.textContent = 'Sent!';\n      msg.className = 'msg ok';\n      form.reset();\n    }).catch(function() {\n      msg.textContent = 'Something went wrong, try again.';\n      msg.className = 'msg err';\n    }).finally(function() {\n      btn.disabled = false;\n    });\n  });\n}\n\nhandleSubmit('clientForm', 'clientMsg', function(fd) {\n  var clients = [{first: fd.get('c1first'), email: fd.get('c1email')}];\n  if (fd.get('c2first') && fd.get('c2email')) {\n    clients.push({first: fd.get('c2first'), email: fd.get('c2email')});\n  }\n  return { clients: clients, neighborhood: fd.get('neighborhood'), closing: fd.get('closing') };\n}, 'https://n8n.meetpairwell.com/webhook/closing-review-hm-x7k2q9');\n\nhandleSubmit('vendorForm', 'vendorMsg', function(fd) {\n  return { name: fd.get('vname'), email: fd.get('vemail'), vendorType: fd.get('vtype'), dealNote: fd.get('dealNote'), clientNames: fd.get('clientNames') };\n}, 'https://n8n.meetpairwell.com/webhook/vendor-review-hm-p9k3m7');\n</script>\n</body>\n</html>\n",
+          "options": {
+            "responseHeaders": {
+              "entries": [
+                {
+                  "name": "Content-Type",
+                  "value": "text/html; charset=utf-8"
+                }
+              ]
+            }
+          }
+        },
+        "id": "0b45a467-625f-42b2-9562-84bcfe6b06a1"
+      }
+    ],
+    "connections": {
+      "Page Webhook": {
+        "main": [
+          [
+            {
+              "node": "Serve Page",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Hector Meza",
+    "name": null,
+    "description": null
+  },
+  "tags": []
+}
