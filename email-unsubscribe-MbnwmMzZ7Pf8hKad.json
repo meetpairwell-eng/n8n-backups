@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-06-17T18:39:54.032Z",
+  "updatedAt": "2026-07-11T04:34:49.790Z",
   "createdAt": "2026-01-07T18:22:35.620Z",
   "id": "MbnwmMzZ7Pf8hKad",
   "name": "Email Unsubscribe",
@@ -242,7 +242,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.2,
       "position": [
-        768,
+        816,
         0
       ],
       "id": "f763fecf-d0f5-4819-bcbe-012ef9fe98c8",
@@ -354,7 +354,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "0f7d6e8b-1f78-4239-9773-98911c830b89",
+  "versionId": "88c4892f-62fb-4a01-a85e-31d72134341e",
   "activeVersionId": "0f7d6e8b-1f78-4239-9773-98911c830b89",
   "triggerCount": 1,
   "shared": [
