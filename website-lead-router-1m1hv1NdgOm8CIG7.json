@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-11T04:42:04.507Z",
+  "updatedAt": "2026-07-11T23:26:53.515Z",
   "createdAt": "2026-01-30T21:23:15.831Z",
   "id": "1m1hv1NdgOm8CIG7",
   "name": "Website Lead Router",
@@ -300,20 +300,42 @@
     },
     {
       "parameters": {
-        "sendTo": "={{ $('Webhook').item.json.body.email }}",
-        "subject": "={{ $('Webhook').item.json.body.source === 'Valuation Request' ? 'Got your home value request' : 'Got your message' }}",
-        "message": "=<p>Hey {{ ($('Webhook').item.json.body.name || '').split(' ')[0] }},</p>\n<p>Thanks for reaching out{{ $('Webhook').item.json.body.searchedAddress ? ' about ' + $('Webhook').item.json.body.searchedAddress : '' }}. {{ ($now.setZone('America/Chicago').hour >= 20 || $now.setZone('America/Chicago').hour < 8) ? \"I know it's late, so I'll give you a call first thing tomorrow\" : \"I'll give you a call shortly\" }} to {{ $('Webhook').item.json.body.source === 'Valuation Request' ? \"get a couple quick details, then get you a real number based on what's actually selling near you\" : \"get a few details and see how I can help\" }}.</p>\n<p>If it's easier, just text me back at (214) 686-5641.</p>\n<p>Talk soon,<br>\nHector Meza<br>\nBriggs Freeman Sotheby's International Realty<br>\n(214) 686-5641 | hmeza@briggsfreeman.com</p>",
-        "options": {}
+        "jsCode": "const b = $('Webhook').first().json.body;\nconst firstName = (b.name || '').split(' ')[0];\nconst hr = DateTime.now().setZone('America/Chicago').hour;\nconst isLate = hr >= 20 || hr < 8;\nconst callPhrase = isLate ? 'give you a call first thing tomorrow morning' : 'give you a call shortly';\nconst isVal = b.source === 'Valuation Request';\nconst subject = isVal ? 'Got your home value request' : 'Got your message';\nconst para1 = isVal\n  ? `Thank you for requesting a home value on <strong>${b.searchedAddress}</strong>. I'll personally look at what's actually selling in your neighborhood and ${callPhrase} to go over a few quick details, so I can get you a real number instead of an automated guess.`\n  : `Thank you for reaching out. I'll ${callPhrase} to learn a bit more about what you're looking for and how I can help.`;\n\nconst html = `<div style=\"margin:0;padding:0;background:#f0f0ec;\">\n<div style=\"max-width:600px;margin:0 auto;padding:32px 16px;font-family:Helvetica,Arial,sans-serif;\">\n<div style=\"background:#fcfbf8;border:1px solid #e6e8e4;border-radius:6px;overflow:hidden;\">\n<div style=\"padding:40px 44px 44px;\">\n<div style=\"text-align:center;padding-bottom:22px;\">\n<div style=\"font-family:Georgia,'Times New Roman',serif;color:#6f9080;font-size:27px;font-weight:700;letter-spacing:0.3px;\">Hector Meza</div>\n<div style=\"font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8a8f8c;font-weight:600;line-height:1.5;padding-top:8px;\">Briggs Freeman Sotheby's<br>International Realty</div>\n</div>\n<div style=\"height:1px;background:#e6e8e4;margin:0 0 26px 0;font-size:0;line-height:0;\">&nbsp;</div>\n<p style=\"color:#34393b;font-size:16px;line-height:1.65;margin:0 0 20px 0;\">Dear ${firstName},</p>\n<p style=\"color:#34393b;font-size:16px;line-height:1.65;margin:0 0 18px 0;\">${para1}</p>\n<p style=\"color:#34393b;font-size:16px;line-height:1.65;margin:0 0 18px 0;\">If you have any questions in the meantime, feel free to call or text me directly at (214) 686-5641.</p>\n<p style=\"color:#34393b;font-size:16px;line-height:1.65;margin:0 0 18px 0;\">I look forward to speaking with you.</p>\n<div style=\"margin-top:30px;\">\n<p style=\"color:#34393b;font-size:15px;margin:0 0 10px 0;\">Warm regards,</p>\n<p style=\"font-family:Georgia,'Times New Roman',serif;color:#6f9080;font-weight:700;font-size:17px;margin:0 0 2px 0;\">Hector Meza</p>\n<p style=\"color:#8a8f8c;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:2px 0 0 0;\">Briggs Freeman Sotheby's International Realty</p>\n<p style=\"color:#8a8f8c;font-size:14px;margin:8px 0 0 0;\">(214) 686-5641<br>hmeza@briggsfreeman.com</p>\n</div>\n</div>\n</div>\n</div>\n</div>`;\n\nconst headers = [\n  'From: Hector Meza <h.mezarealty@gmail.com>',\n  'Reply-To: hmeza@briggsfreeman.com',\n  'To: ' + b.email,\n  'Subject: ' + subject,\n  'MIME-Version: 1.0',\n  'Content-Type: text/html; charset=\"UTF-8\"'\n].join('\\r\\n');\n\nconst mime = headers + '\\r\\n\\r\\n' + html;\nconst raw = Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\nreturn [{ json: { raw } }];\n"
       },
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.2,
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
       "position": [
-        1040,
+        1168,
         0
       ],
-      "id": "88a84aab-971a-4ad7-be0a-75001d51aa07",
-      "name": "Send a message",
-      "webhookId": "a2e715ea-8176-4710-b227-952a9f12e6ec",
+      "id": "c14e35e1-c7b0-4a62-ba84-1247412ece49",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "raw",
+              "value": "={{ $json.raw }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1245.9378427787935,
+        0
+      ],
+      "id": "32748ba3-69a6-4d80-b43f-658a46c779d2",
+      "name": "HTTP Request",
       "credentials": {
         "gmailOAuth2": {
           "id": "bsAbfRmGUOzzryvM",
@@ -371,7 +393,18 @@
       "main": [
         [
           {
-            "node": "Send a message",
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
             "type": "main",
             "index": 0
           }
@@ -459,8 +492,8 @@
       }
     ]
   },
-  "versionId": "c7a35f55-af93-4bd6-ae9f-2a4408c97111",
-  "activeVersionId": "c7a35f55-af93-4bd6-ae9f-2a4408c97111",
+  "versionId": "a14be439-2ffe-499b-ae25-c94557c4793c",
+  "activeVersionId": "a14be439-2ffe-499b-ae25-c94557c4793c",
   "triggerCount": 1,
   "shared": [
     {
@@ -472,9 +505,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-11T04:42:50.533Z",
-    "createdAt": "2026-07-11T04:42:04.509Z",
-    "versionId": "c7a35f55-af93-4bd6-ae9f-2a4408c97111",
+    "updatedAt": "2026-07-11T23:27:45.263Z",
+    "createdAt": "2026-07-11T23:26:53.517Z",
+    "versionId": "a14be439-2ffe-499b-ae25-c94557c4793c",
     "workflowId": "1m1hv1NdgOm8CIG7",
     "nodes": [
       {
@@ -771,20 +804,42 @@
       },
       {
         "parameters": {
-          "sendTo": "={{ $('Webhook').item.json.body.email }}",
-          "subject": "={{ $('Webhook').item.json.body.source === 'Valuation Request' ? 'Got your home value request' : 'Got your message' }}",
-          "message": "=<p>Hey {{ ($('Webhook').item.json.body.name || '').split(' ')[0] }},</p>\n<p>Thanks for reaching out{{ $('Webhook').item.json.body.searchedAddress ? ' about ' + $('Webhook').item.json.body.searchedAddress : '' }}. {{ ($now.setZone('America/Chicago').hour >= 20 || $now.setZone('America/Chicago').hour < 8) ? \"I know it's late, so I'll give you a call first thing tomorrow\" : \"I'll give you a call shortly\" }} to {{ $('Webhook').item.json.body.source === 'Valuation Request' ? \"get a couple quick details, then get you a real number based on what's actually selling near you\" : \"get a few details and see how I can help\" }}.</p>\n<p>If it's easier, just text me back at (214) 686-5641.</p>\n<p>Talk soon,<br>\nHector Meza<br>\nBriggs Freeman Sotheby's International Realty<br>\n(214) 686-5641 | hmeza@briggsfreeman.com</p>",
-          "options": {}
+          "jsCode": "const b = $('Webhook').first().json.body;\nconst firstName = (b.name || '').split(' ')[0];\nconst hr = DateTime.now().setZone('America/Chicago').hour;\nconst isLate = hr >= 20 || hr < 8;\nconst callPhrase = isLate ? 'give you a call first thing tomorrow morning' : 'give you a call shortly';\nconst isVal = b.source === 'Valuation Request';\nconst subject = isVal ? 'Got your home value request' : 'Got your message';\nconst para1 = isVal\n  ? `Thank you for requesting a home value on <strong>${b.searchedAddress}</strong>. I'll personally look at what's actually selling in your neighborhood and ${callPhrase} to go over a few quick details, so I can get you a real number instead of an automated guess.`\n  : `Thank you for reaching out. I'll ${callPhrase} to learn a bit more about what you're looking for and how I can help.`;\n\nconst html = `<div style=\"margin:0;padding:0;background:#f0f0ec;\">\n<div style=\"max-width:600px;margin:0 auto;padding:32px 16px;font-family:Helvetica,Arial,sans-serif;\">\n<div style=\"background:#fcfbf8;border:1px solid #e6e8e4;border-radius:6px;overflow:hidden;\">\n<div style=\"padding:40px 44px 44px;\">\n<div style=\"text-align:center;padding-bottom:22px;\">\n<div style=\"font-family:Georgia,'Times New Roman',serif;color:#6f9080;font-size:27px;font-weight:700;letter-spacing:0.3px;\">Hector Meza</div>\n<div style=\"font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#8a8f8c;font-weight:600;line-height:1.5;padding-top:8px;\">Briggs Freeman Sotheby's<br>International Realty</div>\n</div>\n<div style=\"height:1px;background:#e6e8e4;margin:0 0 26px 0;font-size:0;line-height:0;\">&nbsp;</div>\n<p style=\"color:#34393b;font-size:16px;line-height:1.65;margin:0 0 20px 0;\">Dear ${firstName},</p>\n<p style=\"color:#34393b;font-size:16px;line-height:1.65;margin:0 0 18px 0;\">${para1}</p>\n<p style=\"color:#34393b;font-size:16px;line-height:1.65;margin:0 0 18px 0;\">If you have any questions in the meantime, feel free to call or text me directly at (214) 686-5641.</p>\n<p style=\"color:#34393b;font-size:16px;line-height:1.65;margin:0 0 18px 0;\">I look forward to speaking with you.</p>\n<div style=\"margin-top:30px;\">\n<p style=\"color:#34393b;font-size:15px;margin:0 0 10px 0;\">Warm regards,</p>\n<p style=\"font-family:Georgia,'Times New Roman',serif;color:#6f9080;font-weight:700;font-size:17px;margin:0 0 2px 0;\">Hector Meza</p>\n<p style=\"color:#8a8f8c;font-size:12px;letter-spacing:1px;text-transform:uppercase;margin:2px 0 0 0;\">Briggs Freeman Sotheby's International Realty</p>\n<p style=\"color:#8a8f8c;font-size:14px;margin:8px 0 0 0;\">(214) 686-5641<br>hmeza@briggsfreeman.com</p>\n</div>\n</div>\n</div>\n</div>\n</div>`;\n\nconst headers = [\n  'From: Hector Meza <h.mezarealty@gmail.com>',\n  'Reply-To: hmeza@briggsfreeman.com',\n  'To: ' + b.email,\n  'Subject: ' + subject,\n  'MIME-Version: 1.0',\n  'Content-Type: text/html; charset=\"UTF-8\"'\n].join('\\r\\n');\n\nconst mime = headers + '\\r\\n\\r\\n' + html;\nconst raw = Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\nreturn [{ json: { raw } }];\n"
         },
-        "type": "n8n-nodes-base.gmail",
-        "typeVersion": 2.2,
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
         "position": [
-          1040,
+          1168,
           0
         ],
-        "id": "88a84aab-971a-4ad7-be0a-75001d51aa07",
-        "name": "Send a message",
-        "webhookId": "a2e715ea-8176-4710-b227-952a9f12e6ec",
+        "id": "c14e35e1-c7b0-4a62-ba84-1247412ece49",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "gmailOAuth2",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "raw",
+                "value": "={{ $json.raw }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          1245.9378427787935,
+          0
+        ],
+        "id": "32748ba3-69a6-4d80-b43f-658a46c779d2",
+        "name": "HTTP Request",
         "credentials": {
           "gmailOAuth2": {
             "id": "bsAbfRmGUOzzryvM",
@@ -842,7 +897,18 @@
         "main": [
           [
             {
-              "node": "Send a message",
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
               "type": "main",
               "index": 0
             }
@@ -851,8 +917,8 @@
       }
     },
     "authors": "Hector Meza",
-    "name": "Version c7a35f55",
-    "description": "Add client autoresponder for Hector's leads only: Filter (property = Hector Website) -> Gmail to lead. Time-aware (8pm-8am = \"call first thing tomorrow\"), branches valuation vs contact. Existing shared chain unchanged."
+    "name": "Version a14be439",
+    "description": "Autoresponder now sends via Gmail API (Code builds raw MIME, HTTP sends) so it comes FROM Hector Meza <h.mezarealty@gmail.com> like the review emails, reply-to briggsfreeman. Replaces the plain Gmail node."
   },
   "tags": []
 }
