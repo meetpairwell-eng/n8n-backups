@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-09T22:33:00.163Z",
+  "updatedAt": "2026-07-12T19:32:22.365Z",
   "createdAt": "2026-07-09T21:53:44.939Z",
   "id": "kPGy1GiWKP8wO6T3",
   "name": "Vendor Review Follow-Up",
@@ -7,6 +7,11 @@
   "isArchived": false,
   "nodes": [
     {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vendor-review-hm-p9k3m7",
+        "options": {}
+      },
       "name": "Vendor Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
@@ -15,34 +20,22 @@
         0
       ],
       "webhookId": "f43fdcb5-6445-4293-a1a9-300de96869e8",
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "vendor-review-hm-p9k3m7",
-        "options": {}
-      },
       "id": "26ba0c18-1e4c-4742-9185-0d4f8dba9f77"
     },
     {
+      "parameters": {
+        "jsCode": "function buildRaw(to, subject, html) {\n  const mime = [\n    'From: Hector Meza <h.mezarealty@gmail.com>',\n    `To: ${to}`,\n    'Reply-To: hmeza@briggsfreeman.com',\n    `Subject: ${subject}`,\n    'MIME-Version: 1.0',\n    'Content-Type: text/html; charset=UTF-8',\n    '',\n    html\n  ].join('\\r\\n');\n  return Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nconst raw = $input.first().json;\nconst link = 'https://g.page/r/CabJGOEHci6qEBM/review';\nlet name = '', email = '', vendorType = 'other', dealNote = '', clientNames = '';\n\nif (raw.body && raw.body.email) {\n  name = (raw.body.name || '').trim();\n  email = raw.body.email;\n  vendorType = (raw.body.vendorType || 'other').toLowerCase();\n  dealNote = (raw.body.dealNote || '').trim();\n  clientNames = (raw.body.clientNames || '').trim();\n} else if (raw['Vendor name']) {\n  name = raw['Vendor name'];\n  email = raw['Vendor email'];\n  vendorType = (raw['Vendor type'] || 'other').toLowerCase();\n  dealNote = (raw['Property address'] || '').trim();\n  clientNames = (raw['Client name(s)'] || '').trim();\n}\nif (!name || !email) { throw new Error('Missing vendor name or email'); }\n\nconst dealPhrase = dealNote ? ` on ${dealNote}` : '';\nconst clientLine = clientNames\n  ? ` I know ${clientNames} had a memorable experience, and that's thanks to having a great team like you in my corner.`\n  : '';\nconst subject = `Great working with you${dealNote ? ' on ' + dealNote : ''}`;\n\nconst html = [\n  `<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#eef0f3;padding:40px 16px;\">`,\n  `<tr><td align=\"center\">`,\n  `<table role=\"presentation\" width=\"100%\" style=\"max-width:540px;background:#ffffff;border:1px solid #e3e2de;border-radius:10px;font-family:'Aptos','Segoe UI',Calibri,Helvetica,Arial,sans-serif;\">`,\n  `<tr><td style=\"padding:36px 40px 28px;text-align:center;border-bottom:1px solid #eeece7;\">`,\n  `<img src=\"https://hectormeza.com/hector-headshot.jpg\" alt=\"Hector Meza\" width=\"72\" height=\"72\" style=\"width:72px;height:72px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 14px;border:2px solid #002349;\" /><div style=\"font-size:20px;font-weight:700;color:#002349;\">Hector Meza</div>`,\n  `<div style=\"font-size:11px;color:#999;margin-top:6px;letter-spacing:1px;text-transform:uppercase;\">Briggs Freeman Sotheby's International Realty</div>`,\n  `</td></tr>`,\n  `<tr><td style=\"padding:32px 40px 8px;font-size:15px;line-height:1.65;color:#222;\">`,\n  `<p style=\"margin:0 0 16px;\">Hey ${name},</p>`,\n  `<p style=\"margin:0 0 16px;\">I wanted to take a moment to thank you for taking such great care of my clients${dealPhrase}.${clientLine}</p>`,\n  `<p style=\"margin:0 0 24px;\">If you have a moment, I would really appreciate a quick Google review. It takes about two minutes and helps other clients find me.</p>`,\n  `</td></tr>`,\n  `<tr><td style=\"padding:0 40px 28px;text-align:center;\">`,\n  `<a href=\"${link}\" style=\"display:inline-block;background:#002349;color:#ffffff;padding:13px 30px;border-radius:6px;text-decoration:none;font-weight:600;font-size:15px;\">Leave a Google Review</a>`,\n  `<p style=\"margin:16px 0 0;font-size:12px;color:#999;\">Or copy this link</p>`,\n  `<p style=\"margin:2px 0 0;font-size:12px;color:#002349;word-break:break-all;\">${link}</p>`,\n  `</td></tr>`,\n  `<tr><td style=\"padding:0 40px 36px;font-size:15px;line-height:1.65;color:#222;\">`,\n  `<p style=\"margin:0 0 16px;\">If you haven't already, I'd love to return the favor, just send me your link and I'll leave you a review too.</p>`,\n  `<p style=\"margin:0 0 20px;\">Thank you again, and I look forward to working together on the next one.</p>`,\n  `<p style=\"margin:0;\">Sincerely,<br><strong>Hector Meza</strong><br>Briggs Freeman Sotheby's International Realty<br>(214) 686-5641 &middot; <a href=\"https://hectormeza.com\" style=\"color:#002349;text-decoration:none;\">hectormeza.com</a></p>`,\n  `</td></tr>`,\n  `</table>`,\n  `</td></tr>`,\n  `</table>`\n].join('');\n\nreturn [{ json: {\n  name, email, vendorType, dealNote, clientNames, sent_at: new Date().toISOString(),\n  subject, html, raw: buildRaw(email, subject, html)\n} }];"
+      },
       "name": "One Email Per Vendor",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        220,
+        224,
         0
       ],
-      "parameters": {
-        "jsCode": "function buildRaw(to, subject, html) {\n  const mime = [\n    'From: Hector Meza <h.mezarealty@gmail.com>',\n    `To: ${to}`,\n    'Reply-To: hmeza@briggsfreeman.com',\n    `Subject: ${subject}`,\n    'MIME-Version: 1.0',\n    'Content-Type: text/html; charset=UTF-8',\n    '',\n    html\n  ].join('\\r\\n');\n  return Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nconst raw = $input.first().json;\nconst link = 'https://g.page/r/CabJGOEHci6qEBM/review';\nlet name = '', email = '', vendorType = 'other', dealNote = '', clientNames = '';\n\nif (raw.body && raw.body.email) {\n  name = (raw.body.name || '').trim();\n  email = raw.body.email;\n  vendorType = (raw.body.vendorType || 'other').toLowerCase();\n  dealNote = (raw.body.dealNote || '').trim();\n  clientNames = (raw.body.clientNames || '').trim();\n} else if (raw['Vendor name']) {\n  name = raw['Vendor name'];\n  email = raw['Vendor email'];\n  vendorType = (raw['Vendor type'] || 'other').toLowerCase();\n  dealNote = (raw['Property address'] || '').trim();\n  clientNames = (raw['Client name(s)'] || '').trim();\n}\nif (!name || !email) { throw new Error('Missing vendor name or email'); }\n\nconst dealPhrase = dealNote ? ` on ${dealNote}` : '';\nconst clientLine = clientNames\n  ? ` I know ${clientNames} had a memorable experience, and that's thanks to having a great team like you in my corner.`\n  : '';\nconst subject = `Great working with you${dealNote ? ' on ' + dealNote : ''}`;\n\nconst html = [\n  `<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f2f1ee;padding:40px 16px;\">`,\n  `<tr><td align=\"center\">`,\n  `<table role=\"presentation\" width=\"100%\" style=\"max-width:540px;background:#ffffff;border:1px solid #e3e2de;border-radius:10px;font-family:'Aptos','Segoe UI',Calibri,Helvetica,Arial,sans-serif;\">`,\n  `<tr><td style=\"padding:36px 40px 28px;text-align:center;border-bottom:1px solid #eeece7;\">`,\n  `<div style=\"font-size:20px;font-weight:700;color:#1a3c34;\">Hector Meza</div>`,\n  `<div style=\"font-size:11px;color:#999;margin-top:6px;letter-spacing:1px;text-transform:uppercase;\">Briggs Freeman Sotheby's International Realty</div>`,\n  `</td></tr>`,\n  `<tr><td style=\"padding:32px 40px 8px;font-size:15px;line-height:1.65;color:#222;\">`,\n  `<p style=\"margin:0 0 16px;\">Dear ${name},</p>`,\n  `<p style=\"margin:0 0 16px;\">I wanted to take a moment to thank you for taking such great care of my clients${dealPhrase}.${clientLine}</p>`,\n  `<p style=\"margin:0 0 24px;\">If you have a moment, I would really appreciate a quick Google review. It takes about two minutes and helps other clients find me.</p>`,\n  `</td></tr>`,\n  `<tr><td style=\"padding:0 40px 28px;text-align:center;\">`,\n  `<a href=\"${link}\" style=\"display:inline-block;background:#1a3c34;color:#ffffff;padding:13px 30px;border-radius:6px;text-decoration:none;font-weight:600;font-size:15px;\">Leave a Google Review</a>`,\n  `<p style=\"margin:16px 0 0;font-size:12px;color:#999;\">Or copy this link</p>`,\n  `<p style=\"margin:2px 0 0;font-size:12px;color:#1a3c34;word-break:break-all;\">${link}</p>`,\n  `</td></tr>`,\n  `<tr><td style=\"padding:0 40px 36px;font-size:15px;line-height:1.65;color:#222;\">`,\n  `<p style=\"margin:0 0 16px;\">If you haven't already, I'd love to return the favor, just send me your link and I'll leave you a review too.</p>`,\n  `<p style=\"margin:0 0 20px;\">Thank you again, and I look forward to working together on the next one.</p>`,\n  `<p style=\"margin:0;\">Sincerely,<br><strong>Hector Meza</strong><br>Briggs Freeman Sotheby's International Realty<br>(214) 686-5641 &middot; <a href=\"https://hectormeza.com\" style=\"color:#1a3c34;text-decoration:none;\">hectormeza.com</a></p>`,\n  `</td></tr>`,\n  `</table>`,\n  `</td></tr>`,\n  `</table>`\n].join('');\n\nreturn [{ json: {\n  name, email, vendorType, dealNote, clientNames, sent_at: new Date().toISOString(),\n  subject, html, raw: buildRaw(email, subject, html)\n} }];\n"
-      },
       "id": "8c0a21ab-ca49-4cef-a659-db1d3cbc6ead"
     },
     {
-      "name": "Send Review Email",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        440,
-        0
-      ],
       "parameters": {
         "method": "POST",
         "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
@@ -53,22 +46,22 @@
         "jsonBody": "={{ JSON.stringify({raw: $json.raw}) }}",
         "options": {}
       },
+      "name": "Send Review Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "816ab18a-f104-4227-bd52-a8b3eb0e925d",
       "credentials": {
         "gmailOAuth2": {
           "id": "bsAbfRmGUOzzryvM",
           "name": "Gmail account"
         }
-      },
-      "id": "816ab18a-f104-4227-bd52-a8b3eb0e925d"
+      }
     },
     {
-      "name": "Log to Sheet",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        660,
-        0
-      ],
       "parameters": {
         "method": "POST",
         "url": "https://sheets.googleapis.com/v4/spreadsheets/1hINfEPp2TVfakuKflie609CfYZccvPoxeXGNV6KwngI/values/Vendors!A1:append?valueInputOption=RAW",
@@ -79,13 +72,20 @@
         "jsonBody": "={{ JSON.stringify({values: [[$('One Email Per Vendor').item.json.name, $('One Email Per Vendor').item.json.email, $('One Email Per Vendor').item.json.vendorType, $('One Email Per Vendor').item.json.dealNote, $('One Email Per Vendor').item.json.sent_at, '', '', '', '']]}) }}",
         "options": {}
       },
+      "name": "Log to Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        672,
+        0
+      ],
+      "id": "a1d28d8f-f3b0-49b3-b03c-112ae895a5fb",
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "LOY4ptTaJww2LC2j",
           "name": "Google Sheets account"
         }
-      },
-      "id": "a1d28d8f-f3b0-49b3-b03c-112ae895a5fb"
+      }
     }
   ],
   "connections": {
@@ -131,9 +131,9 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": null,
-  "versionId": "7a6ca355-dd7b-404d-a05a-a76297736fb0",
-  "activeVersionId": "7a6ca355-dd7b-404d-a05a-a76297736fb0",
+  "pinData": {},
+  "versionId": "ad82115a-1aa2-45e3-9570-dbee6642caa6",
+  "activeVersionId": "ad82115a-1aa2-45e3-9570-dbee6642caa6",
   "triggerCount": 1,
   "shared": [
     {
@@ -145,12 +145,17 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-09T22:33:00.164Z",
-    "createdAt": "2026-07-09T22:33:00.164Z",
-    "versionId": "7a6ca355-dd7b-404d-a05a-a76297736fb0",
+    "updatedAt": "2026-07-12T19:33:04.795Z",
+    "createdAt": "2026-07-12T19:32:22.367Z",
+    "versionId": "ad82115a-1aa2-45e3-9570-dbee6642caa6",
     "workflowId": "kPGy1GiWKP8wO6T3",
     "nodes": [
       {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "vendor-review-hm-p9k3m7",
+          "options": {}
+        },
         "name": "Vendor Webhook",
         "type": "n8n-nodes-base.webhook",
         "typeVersion": 2,
@@ -159,34 +164,22 @@
           0
         ],
         "webhookId": "f43fdcb5-6445-4293-a1a9-300de96869e8",
-        "parameters": {
-          "httpMethod": "POST",
-          "path": "vendor-review-hm-p9k3m7",
-          "options": {}
-        },
         "id": "26ba0c18-1e4c-4742-9185-0d4f8dba9f77"
       },
       {
+        "parameters": {
+          "jsCode": "function buildRaw(to, subject, html) {\n  const mime = [\n    'From: Hector Meza <h.mezarealty@gmail.com>',\n    `To: ${to}`,\n    'Reply-To: hmeza@briggsfreeman.com',\n    `Subject: ${subject}`,\n    'MIME-Version: 1.0',\n    'Content-Type: text/html; charset=UTF-8',\n    '',\n    html\n  ].join('\\r\\n');\n  return Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nconst raw = $input.first().json;\nconst link = 'https://g.page/r/CabJGOEHci6qEBM/review';\nlet name = '', email = '', vendorType = 'other', dealNote = '', clientNames = '';\n\nif (raw.body && raw.body.email) {\n  name = (raw.body.name || '').trim();\n  email = raw.body.email;\n  vendorType = (raw.body.vendorType || 'other').toLowerCase();\n  dealNote = (raw.body.dealNote || '').trim();\n  clientNames = (raw.body.clientNames || '').trim();\n} else if (raw['Vendor name']) {\n  name = raw['Vendor name'];\n  email = raw['Vendor email'];\n  vendorType = (raw['Vendor type'] || 'other').toLowerCase();\n  dealNote = (raw['Property address'] || '').trim();\n  clientNames = (raw['Client name(s)'] || '').trim();\n}\nif (!name || !email) { throw new Error('Missing vendor name or email'); }\n\nconst dealPhrase = dealNote ? ` on ${dealNote}` : '';\nconst clientLine = clientNames\n  ? ` I know ${clientNames} had a memorable experience, and that's thanks to having a great team like you in my corner.`\n  : '';\nconst subject = `Great working with you${dealNote ? ' on ' + dealNote : ''}`;\n\nconst html = [\n  `<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#eef0f3;padding:40px 16px;\">`,\n  `<tr><td align=\"center\">`,\n  `<table role=\"presentation\" width=\"100%\" style=\"max-width:540px;background:#ffffff;border:1px solid #e3e2de;border-radius:10px;font-family:'Aptos','Segoe UI',Calibri,Helvetica,Arial,sans-serif;\">`,\n  `<tr><td style=\"padding:36px 40px 28px;text-align:center;border-bottom:1px solid #eeece7;\">`,\n  `<img src=\"https://hectormeza.com/hector-headshot.jpg\" alt=\"Hector Meza\" width=\"72\" height=\"72\" style=\"width:72px;height:72px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 14px;border:2px solid #002349;\" /><div style=\"font-size:20px;font-weight:700;color:#002349;\">Hector Meza</div>`,\n  `<div style=\"font-size:11px;color:#999;margin-top:6px;letter-spacing:1px;text-transform:uppercase;\">Briggs Freeman Sotheby's International Realty</div>`,\n  `</td></tr>`,\n  `<tr><td style=\"padding:32px 40px 8px;font-size:15px;line-height:1.65;color:#222;\">`,\n  `<p style=\"margin:0 0 16px;\">Hey ${name},</p>`,\n  `<p style=\"margin:0 0 16px;\">I wanted to take a moment to thank you for taking such great care of my clients${dealPhrase}.${clientLine}</p>`,\n  `<p style=\"margin:0 0 24px;\">If you have a moment, I would really appreciate a quick Google review. It takes about two minutes and helps other clients find me.</p>`,\n  `</td></tr>`,\n  `<tr><td style=\"padding:0 40px 28px;text-align:center;\">`,\n  `<a href=\"${link}\" style=\"display:inline-block;background:#002349;color:#ffffff;padding:13px 30px;border-radius:6px;text-decoration:none;font-weight:600;font-size:15px;\">Leave a Google Review</a>`,\n  `<p style=\"margin:16px 0 0;font-size:12px;color:#999;\">Or copy this link</p>`,\n  `<p style=\"margin:2px 0 0;font-size:12px;color:#002349;word-break:break-all;\">${link}</p>`,\n  `</td></tr>`,\n  `<tr><td style=\"padding:0 40px 36px;font-size:15px;line-height:1.65;color:#222;\">`,\n  `<p style=\"margin:0 0 16px;\">If you haven't already, I'd love to return the favor, just send me your link and I'll leave you a review too.</p>`,\n  `<p style=\"margin:0 0 20px;\">Thank you again, and I look forward to working together on the next one.</p>`,\n  `<p style=\"margin:0;\">Sincerely,<br><strong>Hector Meza</strong><br>Briggs Freeman Sotheby's International Realty<br>(214) 686-5641 &middot; <a href=\"https://hectormeza.com\" style=\"color:#002349;text-decoration:none;\">hectormeza.com</a></p>`,\n  `</td></tr>`,\n  `</table>`,\n  `</td></tr>`,\n  `</table>`\n].join('');\n\nreturn [{ json: {\n  name, email, vendorType, dealNote, clientNames, sent_at: new Date().toISOString(),\n  subject, html, raw: buildRaw(email, subject, html)\n} }];"
+        },
         "name": "One Email Per Vendor",
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          220,
+          224,
           0
         ],
-        "parameters": {
-          "jsCode": "function buildRaw(to, subject, html) {\n  const mime = [\n    'From: Hector Meza <h.mezarealty@gmail.com>',\n    `To: ${to}`,\n    'Reply-To: hmeza@briggsfreeman.com',\n    `Subject: ${subject}`,\n    'MIME-Version: 1.0',\n    'Content-Type: text/html; charset=UTF-8',\n    '',\n    html\n  ].join('\\r\\n');\n  return Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\n}\nconst raw = $input.first().json;\nconst link = 'https://g.page/r/CabJGOEHci6qEBM/review';\nlet name = '', email = '', vendorType = 'other', dealNote = '', clientNames = '';\n\nif (raw.body && raw.body.email) {\n  name = (raw.body.name || '').trim();\n  email = raw.body.email;\n  vendorType = (raw.body.vendorType || 'other').toLowerCase();\n  dealNote = (raw.body.dealNote || '').trim();\n  clientNames = (raw.body.clientNames || '').trim();\n} else if (raw['Vendor name']) {\n  name = raw['Vendor name'];\n  email = raw['Vendor email'];\n  vendorType = (raw['Vendor type'] || 'other').toLowerCase();\n  dealNote = (raw['Property address'] || '').trim();\n  clientNames = (raw['Client name(s)'] || '').trim();\n}\nif (!name || !email) { throw new Error('Missing vendor name or email'); }\n\nconst dealPhrase = dealNote ? ` on ${dealNote}` : '';\nconst clientLine = clientNames\n  ? ` I know ${clientNames} had a memorable experience, and that's thanks to having a great team like you in my corner.`\n  : '';\nconst subject = `Great working with you${dealNote ? ' on ' + dealNote : ''}`;\n\nconst html = [\n  `<table role=\"presentation\" width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"background:#f2f1ee;padding:40px 16px;\">`,\n  `<tr><td align=\"center\">`,\n  `<table role=\"presentation\" width=\"100%\" style=\"max-width:540px;background:#ffffff;border:1px solid #e3e2de;border-radius:10px;font-family:'Aptos','Segoe UI',Calibri,Helvetica,Arial,sans-serif;\">`,\n  `<tr><td style=\"padding:36px 40px 28px;text-align:center;border-bottom:1px solid #eeece7;\">`,\n  `<div style=\"font-size:20px;font-weight:700;color:#1a3c34;\">Hector Meza</div>`,\n  `<div style=\"font-size:11px;color:#999;margin-top:6px;letter-spacing:1px;text-transform:uppercase;\">Briggs Freeman Sotheby's International Realty</div>`,\n  `</td></tr>`,\n  `<tr><td style=\"padding:32px 40px 8px;font-size:15px;line-height:1.65;color:#222;\">`,\n  `<p style=\"margin:0 0 16px;\">Dear ${name},</p>`,\n  `<p style=\"margin:0 0 16px;\">I wanted to take a moment to thank you for taking such great care of my clients${dealPhrase}.${clientLine}</p>`,\n  `<p style=\"margin:0 0 24px;\">If you have a moment, I would really appreciate a quick Google review. It takes about two minutes and helps other clients find me.</p>`,\n  `</td></tr>`,\n  `<tr><td style=\"padding:0 40px 28px;text-align:center;\">`,\n  `<a href=\"${link}\" style=\"display:inline-block;background:#1a3c34;color:#ffffff;padding:13px 30px;border-radius:6px;text-decoration:none;font-weight:600;font-size:15px;\">Leave a Google Review</a>`,\n  `<p style=\"margin:16px 0 0;font-size:12px;color:#999;\">Or copy this link</p>`,\n  `<p style=\"margin:2px 0 0;font-size:12px;color:#1a3c34;word-break:break-all;\">${link}</p>`,\n  `</td></tr>`,\n  `<tr><td style=\"padding:0 40px 36px;font-size:15px;line-height:1.65;color:#222;\">`,\n  `<p style=\"margin:0 0 16px;\">If you haven't already, I'd love to return the favor, just send me your link and I'll leave you a review too.</p>`,\n  `<p style=\"margin:0 0 20px;\">Thank you again, and I look forward to working together on the next one.</p>`,\n  `<p style=\"margin:0;\">Sincerely,<br><strong>Hector Meza</strong><br>Briggs Freeman Sotheby's International Realty<br>(214) 686-5641 &middot; <a href=\"https://hectormeza.com\" style=\"color:#1a3c34;text-decoration:none;\">hectormeza.com</a></p>`,\n  `</td></tr>`,\n  `</table>`,\n  `</td></tr>`,\n  `</table>`\n].join('');\n\nreturn [{ json: {\n  name, email, vendorType, dealNote, clientNames, sent_at: new Date().toISOString(),\n  subject, html, raw: buildRaw(email, subject, html)\n} }];\n"
-        },
         "id": "8c0a21ab-ca49-4cef-a659-db1d3cbc6ead"
       },
       {
-        "name": "Send Review Email",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          440,
-          0
-        ],
         "parameters": {
           "method": "POST",
           "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
@@ -197,22 +190,22 @@
           "jsonBody": "={{ JSON.stringify({raw: $json.raw}) }}",
           "options": {}
         },
+        "name": "Send Review Email",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          448,
+          0
+        ],
+        "id": "816ab18a-f104-4227-bd52-a8b3eb0e925d",
         "credentials": {
           "gmailOAuth2": {
             "id": "bsAbfRmGUOzzryvM",
             "name": "Gmail account"
           }
-        },
-        "id": "816ab18a-f104-4227-bd52-a8b3eb0e925d"
+        }
       },
       {
-        "name": "Log to Sheet",
-        "type": "n8n-nodes-base.httpRequest",
-        "typeVersion": 4.2,
-        "position": [
-          660,
-          0
-        ],
         "parameters": {
           "method": "POST",
           "url": "https://sheets.googleapis.com/v4/spreadsheets/1hINfEPp2TVfakuKflie609CfYZccvPoxeXGNV6KwngI/values/Vendors!A1:append?valueInputOption=RAW",
@@ -223,13 +216,20 @@
           "jsonBody": "={{ JSON.stringify({values: [[$('One Email Per Vendor').item.json.name, $('One Email Per Vendor').item.json.email, $('One Email Per Vendor').item.json.vendorType, $('One Email Per Vendor').item.json.dealNote, $('One Email Per Vendor').item.json.sent_at, '', '', '', '']]}) }}",
           "options": {}
         },
+        "name": "Log to Sheet",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          672,
+          0
+        ],
+        "id": "a1d28d8f-f3b0-49b3-b03c-112ae895a5fb",
         "credentials": {
           "googleSheetsOAuth2Api": {
             "id": "LOY4ptTaJww2LC2j",
             "name": "Google Sheets account"
           }
-        },
-        "id": "a1d28d8f-f3b0-49b3-b03c-112ae895a5fb"
+        }
       }
     ],
     "connections": {
@@ -268,8 +268,8 @@
       }
     },
     "authors": "Hector Meza",
-    "name": null,
-    "description": null
+    "name": "Version ad82115a",
+    "description": ""
   },
   "tags": []
 }
