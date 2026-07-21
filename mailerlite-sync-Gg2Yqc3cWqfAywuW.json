@@ -1,0 +1,761 @@
+{
+  "updatedAt": "2026-07-20T22:09:27.622Z",
+  "createdAt": "2026-07-20T20:48:35.034Z",
+  "id": "Gg2Yqc3cWqfAywuW",
+  "name": "MailerLite Sync",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 7
+            }
+          ]
+        }
+      },
+      "id": "b1111111-1111-4111-8111-111111111111",
+      "name": "Daily 7am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -460,
+        -80
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mailerlite-sync-run",
+        "options": {}
+      },
+      "id": "b0000000-0000-4000-8000-000000000000",
+      "name": "Manual Run",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        120
+      ],
+      "webhookId": "7d2e5a91-3c84-4f60-b1a7-9e0d6c3b8f52"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Updated",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "b2222222-2222-4222-8222-222222222222",
+      "name": "Read Master Tab",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        -240,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "b3333333-3333-4333-8333-333333333333",
+      "name": "Read Leads Tab",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        -20,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const DRY_RUN = false;\n\nconst src = [\n  ...$('Read Master Tab').all().map(i => ({ tab: 'Updated', r: i.json })),\n  ...$('Read Leads Tab').all().map(i => ({ tab: 'Leads',   r: i.json })),\n];\nconst clean = v => String(v ?? '').trim();\nconst out = [];\nfor (const { tab, r } of src) {\n  const email = clean(r['Email']).toLowerCase();\n  if (!email || !email.includes('@')) continue;\n  if (clean(r['On Mailer List']).toUpperCase() !== 'Y') continue;   // Hector's gate\n  if (clean(r['MailerLite Synced'])) continue;                       // never re-push\n  if (clean(r['Status']).toLowerCase() === 'unsubscribed') continue;\n  out.push({ json: {\n    _tab: tab, _row: r.row_number, dryRun: DRY_RUN, email,\n    first: clean(r['First Name']), last: clean(r['Last Name']), phone: clean(r['Phone']),\n  }});\n}\nreturn out;\n"
+      },
+      "id": "b4444444-4444-4444-8444-444444444444",
+      "name": "Pick Candidates",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://connect.mailerlite.com/api/subscribers/{{ $json.email }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "batching": {
+            "batch": {
+              "batchSize": 25,
+              "batchInterval": 30000
+            }
+          }
+        }
+      },
+      "id": "b5555555-5555-4555-8555-555555555555",
+      "name": "Check MailerLite",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        420,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "bgqmSCUYTRD7xhPi",
+          "name": "MailerLite API"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://connect.mailerlite.com/api/subscribers",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ email: $('Pick Candidates').item.json.email, fields: { name: $('Pick Candidates').item.json.first, last_name: $('Pick Candidates').item.json.last, phone: $('Pick Candidates').item.json.phone }, groups: ['193544692145587963'] }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true
+            }
+          },
+          "batching": {
+            "batch": {
+              "batchSize": 25,
+              "batchInterval": 30000
+            }
+          }
+        }
+      },
+      "id": "b7777777-7777-4777-8777-777777777777",
+      "name": "Upsert To MailerLite",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        640,
+        0
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "bgqmSCUYTRD7xhPi",
+          "name": "MailerLite API"
+        }
+      },
+      "disabled": false
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst cands  = $('Pick Candidates').all().map(i => i.json);\nconst checks = $('Check MailerLite').all().map(i => i.json);\nconst ups    = $('Upsert To MailerLite').all().map(i => i.json);\nconst today  = DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd');\nconst out = [];\nfor (let i = 0; i < cands.length; i++) {\n  const c = cands[i];\n  const code = (ups[i] || {}).statusCode;\n  // ONLY stamp a confirmed write. A 429/5xx must stay unstamped so the next run retries it.\n  if (code !== 200 && code !== 201) continue;\n  const present = (checks[i] || {}).statusCode === 200;\n  out.push({ json: {\n    _tab: c._tab,\n    row_number: c._row,\n    'MailerLite Synced': (present ? 'already on list ' : 'synced ') + today,\n  }});\n}\nreturn out;\n"
+      },
+      "id": "b9999999-9999-4999-8999-999999999999",
+      "name": "Plan Stamps",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        860,
+        0
+      ],
+      "disabled": false
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $json._tab }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "MailerLite Synced": "={{ $json['MailerLite Synced'] }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ]
+        },
+        "options": {}
+      },
+      "id": "ba000000-0000-4000-8000-000000000000",
+      "name": "Stamp Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        1080,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": false,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst checked = $('Check MailerLite').all();\nconst dry = $('Pick Candidates').first()?.json?.dryRun ?? true;\nreturn [{ json: {\n  mode: dry ? 'DRY RUN (nothing written)' : 'LIVE',\n  candidates: checked.length,\n  alreadyInMailerLite: checked.filter(i => i.json.statusCode === 200).length,\n  newlyAdded: checked.filter(i => i.json.statusCode === 404).length,\n  writeFailures: $('Upsert To MailerLite').all()\n      .filter(i => ![200, 201].includes(i.json.statusCode)).length,\n} }];\n"
+      },
+      "id": "b8888888-8888-4888-8888-888888888888",
+      "name": "Summarize",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Daily 7am": {
+      "main": [
+        [
+          {
+            "node": "Read Master Tab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Run": {
+      "main": [
+        [
+          {
+            "node": "Read Master Tab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Master Tab": {
+      "main": [
+        [
+          {
+            "node": "Read Leads Tab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Leads Tab": {
+      "main": [
+        [
+          {
+            "node": "Pick Candidates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pick Candidates": {
+      "main": [
+        [
+          {
+            "node": "Check MailerLite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check MailerLite": {
+      "main": [
+        [
+          {
+            "node": "Upsert To MailerLite",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upsert To MailerLite": {
+      "main": [
+        [
+          {
+            "node": "Plan Stamps",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan Stamps": {
+      "main": [
+        [
+          {
+            "node": "Stamp Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stamp Sheet": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "mem3eZSwpX10Xmdr",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Daily 7am": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "57e6470a-b64d-4822-8769-12e592806227",
+  "activeVersionId": "57e6470a-b64d-4822-8769-12e592806227",
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2026-07-20T20:48:35.034Z",
+      "createdAt": "2026-07-20T20:48:35.034Z",
+      "role": "workflow:owner",
+      "workflowId": "Gg2Yqc3cWqfAywuW",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-07-20T22:09:27.624Z",
+    "createdAt": "2026-07-20T22:09:27.624Z",
+    "versionId": "57e6470a-b64d-4822-8769-12e592806227",
+    "workflowId": "Gg2Yqc3cWqfAywuW",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 7
+              }
+            ]
+          }
+        },
+        "id": "b1111111-1111-4111-8111-111111111111",
+        "name": "Daily 7am",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -460,
+          -80
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "mailerlite-sync-run",
+          "options": {}
+        },
+        "id": "b0000000-0000-4000-8000-000000000000",
+        "name": "Manual Run",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          -460,
+          120
+        ],
+        "webhookId": "7d2e5a91-3c84-4f60-b1a7-9e0d6c3b8f52"
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "Updated",
+            "mode": "name"
+          },
+          "options": {}
+        },
+        "id": "b2222222-2222-4222-8222-222222222222",
+        "name": "Read Master Tab",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.1,
+        "position": [
+          -240,
+          0
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "Leads",
+            "mode": "name"
+          },
+          "options": {}
+        },
+        "id": "b3333333-3333-4333-8333-333333333333",
+        "name": "Read Leads Tab",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.1,
+        "position": [
+          -20,
+          0
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "const DRY_RUN = false;\n\nconst src = [\n  ...$('Read Master Tab').all().map(i => ({ tab: 'Updated', r: i.json })),\n  ...$('Read Leads Tab').all().map(i => ({ tab: 'Leads',   r: i.json })),\n];\nconst clean = v => String(v ?? '').trim();\nconst out = [];\nfor (const { tab, r } of src) {\n  const email = clean(r['Email']).toLowerCase();\n  if (!email || !email.includes('@')) continue;\n  if (clean(r['On Mailer List']).toUpperCase() !== 'Y') continue;   // Hector's gate\n  if (clean(r['MailerLite Synced'])) continue;                       // never re-push\n  if (clean(r['Status']).toLowerCase() === 'unsubscribed') continue;\n  out.push({ json: {\n    _tab: tab, _row: r.row_number, dryRun: DRY_RUN, email,\n    first: clean(r['First Name']), last: clean(r['Last Name']), phone: clean(r['Phone']),\n  }});\n}\nreturn out;\n"
+        },
+        "id": "b4444444-4444-4444-8444-444444444444",
+        "name": "Pick Candidates",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          200,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "url": "=https://connect.mailerlite.com/api/subscribers/{{ $json.email }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "neverError": true
+              }
+            },
+            "batching": {
+              "batch": {
+                "batchSize": 25,
+                "batchInterval": 30000
+              }
+            }
+          }
+        },
+        "id": "b5555555-5555-4555-8555-555555555555",
+        "name": "Check MailerLite",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          420,
+          0
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "bgqmSCUYTRD7xhPi",
+            "name": "MailerLite API"
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://connect.mailerlite.com/api/subscribers",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpHeaderAuth",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={{ JSON.stringify({ email: $('Pick Candidates').item.json.email, fields: { name: $('Pick Candidates').item.json.first, last_name: $('Pick Candidates').item.json.last, phone: $('Pick Candidates').item.json.phone }, groups: ['193544692145587963'] }) }}",
+          "options": {
+            "response": {
+              "response": {
+                "fullResponse": true,
+                "neverError": true
+              }
+            },
+            "batching": {
+              "batch": {
+                "batchSize": 25,
+                "batchInterval": 30000
+              }
+            }
+          }
+        },
+        "id": "b7777777-7777-4777-8777-777777777777",
+        "name": "Upsert To MailerLite",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          640,
+          0
+        ],
+        "credentials": {
+          "httpHeaderAuth": {
+            "id": "bgqmSCUYTRD7xhPi",
+            "name": "MailerLite API"
+          }
+        },
+        "disabled": false
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "\nconst cands  = $('Pick Candidates').all().map(i => i.json);\nconst checks = $('Check MailerLite').all().map(i => i.json);\nconst ups    = $('Upsert To MailerLite').all().map(i => i.json);\nconst today  = DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd');\nconst out = [];\nfor (let i = 0; i < cands.length; i++) {\n  const c = cands[i];\n  const code = (ups[i] || {}).statusCode;\n  // ONLY stamp a confirmed write. A 429/5xx must stay unstamped so the next run retries it.\n  if (code !== 200 && code !== 201) continue;\n  const present = (checks[i] || {}).statusCode === 200;\n  out.push({ json: {\n    _tab: c._tab,\n    row_number: c._row,\n    'MailerLite Synced': (present ? 'already on list ' : 'synced ') + today,\n  }});\n}\nreturn out;\n"
+        },
+        "id": "b9999999-9999-4999-8999-999999999999",
+        "name": "Plan Stamps",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          860,
+          0
+        ],
+        "disabled": false
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "documentId": {
+            "__rl": true,
+            "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "={{ $json._tab }}",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "row_number": "={{ $json.row_number }}",
+              "MailerLite Synced": "={{ $json['MailerLite Synced'] }}"
+            },
+            "matchingColumns": [
+              "row_number"
+            ]
+          },
+          "options": {}
+        },
+        "id": "ba000000-0000-4000-8000-000000000000",
+        "name": "Stamp Sheet",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.1,
+        "position": [
+          1080,
+          0
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        },
+        "disabled": false,
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "\nconst checked = $('Check MailerLite').all();\nconst dry = $('Pick Candidates').first()?.json?.dryRun ?? true;\nreturn [{ json: {\n  mode: dry ? 'DRY RUN (nothing written)' : 'LIVE',\n  candidates: checked.length,\n  alreadyInMailerLite: checked.filter(i => i.json.statusCode === 200).length,\n  newlyAdded: checked.filter(i => i.json.statusCode === 404).length,\n  writeFailures: $('Upsert To MailerLite').all()\n      .filter(i => ![200, 201].includes(i.json.statusCode)).length,\n} }];\n"
+        },
+        "id": "b8888888-8888-4888-8888-888888888888",
+        "name": "Summarize",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1300,
+          0
+        ]
+      }
+    ],
+    "connections": {
+      "Daily 7am": {
+        "main": [
+          [
+            {
+              "node": "Read Master Tab",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual Run": {
+        "main": [
+          [
+            {
+              "node": "Read Master Tab",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Master Tab": {
+        "main": [
+          [
+            {
+              "node": "Read Leads Tab",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Leads Tab": {
+        "main": [
+          [
+            {
+              "node": "Pick Candidates",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Pick Candidates": {
+        "main": [
+          [
+            {
+              "node": "Check MailerLite",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check MailerLite": {
+        "main": [
+          [
+            {
+              "node": "Upsert To MailerLite",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Upsert To MailerLite": {
+        "main": [
+          [
+            {
+              "node": "Plan Stamps",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Plan Stamps": {
+        "main": [
+          [
+            {
+              "node": "Stamp Sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Stamp Sheet": {
+        "main": [
+          [
+            {
+              "node": "Summarize",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Hector Meza",
+    "name": null,
+    "description": null
+  },
+  "tags": []
+}
