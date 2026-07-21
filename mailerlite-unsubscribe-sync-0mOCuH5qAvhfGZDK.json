@@ -1,0 +1,451 @@
+{
+  "updatedAt": "2026-07-20T22:22:37.950Z",
+  "createdAt": "2026-07-20T22:22:37.950Z",
+  "id": "0mOCuH5qAvhfGZDK",
+  "name": "MailerLite Unsubscribe Sync",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mailerlite-unsub-hm",
+        "options": {}
+      },
+      "id": "30000000-0000-4000-8000-000000000000",
+      "name": "MailerLite Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        0
+      ],
+      "webhookId": "4a8f6c25-7e13-4d09-b562-0c9a3e7f1b84"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\n// MailerLite webhook payloads vary by event; dig the email out defensively.\nconst b = $input.first().json.body ?? $input.first().json;\nconst events = Array.isArray(b?.events) ? b.events : [b];\nconst out = [];\nfor (const ev of events) {\n  const d = ev?.data ?? {};\n  const email = String(\n    d?.subscriber?.email ?? d?.email ?? ev?.email ?? ''\n  ).trim().toLowerCase();\n  if (!email) continue;\n  const type = String(ev?.type ?? b?.type ?? 'unknown');\n  out.push({ json: { email, eventType: type } });\n}\nif (!out.length) throw new Error('No subscriber email found in MailerLite webhook payload');\nreturn out;\n"
+      },
+      "id": "31111111-1111-4111-8111-111111111111",
+      "name": "Extract Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -20,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Updated",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "32222222-2222-4222-8222-222222222222",
+      "name": "Read Master",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        200,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "33333333-3333-4333-8333-333333333333",
+      "name": "Read Leads",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        420,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      },
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "\nconst targets = new Map(\n  $('Extract Email').all().map(i => [i.json.email, i.json.eventType])\n);\nconst today = DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd');\n\nconst rows = [\n  ...$('Read Master').all().map(i => ({ tab: 'Updated', r: i.json })),\n  ...$('Read Leads').all().map(i => ({ tab: 'Leads',   r: i.json })),\n];\n\nconst out = [];\nfor (const { tab, r } of rows) {\n  const email = String(r['Email'] ?? '').trim().toLowerCase();\n  if (!email || !targets.has(email)) continue;\n  const ev = targets.get(email);\n  const reason = ev.includes('bounce') ? 'Bounced'\n               : ev.includes('spam')   ? 'Spam complaint'\n               : 'Unsubscribed';\n  out.push({ json: {\n    _tab: tab,\n    row_number: r.row_number,\n    'Status': reason,\n    'On Mailer List': '',                      // drop the gate so nothing re-adds them\n    'MailerLite Synced': reason + ' ' + today,  // keep stamped so the sync skips them\n  }});\n}\nreturn out;\n"
+      },
+      "id": "34444444-4444-4444-8444-444444444444",
+      "name": "Match Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $json._tab }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $json.row_number }}",
+            "Status": "={{ $json['Status'] }}",
+            "On Mailer List": "={{ $json['On Mailer List'] }}",
+            "MailerLite Synced": "={{ $json['MailerLite Synced'] }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ]
+        },
+        "options": {}
+      },
+      "id": "35555555-5555-4555-8555-555555555555",
+      "name": "Mark Unsubscribed",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        860,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      },
+      "alwaysOutputData": true
+    }
+  ],
+  "connections": {
+    "MailerLite Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Email": {
+      "main": [
+        [
+          {
+            "node": "Read Master",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Master": {
+      "main": [
+        [
+          {
+            "node": "Read Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Leads": {
+      "main": [
+        [
+          {
+            "node": "Match Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Match Rows": {
+      "main": [
+        [
+          {
+            "node": "Mark Unsubscribed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "mem3eZSwpX10Xmdr",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "959f78ed-1144-45bd-a169-70c028d53da4",
+  "activeVersionId": "959f78ed-1144-45bd-a169-70c028d53da4",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-07-20T22:22:37.950Z",
+      "createdAt": "2026-07-20T22:22:37.950Z",
+      "role": "workflow:owner",
+      "workflowId": "0mOCuH5qAvhfGZDK",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-07-20T22:22:37.994Z",
+    "createdAt": "2026-07-20T22:22:37.994Z",
+    "versionId": "959f78ed-1144-45bd-a169-70c028d53da4",
+    "workflowId": "0mOCuH5qAvhfGZDK",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "mailerlite-unsub-hm",
+          "options": {}
+        },
+        "id": "30000000-0000-4000-8000-000000000000",
+        "name": "MailerLite Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          -240,
+          0
+        ],
+        "webhookId": "4a8f6c25-7e13-4d09-b562-0c9a3e7f1b84"
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "\n// MailerLite webhook payloads vary by event; dig the email out defensively.\nconst b = $input.first().json.body ?? $input.first().json;\nconst events = Array.isArray(b?.events) ? b.events : [b];\nconst out = [];\nfor (const ev of events) {\n  const d = ev?.data ?? {};\n  const email = String(\n    d?.subscriber?.email ?? d?.email ?? ev?.email ?? ''\n  ).trim().toLowerCase();\n  if (!email) continue;\n  const type = String(ev?.type ?? b?.type ?? 'unknown');\n  out.push({ json: { email, eventType: type } });\n}\nif (!out.length) throw new Error('No subscriber email found in MailerLite webhook payload');\nreturn out;\n"
+        },
+        "id": "31111111-1111-4111-8111-111111111111",
+        "name": "Extract Email",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          -20,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "Updated",
+            "mode": "name"
+          },
+          "options": {}
+        },
+        "id": "32222222-2222-4222-8222-222222222222",
+        "name": "Read Master",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.1,
+        "position": [
+          200,
+          0
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "documentId": {
+            "__rl": true,
+            "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "Leads",
+            "mode": "name"
+          },
+          "options": {}
+        },
+        "id": "33333333-3333-4333-8333-333333333333",
+        "name": "Read Leads",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.1,
+        "position": [
+          420,
+          0
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "\nconst targets = new Map(\n  $('Extract Email').all().map(i => [i.json.email, i.json.eventType])\n);\nconst today = DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd');\n\nconst rows = [\n  ...$('Read Master').all().map(i => ({ tab: 'Updated', r: i.json })),\n  ...$('Read Leads').all().map(i => ({ tab: 'Leads',   r: i.json })),\n];\n\nconst out = [];\nfor (const { tab, r } of rows) {\n  const email = String(r['Email'] ?? '').trim().toLowerCase();\n  if (!email || !targets.has(email)) continue;\n  const ev = targets.get(email);\n  const reason = ev.includes('bounce') ? 'Bounced'\n               : ev.includes('spam')   ? 'Spam complaint'\n               : 'Unsubscribed';\n  out.push({ json: {\n    _tab: tab,\n    row_number: r.row_number,\n    'Status': reason,\n    'On Mailer List': '',                      // drop the gate so nothing re-adds them\n    'MailerLite Synced': reason + ' ' + today,  // keep stamped so the sync skips them\n  }});\n}\nreturn out;\n"
+        },
+        "id": "34444444-4444-4444-8444-444444444444",
+        "name": "Match Rows",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          640,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "documentId": {
+            "__rl": true,
+            "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "={{ $json._tab }}",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "row_number": "={{ $json.row_number }}",
+              "Status": "={{ $json['Status'] }}",
+              "On Mailer List": "={{ $json['On Mailer List'] }}",
+              "MailerLite Synced": "={{ $json['MailerLite Synced'] }}"
+            },
+            "matchingColumns": [
+              "row_number"
+            ]
+          },
+          "options": {}
+        },
+        "id": "35555555-5555-4555-8555-555555555555",
+        "name": "Mark Unsubscribed",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.1,
+        "position": [
+          860,
+          0
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        },
+        "alwaysOutputData": true
+      }
+    ],
+    "connections": {
+      "MailerLite Webhook": {
+        "main": [
+          [
+            {
+              "node": "Extract Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Email": {
+        "main": [
+          [
+            {
+              "node": "Read Master",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Master": {
+        "main": [
+          [
+            {
+              "node": "Read Leads",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Leads": {
+        "main": [
+          [
+            {
+              "node": "Match Rows",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Match Rows": {
+        "main": [
+          [
+            {
+              "node": "Mark Unsubscribed",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Hector Meza",
+    "name": null,
+    "description": null
+  },
+  "tags": []
+}
