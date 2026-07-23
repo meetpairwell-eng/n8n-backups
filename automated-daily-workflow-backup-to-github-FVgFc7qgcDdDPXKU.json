@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-07T20:07:03.083Z",
+  "updatedAt": "2026-07-23T21:01:19.112Z",
   "createdAt": "2026-01-03T21:08:42.083Z",
   "id": "FVgFc7qgcDdDPXKU",
   "name": "Automated daily workflow backup to GitHub",
@@ -129,15 +129,15 @@
       ],
       "webhookId": "27218087-8df7-474d-a39f-70cfa9c34ec8",
       "typeVersion": 1,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
       "credentials": {
         "githubOAuth2Api": {
           "id": "6WdEClMBTILVHYrZ",
           "name": "GitHub account"
         }
-      },
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 3000
+      }
     },
     {
       "parameters": {
@@ -168,15 +168,17 @@
       ],
       "webhookId": "ce4b561b-acb9-4cd8-b76f-4928dada9674",
       "typeVersion": 1,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
       "credentials": {
         "githubOAuth2Api": {
           "id": "6WdEClMBTILVHYrZ",
           "name": "GitHub account"
         }
       },
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 3000
+      "onError": "continueRegularOutput",
+      "notes": "On Error = Continue (set 2026-07-23). This stops the whole backup from failing when GitHub's org-enforced secret-scanning push protection blocks a file. Current case: the \"Twilio Health Check\" workflow has the Twilio Account SID in its request URL, which GitHub flags. That one file is skipped; every other workflow still backs up and no failure email is sent. The Twilio Account SID cannot be kept out of the backup (it must be in the URL and this backup evaluates expressions), and push protection is enforced org-wide, so skipping is the accepted fix."
     },
     {
       "parameters": {
@@ -423,7 +425,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "413149e8-e370-496e-8e50-21eba72d1007",
+  "versionId": "9067b8b8-d191-4d6b-a3a4-12ebaabd3401",
   "activeVersionId": "413149e8-e370-496e-8e50-21eba72d1007",
   "triggerCount": 1,
   "shared": [
