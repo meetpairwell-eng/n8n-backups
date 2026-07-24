@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-23T21:01:19.112Z",
+  "updatedAt": "2026-07-24T14:42:29.565Z",
   "createdAt": "2026-01-03T21:08:42.083Z",
   "id": "FVgFc7qgcDdDPXKU",
   "name": "Automated daily workflow backup to GitHub",
@@ -308,6 +308,37 @@
         688
       ],
       "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Strip Twilio Account SID from the backed-up copy so GitHub secret-scanning\n// does not block the push. Live workflows are untouched (this only edits the\n// JSON that gets committed). Add more patterns here if other secrets appear.\nreturn $input.all().map((item, i) => {\n  const scrubbed = JSON.parse(\n    JSON.stringify(item.json).replace(/AC[0-9a-fA-F]{32}/g, 'TWILIO_ACCOUNT_SID_REDACTED')\n  );\n  return { json: scrubbed, pairedItem: { item: i } };\n});"
+      },
+      "id": "57a85c99-c119-4099-b53f-ab3be75cc8fb",
+      "name": "Redact Secrets",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        816
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tmp-backup-fire-d7202512",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "daed24ba-4b03-4c4b-8725-b2b4e05d9346",
+      "name": "TEMP Fire",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -412,
+        976
+      ],
+      "webhookId": "45a6ad4d-eaaf-43c1-9f74-9be911dc46c5"
     }
   ],
   "connections": {
@@ -326,7 +357,7 @@
       "main": [
         [
           {
-            "node": "Json file1",
+            "node": "Redact Secrets",
             "type": "main",
             "index": 0
           }
@@ -405,6 +436,28 @@
           }
         ]
       ]
+    },
+    "Redact Secrets": {
+      "main": [
+        [
+          {
+            "node": "Json file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TEMP Fire": {
+      "main": [
+        [
+          {
+            "node": "List files from repo1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -425,9 +478,9 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "9067b8b8-d191-4d6b-a3a4-12ebaabd3401",
-  "activeVersionId": "413149e8-e370-496e-8e50-21eba72d1007",
-  "triggerCount": 1,
+  "versionId": "94c30a8b-b5cc-4f3b-b135-adf857aae0c7",
+  "activeVersionId": "94c30a8b-b5cc-4f3b-b135-adf857aae0c7",
+  "triggerCount": 2,
   "shared": [
     {
       "updatedAt": "2026-01-03T21:08:42.083Z",
@@ -438,9 +491,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-07T20:07:03.085Z",
-    "createdAt": "2026-07-07T20:07:03.085Z",
-    "versionId": "413149e8-e370-496e-8e50-21eba72d1007",
+    "updatedAt": "2026-07-24T14:42:29.567Z",
+    "createdAt": "2026-07-24T14:42:29.567Z",
+    "versionId": "94c30a8b-b5cc-4f3b-b135-adf857aae0c7",
     "workflowId": "FVgFc7qgcDdDPXKU",
     "nodes": [
       {
@@ -566,15 +619,15 @@
         ],
         "webhookId": "27218087-8df7-474d-a39f-70cfa9c34ec8",
         "typeVersion": 1,
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 3000,
         "credentials": {
           "githubOAuth2Api": {
             "id": "6WdEClMBTILVHYrZ",
             "name": "GitHub account"
           }
-        },
-        "retryOnFail": true,
-        "maxTries": 3,
-        "waitBetweenTries": 3000
+        }
       },
       {
         "parameters": {
@@ -605,15 +658,17 @@
         ],
         "webhookId": "ce4b561b-acb9-4cd8-b76f-4928dada9674",
         "typeVersion": 1,
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 3000,
         "credentials": {
           "githubOAuth2Api": {
             "id": "6WdEClMBTILVHYrZ",
             "name": "GitHub account"
           }
         },
-        "retryOnFail": true,
-        "maxTries": 3,
-        "waitBetweenTries": 3000
+        "onError": "continueRegularOutput",
+        "notes": "On Error = Continue (set 2026-07-23). This stops the whole backup from failing when GitHub's org-enforced secret-scanning push protection blocks a file. Current case: the \"Twilio Health Check\" workflow has the Twilio Account SID in its request URL, which GitHub flags. That one file is skipped; every other workflow still backs up and no failure email is sent. The Twilio Account SID cannot be kept out of the backup (it must be in the URL and this backup evaluates expressions), and push protection is enforced org-wide, so skipping is the accepted fix."
       },
       {
         "parameters": {
@@ -743,6 +798,37 @@
           688
         ],
         "typeVersion": 1
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "// Strip Twilio Account SID from the backed-up copy so GitHub secret-scanning\n// does not block the push. Live workflows are untouched (this only edits the\n// JSON that gets committed). Add more patterns here if other secrets appear.\nreturn $input.all().map((item, i) => {\n  const scrubbed = JSON.parse(\n    JSON.stringify(item.json).replace(/AC[0-9a-fA-F]{32}/g, 'TWILIO_ACCOUNT_SID_REDACTED')\n  );\n  return { json: scrubbed, pairedItem: { item: i } };\n});"
+        },
+        "id": "57a85c99-c119-4099-b53f-ab3be75cc8fb",
+        "name": "Redact Secrets",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          208,
+          816
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "tmp-backup-fire-d7202512",
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "id": "daed24ba-4b03-4c4b-8725-b2b4e05d9346",
+        "name": "TEMP Fire",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          -412,
+          976
+        ],
+        "webhookId": "45a6ad4d-eaaf-43c1-9f74-9be911dc46c5"
       }
     ],
     "connections": {
@@ -761,7 +847,7 @@
         "main": [
           [
             {
-              "node": "Json file1",
+              "node": "Redact Secrets",
               "type": "main",
               "index": 0
             }
@@ -835,6 +921,28 @@
           [
             {
               "node": "Check if file exists1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Redact Secrets": {
+        "main": [
+          [
+            {
+              "node": "Json file1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "TEMP Fire": {
+        "main": [
+          [
+            {
+              "node": "List files from repo1",
               "type": "main",
               "index": 0
             }
