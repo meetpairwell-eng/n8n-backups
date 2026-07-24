@@ -1,0 +1,438 @@
+{
+  "updatedAt": "2026-07-23T21:05:58.031Z",
+  "createdAt": "2026-07-22T13:28:31.629Z",
+  "id": "ucsBqi0FyWT9qTHy",
+  "name": "Twilio Health Check",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "triggerAtDay": [
+                1
+              ],
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "60000000-0000-4000-8000-000000000000",
+      "name": "Weekly Mon 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "twilio-health-run",
+        "options": {}
+      },
+      "id": "60000001-0000-4000-8000-000000000001",
+      "name": "Manual Run",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        192
+      ],
+      "webhookId": "1e7a3d92-6c48-4b05-9f21-8d0e5a7c3b60"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.twilio.com/2010-04-01/Accounts/TWILIO_ACCOUNT_SID_REDACTED/Messages.json?From=+18557748160&DateSent%3E={{ $now.minus({days:7}).toFormat('yyyy-LL-dd') }}&PageSize=1000",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "61111111-1111-4111-8111-111111111111",
+      "name": "Fetch 7d Messages",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "JnW2cNuAcotPSVwr",
+          "name": "Twilio REST (basic)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst msgs = ($input.first().json.messages) || [];\n\n// Recipient-side outcomes we do NOT count against our health (not our fault / not a filter)\nconst RECIPIENT = new Set([30003, 30004, 30005, 30006, 21610]); // unreachable, blocked-by-user, unknown, landline, opted-out\n// Codes that mean the CARRIER filtered us or the number isn't accepted — the real canaries\nconst FILTERED = { 30032: 'Toll-free not verified / blocked', 30007: 'Carrier filtered (spam flag)', 30008: 'Unknown carrier error' };\n\nconst tally = {};\nconst filteredHits = [];\nlet terminal = 0, delivered = 0, recipientIssues = 0;\n\nfor (const m of msgs) {\n  const s = m.status || 'unknown';\n  tally[s] = (tally[s] || 0) + 1;\n  const ec = m.error_code ? Number(m.error_code) : null;\n\n  if (['delivered', 'undelivered', 'failed'].includes(s)) terminal++;\n  if (s === 'delivered') delivered++;\n  if (ec && RECIPIENT.has(ec)) recipientIssues++;\n  if (ec && FILTERED[ec]) filteredHits.push({ to: m.to, code: ec, meaning: FILTERED[ec] });\n}\n\n// Delivery rate excluding recipient-side issues (we can't fix a landline)\nconst denom = terminal - recipientIssues;\nconst rate = denom > 0 ? Math.round((delivered / denom) * 100) : null;\n\n// Decide severity\nlet level = 'ok';\nconst reasons = [];\nif (filteredHits.some(h => h.code === 30032)) { level = 'critical'; reasons.push('Number rejected as unverified (30032) — the registration-mismatch canary'); }\nif (filteredHits.some(h => h.code === 30007)) { level = level === 'critical' ? 'critical' : 'warning'; reasons.push('Carrier filtered messages as spam (30007)'); }\nif (filteredHits.some(h => h.code === 30008)) { if (level === 'ok') level = 'warning'; reasons.push('Unknown carrier errors (30008)'); }\nif (rate !== null && rate < 90 && denom >= 3) { if (level === 'ok') level = 'warning'; reasons.push(`Delivery rate ${rate}% is below 90%`); }\n\nconst alert = level !== 'ok';\n\nconst summary =\n  `Twilio weekly health — ${'+18557748160'}\\n` +\n  `Texts sent (7d): ${msgs.length}\\n` +\n  `Delivered: ${delivered}${rate !== null ? `  (${rate}% of deliverable)` : ''}\\n` +\n  `By status: ${Object.entries(tally).map(([k,v]) => `${k}=${v}`).join(', ') || 'none'}\\n` +\n  `Recipient-side (landline/opted-out/unreachable, not our fault): ${recipientIssues}\\n` +\n  (filteredHits.length ? `\\nCARRIER FLAGS:\\n${filteredHits.map(h => `  ${h.to}  ${h.code} — ${h.meaning}`).join('\\n')}\\n` : '') +\n  (reasons.length ? `\\nWhy flagged:\\n${reasons.map(r => '  - ' + r).join('\\n')}\\n` : '\\nAll clear — nothing to act on.\\n');\n\nreturn [{ json: { alert, level, count: msgs.length, delivered, rate, summary } }];\n"
+      },
+      "id": "62222222-2222-4222-8222-222222222222",
+      "name": "Analyze",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a1",
+              "leftValue": "={{ $json.alert }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "63333333-3333-4333-8333-333333333333",
+      "name": "Something Off?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "meetpairwell@gmail.com",
+        "subject": "=⚠️ Twilio text-back needs a look ({{ $json.level }})",
+        "emailType": "text",
+        "message": "={{ $json.summary }}",
+        "options": {}
+      },
+      "id": "64444444-4444-4444-8444-444444444444",
+      "name": "Email Hector",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        688,
+        -96
+      ],
+      "webhookId": "11c18b8a-2373-4c04-bc1b-ebcb25d1d6b9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Weekly Mon 8am": {
+      "main": [
+        [
+          {
+            "node": "Fetch 7d Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Run": {
+      "main": [
+        [
+          {
+            "node": "Fetch 7d Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch 7d Messages": {
+      "main": [
+        [
+          {
+            "node": "Analyze",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze": {
+      "main": [
+        [
+          {
+            "node": "Something Off?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Something Off?": {
+      "main": [
+        [
+          {
+            "node": "Email Hector",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "mem3eZSwpX10Xmdr",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Weekly Mon 8am": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": {},
+  "versionId": "2c2ba36e-214f-41eb-ba7e-c20aa8268a7f",
+  "activeVersionId": "57240e84-ec7a-4837-9a89-90de9981a0eb",
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2026-07-22T13:28:31.629Z",
+      "createdAt": "2026-07-22T13:28:31.629Z",
+      "role": "workflow:owner",
+      "workflowId": "ucsBqi0FyWT9qTHy",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-07-22T13:28:31.642Z",
+    "createdAt": "2026-07-22T13:28:31.642Z",
+    "versionId": "57240e84-ec7a-4837-9a89-90de9981a0eb",
+    "workflowId": "ucsBqi0FyWT9qTHy",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "weeks",
+                "triggerAtDay": [
+                  1
+                ],
+                "triggerAtHour": 8
+              }
+            ]
+          }
+        },
+        "id": "60000000-0000-4000-8000-000000000000",
+        "name": "Weekly Mon 8am",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -240,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "twilio-health-run",
+          "options": {}
+        },
+        "id": "60000001-0000-4000-8000-000000000001",
+        "name": "Manual Run",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 1,
+        "position": [
+          -240,
+          180
+        ],
+        "webhookId": "1e7a3d92-6c48-4b05-9f21-8d0e5a7c3b60"
+      },
+      {
+        "parameters": {
+          "url": "=https://api.twilio.com/2010-04-01/Accounts/TWILIO_ACCOUNT_SID_REDACTED/Messages.json?From=+18557748160&DateSent%3E={{ $now.minus({days:7}).toFormat('yyyy-LL-dd') }}&PageSize=1000",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "options": {
+            "response": {
+              "response": {
+                "neverError": true
+              }
+            }
+          }
+        },
+        "id": "61111111-1111-4111-8111-111111111111",
+        "name": "Fetch 7d Messages",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          0,
+          0
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "JnW2cNuAcotPSVwr",
+            "name": "Twilio REST (basic)"
+          }
+        },
+        "alwaysOutputData": true
+      },
+      {
+        "parameters": {
+          "mode": "runOnceForAllItems",
+          "jsCode": "\nconst msgs = ($input.first().json.messages) || [];\n\n// Recipient-side outcomes we do NOT count against our health (not our fault / not a filter)\nconst RECIPIENT = new Set([30003, 30004, 30005, 30006, 21610]); // unreachable, blocked-by-user, unknown, landline, opted-out\n// Codes that mean the CARRIER filtered us or the number isn't accepted — the real canaries\nconst FILTERED = { 30032: 'Toll-free not verified / blocked', 30007: 'Carrier filtered (spam flag)', 30008: 'Unknown carrier error' };\n\nconst tally = {};\nconst filteredHits = [];\nlet terminal = 0, delivered = 0, recipientIssues = 0;\n\nfor (const m of msgs) {\n  const s = m.status || 'unknown';\n  tally[s] = (tally[s] || 0) + 1;\n  const ec = m.error_code ? Number(m.error_code) : null;\n\n  if (['delivered', 'undelivered', 'failed'].includes(s)) terminal++;\n  if (s === 'delivered') delivered++;\n  if (ec && RECIPIENT.has(ec)) recipientIssues++;\n  if (ec && FILTERED[ec]) filteredHits.push({ to: m.to, code: ec, meaning: FILTERED[ec] });\n}\n\n// Delivery rate excluding recipient-side issues (we can't fix a landline)\nconst denom = terminal - recipientIssues;\nconst rate = denom > 0 ? Math.round((delivered / denom) * 100) : null;\n\n// Decide severity\nlet level = 'ok';\nconst reasons = [];\nif (filteredHits.some(h => h.code === 30032)) { level = 'critical'; reasons.push('Number rejected as unverified (30032) — the registration-mismatch canary'); }\nif (filteredHits.some(h => h.code === 30007)) { level = level === 'critical' ? 'critical' : 'warning'; reasons.push('Carrier filtered messages as spam (30007)'); }\nif (filteredHits.some(h => h.code === 30008)) { if (level === 'ok') level = 'warning'; reasons.push('Unknown carrier errors (30008)'); }\nif (rate !== null && rate < 90 && denom >= 3) { if (level === 'ok') level = 'warning'; reasons.push(`Delivery rate ${rate}% is below 90%`); }\n\nconst alert = level !== 'ok';\n\nconst summary =\n  `Twilio weekly health — ${'+18557748160'}\\n` +\n  `Texts sent (7d): ${msgs.length}\\n` +\n  `Delivered: ${delivered}${rate !== null ? `  (${rate}% of deliverable)` : ''}\\n` +\n  `By status: ${Object.entries(tally).map(([k,v]) => `${k}=${v}`).join(', ') || 'none'}\\n` +\n  `Recipient-side (landline/opted-out/unreachable, not our fault): ${recipientIssues}\\n` +\n  (filteredHits.length ? `\\nCARRIER FLAGS:\\n${filteredHits.map(h => `  ${h.to}  ${h.code} — ${h.meaning}`).join('\\n')}\\n` : '') +\n  (reasons.length ? `\\nWhy flagged:\\n${reasons.map(r => '  - ' + r).join('\\n')}\\n` : '\\nAll clear — nothing to act on.\\n');\n\nreturn [{ json: { alert, level, count: msgs.length, delivered, rate, summary } }];\n"
+        },
+        "id": "62222222-2222-4222-8222-222222222222",
+        "name": "Analyze",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          220,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "a1",
+                "leftValue": "={{ $json.alert }}",
+                "rightValue": "true",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          }
+        },
+        "id": "63333333-3333-4333-8333-333333333333",
+        "name": "Something Off?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "sendTo": "meetpairwell@gmail.com",
+          "subject": "=⚠️ Twilio text-back needs a look ({{ $json.level }})",
+          "message": "={{ $json.summary }}",
+          "options": {},
+          "emailType": "text"
+        },
+        "id": "64444444-4444-4444-8444-444444444444",
+        "name": "Email Hector",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2.1,
+        "position": [
+          680,
+          -100
+        ],
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "bsAbfRmGUOzzryvM",
+            "name": "Gmail account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Weekly Mon 8am": {
+        "main": [
+          [
+            {
+              "node": "Fetch 7d Messages",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Manual Run": {
+        "main": [
+          [
+            {
+              "node": "Fetch 7d Messages",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Fetch 7d Messages": {
+        "main": [
+          [
+            {
+              "node": "Analyze",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Analyze": {
+        "main": [
+          [
+            {
+              "node": "Something Off?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Something Off?": {
+        "main": [
+          [
+            {
+              "node": "Email Hector",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      }
+    },
+    "authors": "Hector Meza",
+    "name": null,
+    "description": null
+  },
+  "tags": []
+}
