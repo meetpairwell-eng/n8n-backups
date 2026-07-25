@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-24T14:42:29.565Z",
+  "updatedAt": "2026-07-24T14:44:06.425Z",
   "createdAt": "2026-01-03T21:08:42.083Z",
   "id": "FVgFc7qgcDdDPXKU",
   "name": "Automated daily workflow backup to GitHub",
@@ -322,23 +322,6 @@
         208,
         816
       ]
-    },
-    {
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "tmp-backup-fire-d7202512",
-        "responseMode": "onReceived",
-        "options": {}
-      },
-      "id": "daed24ba-4b03-4c4b-8725-b2b4e05d9346",
-      "name": "TEMP Fire",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
-      "position": [
-        -412,
-        976
-      ],
-      "webhookId": "45a6ad4d-eaaf-43c1-9f74-9be911dc46c5"
     }
   ],
   "connections": {
@@ -447,17 +430,6 @@
           }
         ]
       ]
-    },
-    "TEMP Fire": {
-      "main": [
-        [
-          {
-            "node": "List files from repo1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
     }
   },
   "settings": {
@@ -478,9 +450,9 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "94c30a8b-b5cc-4f3b-b135-adf857aae0c7",
-  "activeVersionId": "94c30a8b-b5cc-4f3b-b135-adf857aae0c7",
-  "triggerCount": 2,
+  "versionId": "72fd93ec-0412-47ca-b37a-cad52f552bf5",
+  "activeVersionId": "72fd93ec-0412-47ca-b37a-cad52f552bf5",
+  "triggerCount": 1,
   "shared": [
     {
       "updatedAt": "2026-01-03T21:08:42.083Z",
@@ -491,9 +463,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-24T14:42:29.567Z",
-    "createdAt": "2026-07-24T14:42:29.567Z",
-    "versionId": "94c30a8b-b5cc-4f3b-b135-adf857aae0c7",
+    "updatedAt": "2026-07-24T14:44:06.426Z",
+    "createdAt": "2026-07-24T14:44:06.426Z",
+    "versionId": "72fd93ec-0412-47ca-b37a-cad52f552bf5",
     "workflowId": "FVgFc7qgcDdDPXKU",
     "nodes": [
       {
@@ -812,23 +784,6 @@
           208,
           816
         ]
-      },
-      {
-        "parameters": {
-          "httpMethod": "POST",
-          "path": "tmp-backup-fire-d7202512",
-          "responseMode": "onReceived",
-          "options": {}
-        },
-        "id": "daed24ba-4b03-4c4b-8725-b2b4e05d9346",
-        "name": "TEMP Fire",
-        "type": "n8n-nodes-base.webhook",
-        "typeVersion": 2,
-        "position": [
-          -412,
-          976
-        ],
-        "webhookId": "45a6ad4d-eaaf-43c1-9f74-9be911dc46c5"
       }
     ],
     "connections": {
@@ -932,17 +887,6 @@
           [
             {
               "node": "Json file1",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
-      "TEMP Fire": {
-        "main": [
-          [
-            {
-              "node": "List files from repo1",
               "type": "main",
               "index": 0
             }
