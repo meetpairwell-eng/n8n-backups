@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-21T20:14:10.787Z",
+  "updatedAt": "2026-07-30T17:43:26.754Z",
   "createdAt": "2026-07-20T20:17:16.735Z",
   "id": "gRYy19j6T4Brqe3d",
   "name": "Contact Database Sync",
@@ -17,14 +17,14 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 1,
       "position": [
-        -220,
+        -224,
         0
       ],
       "webhookId": "8f3c1d7a-45b2-4e91-a6d8-2c7b9e4f1a30"
     },
     {
       "parameters": {
-        "jsCode": "\nconst b = $input.first().json.body || $input.first().json;\nconst clean = v => (v === undefined || v === null) ? '' : String(v).trim();\n\nconst email = clean(b.email).toLowerCase();\n\nlet first = clean(b.firstName), last = clean(b.lastName);\nif (!first) {\n  const parts = clean(b.name).split(/\\s+/).filter(Boolean);\n  first = parts.shift() || '';\n  last = parts.join(' ');\n}\n\nconst rawPhone = clean(b.phone);\nconst d = rawPhone.replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst phone = d.length === 10 ? '(' + d.slice(0,3) + ')' + d.slice(3,6) + '-' + d.slice(6) : rawPhone;\n\nconst formName = clean(b.source);\nconst searched = clean(b.searchedAddress);\nlet leadType = 'General';\nif (/valuation|sell/i.test(formName) || searched) leadType = 'Seller';\nif (/buyer|buy/i.test(formName) || /buyer/i.test(clean(b.formName))) leadType = 'Buyer';\n\nconst utmSource = clean(b.utm_source);\nconst metaLeadId = clean(b.leadgenId || b.leadId);\nlet origin;\nif (metaLeadId) origin = 'Meta Instant Form';\nelse if (utmSource) origin = 'Paid ad: ' + utmSource;\nelse if (clean(b.referrer)) origin = 'Referral: ' + clean(b.referrer);\nelse origin = 'Website (organic/direct)';\n\nreturn [{ json: {\n  timestamp: DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd HH:mm'),\n  first, last, email, phone, leadType, origin,\n  campaign: clean(b.utm_campaign),\n  ad: clean(b.utm_content),\n  searchedAddress: searched,\n  message: clean(b.message),\n  metaLeadId,\n  formName\n} }];\n"
+        "jsCode": "\nconst b = $input.first().json.body || $input.first().json;\nconst clean = v => (v === undefined || v === null) ? '' : String(v).trim();\n\nconst email = clean(b.email).toLowerCase();\n\nlet first = clean(b.firstName), last = clean(b.lastName);\nif (!first) {\n  const parts = clean(b.name).split(/\\s+/).filter(Boolean);\n  first = parts.shift() || '';\n  last = parts.join(' ');\n}\n\nconst rawPhone = clean(b.phone);\nconst d = rawPhone.replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst phone = d.length === 10 ? '(' + d.slice(0,3) + ')' + d.slice(3,6) + '-' + d.slice(6) : rawPhone;\n\nconst formName = clean(b.source);\nconst searched = clean(b.searchedAddress);\nlet leadType = 'General';\nif (/valuation|sell/i.test(formName) || searched) leadType = 'Seller';\nif (/buyer|buy/i.test(formName) || /buyer/i.test(clean(b.formName))) leadType = 'Buyer';\n\nconst utmSource = clean(b.utm_source);\nconst metaLeadId = clean(b.leadgenId || b.leadId);\nlet origin;\nif (metaLeadId) origin = 'Meta Instant Form';\nelse if (utmSource) origin = 'Paid ad: ' + utmSource;\nelse if (clean(b.referrer)) origin = 'Referral: ' + clean(b.referrer);\nelse origin = 'Website (organic/direct)';\n\nreturn [{ json: {\n  timestamp: DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd HH:mm'),\n  first, last, email, phone, leadType, origin,\n  campaign: clean(b.utm_campaign),\n  ad: clean(b.utm_content),\n  searchedAddress: searched,\n  message: clean(b.message),\n  metaLeadId,\n  onMailerList: (b.newsletterOptIn === true || clean(b.newsletterOptIn).toLowerCase() === 'true') ? 'Y' : '',\n  formName\n} }];\n"
       },
       "id": "a2222222-2222-4222-8222-222222222222",
       "name": "Normalize Lead",
@@ -54,20 +54,19 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.1,
       "position": [
-        220,
+        224,
         0
       ],
+      "alwaysOutputData": true,
       "credentials": {
         "googleSheetsOAuth2Api": {
           "id": "LOY4ptTaJww2LC2j",
           "name": "Google Sheets account"
         }
-      },
-      "alwaysOutputData": true
+      }
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "\nconst lead = $('Normalize Lead').first().json;\nconst rows = $input.all().map(i => i.json);\n\nconst norm = s => String(s || '').trim().toLowerCase();\nconst digits = s => String(s || '').replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst leadPhone = digits(lead.phone);\n\nlet match = null;\nfor (const r of rows) {\n  if (lead.email && norm(r['Email']) === norm(lead.email)) { match = r; break; }\n  if (!match && leadPhone.length === 10 && digits(r['Phone']) === leadPhone) { match = r; }\n}\n\nconst notes = match\n  ? ('Already in Database as ' + [match['First Name'], match['Last Name']].filter(Boolean).join(' ')\n     + ' (' + (match['Category'] || 'uncategorized') + ')').trim()\n  : '';\n\nreturn [{ json: { ...lead, alreadyInDatabase: match ? 'Y' : '', notes } }];\n"
       },
       "id": "a4444444-4444-4444-8444-444444444444",
@@ -75,7 +74,7 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        440,
+        448,
         0
       ]
     },
@@ -108,9 +107,170 @@
             "Message": "={{ $json.message }}",
             "Already In Database": "={{ $json.alreadyInDatabase }}",
             "Meta Lead ID": "={{ $json.metaLeadId }}",
-            "Notes": "={{ $json.notes }}"
+            "Notes": "={{ $json.notes }}",
+            "On Mailer List": "={{ $json.onMailerList }}"
           },
-          "matchingColumns": []
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lead Type",
+              "displayName": "Lead Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Campaign",
+              "displayName": "Campaign",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ad",
+              "displayName": "Ad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Searched Address",
+              "displayName": "Searched Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Already In Database",
+              "displayName": "Already In Database",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Meta Lead ID",
+              "displayName": "Meta Lead ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "On Mailer List",
+              "displayName": "On Mailer List",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "MailerLite Synced",
+              "displayName": "MailerLite Synced",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
         },
         "options": {}
       },
@@ -119,7 +279,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.1,
       "position": [
-        660,
+        672,
         0
       ],
       "credentials": {
@@ -131,7 +291,6 @@
     },
     {
       "parameters": {
-        "mode": "runOnceForAllItems",
         "jsCode": "\nconst lead = $('Check For Duplicate').first().json;\n\n// E.164 the phone; anything that isn't a clean 10-digit US number is skipped\nconst d = String(lead.phone || '').replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst to = d.length === 10 ? '+1' + d : '';\n\n// TCPA: no marketing texts outside 8am-9pm local. Central is Hector's market.\nconst hour = DateTime.now().setZone('America/Chicago').hour;\nconst quiet = hour < 8 || hour >= 21;\n\nconst first = (lead.first || '').trim() || 'there';\nconst addr  = String(lead.searchedAddress || '').split(',')[0].trim();\n\nconst body = addr\n  ? `Hey ${first}, it's Hector. Thanks for reaching out about ${addr}. Before I put a number together I'd like to hear a little about the home from you, so I'll give you a call in a bit. If another time is easier, just text me back and let me know.\\n\\nReply STOP to unsubscribe.`\n  : `Hey ${first}, it's Hector. Thanks for reaching out. I'll give you a call in a bit to hear more about what you're looking for and how I can help.\\n\\nReply STOP to unsubscribe.`;\n\nconst send = Boolean(to) && !quiet;\n\nreturn [{ json: {\n  to, body, send,\n  skipReason: !to ? 'no valid US mobile' : (quiet ? 'quiet hours (8am-9pm CT rule)' : ''),\n  email: lead.email,\n} }];\n"
       },
       "id": "50000000-0000-4000-8000-000000000000",
@@ -164,14 +323,15 @@
             }
           ],
           "combinator": "and"
-        }
+        },
+        "options": {}
       },
       "id": "51111111-1111-4111-8111-111111111111",
       "name": "Textable?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        1100,
+        1104,
         0
       ]
     },
@@ -187,8 +347,8 @@
       "type": "n8n-nodes-base.twilio",
       "typeVersion": 1,
       "position": [
-        1340,
-        -100
+        1344,
+        -96
       ],
       "credentials": {
         "twilioApi": {
@@ -287,9 +447,9 @@
   },
   "staticData": null,
   "meta": null,
-  "pinData": null,
-  "versionId": "e6af5099-92de-4c0d-9476-c9cc4ab32b3e",
-  "activeVersionId": "e6af5099-92de-4c0d-9476-c9cc4ab32b3e",
+  "pinData": {},
+  "versionId": "d35c76e6-a2f0-48ab-bb1d-a4a1ccc6de3d",
+  "activeVersionId": "d35c76e6-a2f0-48ab-bb1d-a4a1ccc6de3d",
   "triggerCount": 1,
   "shared": [
     {
@@ -301,9 +461,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-21T20:14:10.789Z",
-    "createdAt": "2026-07-21T20:14:10.789Z",
-    "versionId": "e6af5099-92de-4c0d-9476-c9cc4ab32b3e",
+    "updatedAt": "2026-07-30T17:44:17.353Z",
+    "createdAt": "2026-07-30T17:43:26.758Z",
+    "versionId": "d35c76e6-a2f0-48ab-bb1d-a4a1ccc6de3d",
     "workflowId": "gRYy19j6T4Brqe3d",
     "nodes": [
       {
@@ -317,14 +477,14 @@
         "type": "n8n-nodes-base.webhook",
         "typeVersion": 1,
         "position": [
-          -220,
+          -224,
           0
         ],
         "webhookId": "8f3c1d7a-45b2-4e91-a6d8-2c7b9e4f1a30"
       },
       {
         "parameters": {
-          "jsCode": "\nconst b = $input.first().json.body || $input.first().json;\nconst clean = v => (v === undefined || v === null) ? '' : String(v).trim();\n\nconst email = clean(b.email).toLowerCase();\n\nlet first = clean(b.firstName), last = clean(b.lastName);\nif (!first) {\n  const parts = clean(b.name).split(/\\s+/).filter(Boolean);\n  first = parts.shift() || '';\n  last = parts.join(' ');\n}\n\nconst rawPhone = clean(b.phone);\nconst d = rawPhone.replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst phone = d.length === 10 ? '(' + d.slice(0,3) + ')' + d.slice(3,6) + '-' + d.slice(6) : rawPhone;\n\nconst formName = clean(b.source);\nconst searched = clean(b.searchedAddress);\nlet leadType = 'General';\nif (/valuation|sell/i.test(formName) || searched) leadType = 'Seller';\nif (/buyer|buy/i.test(formName) || /buyer/i.test(clean(b.formName))) leadType = 'Buyer';\n\nconst utmSource = clean(b.utm_source);\nconst metaLeadId = clean(b.leadgenId || b.leadId);\nlet origin;\nif (metaLeadId) origin = 'Meta Instant Form';\nelse if (utmSource) origin = 'Paid ad: ' + utmSource;\nelse if (clean(b.referrer)) origin = 'Referral: ' + clean(b.referrer);\nelse origin = 'Website (organic/direct)';\n\nreturn [{ json: {\n  timestamp: DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd HH:mm'),\n  first, last, email, phone, leadType, origin,\n  campaign: clean(b.utm_campaign),\n  ad: clean(b.utm_content),\n  searchedAddress: searched,\n  message: clean(b.message),\n  metaLeadId,\n  formName\n} }];\n"
+          "jsCode": "\nconst b = $input.first().json.body || $input.first().json;\nconst clean = v => (v === undefined || v === null) ? '' : String(v).trim();\n\nconst email = clean(b.email).toLowerCase();\n\nlet first = clean(b.firstName), last = clean(b.lastName);\nif (!first) {\n  const parts = clean(b.name).split(/\\s+/).filter(Boolean);\n  first = parts.shift() || '';\n  last = parts.join(' ');\n}\n\nconst rawPhone = clean(b.phone);\nconst d = rawPhone.replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst phone = d.length === 10 ? '(' + d.slice(0,3) + ')' + d.slice(3,6) + '-' + d.slice(6) : rawPhone;\n\nconst formName = clean(b.source);\nconst searched = clean(b.searchedAddress);\nlet leadType = 'General';\nif (/valuation|sell/i.test(formName) || searched) leadType = 'Seller';\nif (/buyer|buy/i.test(formName) || /buyer/i.test(clean(b.formName))) leadType = 'Buyer';\n\nconst utmSource = clean(b.utm_source);\nconst metaLeadId = clean(b.leadgenId || b.leadId);\nlet origin;\nif (metaLeadId) origin = 'Meta Instant Form';\nelse if (utmSource) origin = 'Paid ad: ' + utmSource;\nelse if (clean(b.referrer)) origin = 'Referral: ' + clean(b.referrer);\nelse origin = 'Website (organic/direct)';\n\nreturn [{ json: {\n  timestamp: DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd HH:mm'),\n  first, last, email, phone, leadType, origin,\n  campaign: clean(b.utm_campaign),\n  ad: clean(b.utm_content),\n  searchedAddress: searched,\n  message: clean(b.message),\n  metaLeadId,\n  onMailerList: (b.newsletterOptIn === true || clean(b.newsletterOptIn).toLowerCase() === 'true') ? 'Y' : '',\n  formName\n} }];\n"
         },
         "id": "a2222222-2222-4222-8222-222222222222",
         "name": "Normalize Lead",
@@ -354,20 +514,19 @@
         "type": "n8n-nodes-base.googleSheets",
         "typeVersion": 4.1,
         "position": [
-          220,
+          224,
           0
         ],
+        "alwaysOutputData": true,
         "credentials": {
           "googleSheetsOAuth2Api": {
             "id": "LOY4ptTaJww2LC2j",
             "name": "Google Sheets account"
           }
-        },
-        "alwaysOutputData": true
+        }
       },
       {
         "parameters": {
-          "mode": "runOnceForAllItems",
           "jsCode": "\nconst lead = $('Normalize Lead').first().json;\nconst rows = $input.all().map(i => i.json);\n\nconst norm = s => String(s || '').trim().toLowerCase();\nconst digits = s => String(s || '').replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst leadPhone = digits(lead.phone);\n\nlet match = null;\nfor (const r of rows) {\n  if (lead.email && norm(r['Email']) === norm(lead.email)) { match = r; break; }\n  if (!match && leadPhone.length === 10 && digits(r['Phone']) === leadPhone) { match = r; }\n}\n\nconst notes = match\n  ? ('Already in Database as ' + [match['First Name'], match['Last Name']].filter(Boolean).join(' ')\n     + ' (' + (match['Category'] || 'uncategorized') + ')').trim()\n  : '';\n\nreturn [{ json: { ...lead, alreadyInDatabase: match ? 'Y' : '', notes } }];\n"
         },
         "id": "a4444444-4444-4444-8444-444444444444",
@@ -375,7 +534,7 @@
         "type": "n8n-nodes-base.code",
         "typeVersion": 2,
         "position": [
-          440,
+          448,
           0
         ]
       },
@@ -408,9 +567,170 @@
               "Message": "={{ $json.message }}",
               "Already In Database": "={{ $json.alreadyInDatabase }}",
               "Meta Lead ID": "={{ $json.metaLeadId }}",
-              "Notes": "={{ $json.notes }}"
+              "Notes": "={{ $json.notes }}",
+              "On Mailer List": "={{ $json.onMailerList }}"
             },
-            "matchingColumns": []
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "Timestamp",
+                "displayName": "Timestamp",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "First Name",
+                "displayName": "First Name",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Last Name",
+                "displayName": "Last Name",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Email",
+                "displayName": "Email",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Phone",
+                "displayName": "Phone",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Lead Type",
+                "displayName": "Lead Type",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Source",
+                "displayName": "Source",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Campaign",
+                "displayName": "Campaign",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Ad",
+                "displayName": "Ad",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Searched Address",
+                "displayName": "Searched Address",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Message",
+                "displayName": "Message",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Already In Database",
+                "displayName": "Already In Database",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Meta Lead ID",
+                "displayName": "Meta Lead ID",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "On Mailer List",
+                "displayName": "On Mailer List",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "MailerLite Synced",
+                "displayName": "MailerLite Synced",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Notes",
+                "displayName": "Notes",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Status",
+                "displayName": "Status",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
           },
           "options": {}
         },
@@ -419,7 +739,7 @@
         "type": "n8n-nodes-base.googleSheets",
         "typeVersion": 4.1,
         "position": [
-          660,
+          672,
           0
         ],
         "credentials": {
@@ -431,7 +751,6 @@
       },
       {
         "parameters": {
-          "mode": "runOnceForAllItems",
           "jsCode": "\nconst lead = $('Check For Duplicate').first().json;\n\n// E.164 the phone; anything that isn't a clean 10-digit US number is skipped\nconst d = String(lead.phone || '').replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst to = d.length === 10 ? '+1' + d : '';\n\n// TCPA: no marketing texts outside 8am-9pm local. Central is Hector's market.\nconst hour = DateTime.now().setZone('America/Chicago').hour;\nconst quiet = hour < 8 || hour >= 21;\n\nconst first = (lead.first || '').trim() || 'there';\nconst addr  = String(lead.searchedAddress || '').split(',')[0].trim();\n\nconst body = addr\n  ? `Hey ${first}, it's Hector. Thanks for reaching out about ${addr}. Before I put a number together I'd like to hear a little about the home from you, so I'll give you a call in a bit. If another time is easier, just text me back and let me know.\\n\\nReply STOP to unsubscribe.`\n  : `Hey ${first}, it's Hector. Thanks for reaching out. I'll give you a call in a bit to hear more about what you're looking for and how I can help.\\n\\nReply STOP to unsubscribe.`;\n\nconst send = Boolean(to) && !quiet;\n\nreturn [{ json: {\n  to, body, send,\n  skipReason: !to ? 'no valid US mobile' : (quiet ? 'quiet hours (8am-9pm CT rule)' : ''),\n  email: lead.email,\n} }];\n"
         },
         "id": "50000000-0000-4000-8000-000000000000",
@@ -464,14 +783,15 @@
               }
             ],
             "combinator": "and"
-          }
+          },
+          "options": {}
         },
         "id": "51111111-1111-4111-8111-111111111111",
         "name": "Textable?",
         "type": "n8n-nodes-base.if",
         "typeVersion": 2.2,
         "position": [
-          1100,
+          1104,
           0
         ]
       },
@@ -487,8 +807,8 @@
         "type": "n8n-nodes-base.twilio",
         "typeVersion": 1,
         "position": [
-          1340,
-          -100
+          1344,
+          -96
         ],
         "credentials": {
           "twilioApi": {
@@ -580,8 +900,8 @@
       }
     },
     "authors": "Hector Meza",
-    "name": null,
-    "description": null
+    "name": "Version d35c76e6",
+    "description": "Add newsletter opt-in. Normalize Lead maps newsletterOptIn to onMailerList (Y or blank), Append To Leads Tab writes it to the On Mailer List column."
   },
   "tags": []
 }
