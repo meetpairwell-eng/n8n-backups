@@ -1,0 +1,194 @@
+{
+  "updatedAt": "2026-08-02T12:44:35.759Z",
+  "createdAt": "2026-08-02T12:44:16.129Z",
+  "id": "Cs3qKEQdCUTpXyjG",
+  "name": "HM - Inbound SMS Handler",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "twilio-inbound",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "n1",
+      "name": "Twilio Inbound",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "twilio-inbound-hm"
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $input.first().json.body || $input.first().json;\\nconst raw = String(b.From || '');\\nconst digits = raw.replace(/\\\\D/g,'').slice(-10);\\nconst body = String(b.Body || '').trim();\\nconst isStop = /^(stop|stopall|unsubscribe|cancel|end|quit)$/i.test(body);\\nconst pretty = digits.length===10 ? `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}` : raw;\\nreturn [{ json: { fromRaw: raw, digits, pretty, body, isStop } }];"
+      },
+      "id": "n2",
+      "name": "Parse Inbound",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "h.mezarealty@gmail.com",
+        "subject": "={{ $json.isStop ? 'OPT-OUT: ' : 'Lead replied by text: ' }}{{ $json.pretty }}",
+        "emailType": "text",
+        "message": "={{ $json.pretty }} texted your business line.\\n\\nMessage:\\n{{ $json.body }}\\n\\n{{ $json.isStop ? 'This was an OPT-OUT. Twilio already blocks further texts to this number automatically.' : 'Reply from your phone, then set Status in the Database > Leads tab so the follow-up sequence stops chasing them.' }}",
+        "options": {}
+      },
+      "id": "n3",
+      "name": "Email Hector",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Twilio Inbound": {
+      "main": [
+        [
+          {
+            "node": "Parse Inbound",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Inbound": {
+      "main": [
+        [
+          {
+            "node": "Email Hector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "2145367a-e89c-494e-825e-7b6844ed8e4f",
+  "activeVersionId": "2145367a-e89c-494e-825e-7b6844ed8e4f",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-08-02T12:44:16.129Z",
+      "createdAt": "2026-08-02T12:44:16.129Z",
+      "role": "workflow:owner",
+      "workflowId": "Cs3qKEQdCUTpXyjG",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-08-02T12:45:04.382Z",
+    "createdAt": "2026-08-02T12:44:16.129Z",
+    "versionId": "2145367a-e89c-494e-825e-7b6844ed8e4f",
+    "workflowId": "Cs3qKEQdCUTpXyjG",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "POST",
+          "path": "twilio-inbound",
+          "responseMode": "onReceived",
+          "options": {}
+        },
+        "id": "n1",
+        "name": "Twilio Inbound",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "twilio-inbound-hm"
+      },
+      {
+        "parameters": {
+          "jsCode": "const b = $input.first().json.body || $input.first().json;\\nconst raw = String(b.From || '');\\nconst digits = raw.replace(/\\\\D/g,'').slice(-10);\\nconst body = String(b.Body || '').trim();\\nconst isStop = /^(stop|stopall|unsubscribe|cancel|end|quit)$/i.test(body);\\nconst pretty = digits.length===10 ? `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}` : raw;\\nreturn [{ json: { fromRaw: raw, digits, pretty, body, isStop } }];"
+        },
+        "id": "n2",
+        "name": "Parse Inbound",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          220,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "sendTo": "h.mezarealty@gmail.com",
+          "subject": "={{ $json.isStop ? 'OPT-OUT: ' : 'Lead replied by text: ' }}{{ $json.pretty }}",
+          "emailType": "text",
+          "message": "={{ $json.pretty }} texted your business line.\\n\\nMessage:\\n{{ $json.body }}\\n\\n{{ $json.isStop ? 'This was an OPT-OUT. Twilio already blocks further texts to this number automatically.' : 'Reply from your phone, then set Status in the Database > Leads tab so the follow-up sequence stops chasing them.' }}",
+          "options": {}
+        },
+        "id": "n3",
+        "name": "Email Hector",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ],
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "bsAbfRmGUOzzryvM",
+            "name": "Gmail account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Twilio Inbound": {
+        "main": [
+          [
+            {
+              "node": "Parse Inbound",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse Inbound": {
+        "main": [
+          [
+            {
+              "node": "Email Hector",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Hector Meza",
+    "name": "Version 2145367a",
+    "description": ""
+  },
+  "tags": []
+}
