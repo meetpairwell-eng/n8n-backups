@@ -1,0 +1,110 @@
+{
+  "updatedAt": "2026-08-02T20:56:48.688Z",
+  "createdAt": "2026-08-02T12:38:58.849Z",
+  "id": "5mv7vqpWcj8ZmS4M",
+  "name": "Meta Lead Poller (WIP - not active)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b19b6f88-57af-45c7-bfb3-891ef920727b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://graph.facebook.com/v21.0/287212181952514?fields=access_token",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "585eaa46-570c-4571-94dc-927c9ee87340",
+      "name": "Get Page Token",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "bcjd3EsQP1ZcszFm",
+          "name": "Meta HM Lead Sync (System User)"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://graph.facebook.com/v21.0/287212181952514/leadgen_forms?fields=id,name,status,leads_count",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{  $json.access_token }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "5f34adf3-1b77-4434-abd1-b68f87e1172a",
+      "name": "HTTP Request"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Page Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Page Token": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "e568bb84-7759-46c8-a72c-288a8398bbca",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-02T12:38:58.849Z",
+      "createdAt": "2026-08-02T12:38:58.849Z",
+      "role": "workflow:owner",
+      "workflowId": "5mv7vqpWcj8ZmS4M",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
