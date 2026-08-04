@@ -1,0 +1,137 @@
+{
+  "updatedAt": "2026-08-03T16:31:44.679Z",
+  "createdAt": "2026-08-03T15:29:51.482Z",
+  "id": "0AA6SQhq3liFkyjA",
+  "name": "ZZ ONE-OFF - Add Leads Columns",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c0",
+      "name": "Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4/values/Leads!A1:BZ1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "c1",
+      "name": "Read Header Row",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst row = ($input.first().json.values || [[]])[0] || [];\nconst headers = row.map(x => String(x||'').trim());\nconst want = ['Day 5 Email Sent','Last Touch'];\nconst missing = want.filter(w => !headers.some(x => x.toLowerCase() === w.toLowerCase()));\nif (!missing.length) return [{ json: { skip:true, note:'both columns already exist', headers } }];\nconst col = n => { let s=''; n=n+1; while(n>0){ const m=(n-1)%26; s=String.fromCharCode(65+m)+s; n=Math.floor((n-1)/26);} return s; };\nconst start = headers.length;                    // first empty column index\nconst range = 'Leads!' + col(start) + '1:' + col(start + missing.length - 1) + '1';\nreturn [{ json: { skip:false, range, values:[missing], existingCount: headers.length,\n                  lastExisting: headers[headers.length-1], adding: missing } }];\n"
+      },
+      "id": "c2",
+      "name": "Find Empty Columns",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4/values/{{ $json.range }}?valueInputOption=RAW",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ values: $json.values }) }}",
+        "options": {}
+      },
+      "id": "c3",
+      "name": "Write Headers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run": {
+      "main": [
+        [
+          {
+            "node": "Read Header Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Header Row": {
+      "main": [
+        [
+          {
+            "node": "Find Empty Columns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Empty Columns": {
+      "main": [
+        [
+          {
+            "node": "Write Headers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "b83fd87a-f4b7-48d2-a3fe-ff6df32cd01d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-03T15:29:51.482Z",
+      "createdAt": "2026-08-03T15:29:51.482Z",
+      "role": "workflow:owner",
+      "workflowId": "0AA6SQhq3liFkyjA",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
