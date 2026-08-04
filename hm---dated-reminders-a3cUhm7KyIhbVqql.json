@@ -1,0 +1,204 @@
+{
+  "updatedAt": "2026-08-03T15:47:14.201Z",
+  "createdAt": "2026-08-03T15:47:14.201Z",
+  "id": "a3cUhm7KyIhbVqql",
+  "name": "HM - Dated Reminders",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9,
+              "triggerAtMinute": 15
+            }
+          ]
+        }
+      },
+      "id": "r1",
+      "name": "Daily 9:15am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// Long-nurture reminders. Add rows here as needed - date is when Hector wants the nudge.\nconst REMINDERS = [\n  { date: '2027-02-01', who: 'Andrew Ikall',\n    phone: '(214) 886-9969', email: 'andrewikall@gmail.com',\n    note: '921 Glen Stone Ln. Came in via Meta ads July 2026. Could not sell for ~1 year because of a 1031 exchange, targeting summer 2027. This is the check-in ahead of that window. Ask how the exchange went and whether the timeline still holds.' }\n];\nconst today = new Date().toISOString().slice(0,10);\nconst due = REMINDERS.filter(r => r.date <= today);\nif (!due.length) return [];\nconst body = due.map(r =>\n  r.who + '\\n' + r.phone + '  ·  ' + r.email + '\\n\\n' + r.note\n).join('\\n\\n' + '-'.repeat(46) + '\\n\\n');\nreturn [{ json: { count: due.length,\n  subject: 'Reminder: reach out to ' + due.map(r=>r.who).join(', '),\n  body: 'This was set months ago. Time to reconnect.\\n\\n' + '='.repeat(46) + '\\n\\n' + body } }];\n"
+      },
+      "id": "r2",
+      "name": "Any Reminders Due",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "h.mezarealty@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "r3",
+      "name": "Email Hector",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daily 9:15am": {
+      "main": [
+        [
+          {
+            "node": "Any Reminders Due",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any Reminders Due": {
+      "main": [
+        [
+          {
+            "node": "Email Hector",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Daily 9:15am": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "1b855de9-7010-41e5-ba83-d1e860461335",
+  "activeVersionId": "1b855de9-7010-41e5-ba83-d1e860461335",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-08-03T15:47:14.201Z",
+      "createdAt": "2026-08-03T15:47:14.201Z",
+      "role": "workflow:owner",
+      "workflowId": "a3cUhm7KyIhbVqql",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-08-03T15:53:01.116Z",
+    "createdAt": "2026-08-03T15:47:14.201Z",
+    "versionId": "1b855de9-7010-41e5-ba83-d1e860461335",
+    "workflowId": "a3cUhm7KyIhbVqql",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 9,
+                "triggerAtMinute": 15
+              }
+            ]
+          }
+        },
+        "id": "r1",
+        "name": "Daily 9:15am",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "\n// Long-nurture reminders. Add rows here as needed - date is when Hector wants the nudge.\nconst REMINDERS = [\n  { date: '2027-02-01', who: 'Andrew Ikall',\n    phone: '(214) 886-9969', email: 'andrewikall@gmail.com',\n    note: '921 Glen Stone Ln. Came in via Meta ads July 2026. Could not sell for ~1 year because of a 1031 exchange, targeting summer 2027. This is the check-in ahead of that window. Ask how the exchange went and whether the timeline still holds.' }\n];\nconst today = new Date().toISOString().slice(0,10);\nconst due = REMINDERS.filter(r => r.date <= today);\nif (!due.length) return [];\nconst body = due.map(r =>\n  r.who + '\\n' + r.phone + '  ·  ' + r.email + '\\n\\n' + r.note\n).join('\\n\\n' + '-'.repeat(46) + '\\n\\n');\nreturn [{ json: { count: due.length,\n  subject: 'Reminder: reach out to ' + due.map(r=>r.who).join(', '),\n  body: 'This was set months ago. Time to reconnect.\\n\\n' + '='.repeat(46) + '\\n\\n' + body } }];\n"
+        },
+        "id": "r2",
+        "name": "Any Reminders Due",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          220,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "sendTo": "h.mezarealty@gmail.com",
+          "subject": "={{ $json.subject }}",
+          "emailType": "text",
+          "message": "={{ $json.body }}",
+          "options": {}
+        },
+        "id": "r3",
+        "name": "Email Hector",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ],
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "bsAbfRmGUOzzryvM",
+            "name": "Gmail account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Daily 9:15am": {
+        "main": [
+          [
+            {
+              "node": "Any Reminders Due",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Any Reminders Due": {
+        "main": [
+          [
+            {
+              "node": "Email Hector",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Hector Meza",
+    "name": "Version 1b855de9",
+    "description": ""
+  },
+  "tags": []
+}
