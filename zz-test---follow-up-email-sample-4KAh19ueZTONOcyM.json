@@ -1,0 +1,125 @@
+{
+  "updatedAt": "2026-08-03T16:32:52.248Z",
+  "createdAt": "2026-08-03T15:02:28.839Z",
+  "id": "4KAh19ueZTONOcyM",
+  "name": "ZZ TEST - Follow-Up Email Sample",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "t0",
+      "name": "When clicking Execute",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst d = n => { const t = new Date(Date.now() - n*86400000); return t.toISOString().slice(0,16).replace('T',' '); };\nreturn [\n { json: { 'Timestamp': d(2),  'First Name':'Karim',  'Last Name':'Mammen', 'Phone':'(503)954-9211',\n           'Searched Address':'8624 Fanellanwood Pl, Dallas, TX 75238', 'Lead Type':'Seller', 'Status':'' } },\n { json: { 'Timestamp': d(12), 'First Name':'Andrew', 'Last Name':'Ikall',  'Phone':'2148869969',\n           'Searched Address':'921 Glen Stone Ln, Dallas, TX 75232', 'Lead Type':'Seller', 'Status':'' } },\n { json: { 'Timestamp': d(6),  'First Name':'Sample', 'Last Name':'Buyer',  'Phone':'(214)555-0142',\n           'Searched Address':'', 'Lead Type':'General', 'Status':'' } },\n { json: { 'Timestamp': d(2),  'First Name':'Already','Last Name':'Handled','Phone':'(214)555-0199',\n           'Searched Address':'123 Test St', 'Lead Type':'Seller', 'Status':'Replied' } }\n];"
+      },
+      "id": "t1",
+      "name": "Fake Leads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst rows = $input.all().map(i => i.json);\nconst now = new Date();\nconst DONE = /^(replied|responded|dead|closed|won|lost|unsubscribed|do not contact|no contact)$/i;\nconst days = d => { const t = new Date(d); return isNaN(t) ? null : Math.floor((now - t) / 86400000); };\nconst pretty = p => { const d = String(p||'').replace(/\\D/g,'').slice(-10);\n  return d.length===10 ? '('+d.slice(0,3)+') '+d.slice(3,6)+'-'+d.slice(6) : String(p||''); };\n\nconst due = [], stale = [];\nfor (const r of rows) {\n  const status = String(r['Status'] || '').trim();\n  if (DONE.test(status)) continue;\n  const age = days(r['Timestamp']);\n  if (age === null || age < 2 || age > 30) continue;\n  const first = String(r['First Name'] || '').trim() || 'there';\n  const addr  = String(r['Searched Address'] || '').trim();\n  const where = addr ? addr.split(',')[0] : '';\n  const phone = pretty(r['Phone']);\n  if (!phone) continue;\n\n  const msg2 = where\n    ? 'Hey ' + first + ', it\\'s Hector again. Still want to connect about ' + where + '. Is morning or evening easier for a quick call? Or if texting is simpler, tell me a little about the place and I can start there.'\n    : 'Hey ' + first + ', it\\'s Hector again. Still want to hear what you\\'re looking for. Is morning or evening better for a quick call? Or just text me what you\\'re after and I\\'ll take it from there.';\n  const msg12 = 'Hey ' + first + ', last one from me. Are you looking to sell this year, or is it more of a someday thing? Either answer is fine, I just want to know whether to keep in touch or leave you alone.';\n\n  const base = { first, last: String(r['Last Name']||'').trim(), phone, addr, age,\n                 type: String(r['Lead Type']||'').trim(), status };\n  if (age === 2)       due.push({ ...base, touch: 'Day 2',  msg: msg2 });\n  else if (age === 12) due.push({ ...base, touch: 'Day 12', msg: msg12 });\n  else if (!status)    stale.push(base);\n}\n\nif (!due.length && !stale.length) return [];\n\nconst line = d => d.first + ' ' + d.last + '  —  ' + d.touch + (d.addr ? '  ·  ' + d.addr : '') +\n  '\\n' + d.phone + '\\n\\nSuggested:\\n\"' + d.msg + '\"\\n' + '-'.repeat(46);\nlet body = '';\nif (due.length) body += 'TEXT TODAY (' + due.length + ')\\n' + '='.repeat(46) + '\\n' + due.map(line).join('\\n') + '\\n\\n';\nif (stale.length) body += 'STILL OPEN, NO STATUS SET (' + stale.length + ')\\n' + '='.repeat(46) + '\\n' +\n  stale.map(d => d.first + ' ' + d.last + '  ·  day ' + d.age + '  ·  ' + d.phone + (d.addr ? '  ·  ' + d.addr : '')).join('\\n') +\n  '\\n\\nSet Status in Database > Leads once you have talked to them and they will drop off this list.\\n';\n\nreturn [{ json: { count: due.length, staleCount: stale.length, body,\n  subject: due.length ? 'Follow up today: ' + due.length + ' lead' + (due.length>1?'s':'') : 'Open leads: nothing due today' } }];\n"
+      },
+      "id": "t2",
+      "name": "Who To Contact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "h.mezarealty@gmail.com",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "t3",
+      "name": "Email The List",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking Execute": {
+      "main": [
+        [
+          {
+            "node": "Fake Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fake Leads": {
+      "main": [
+        [
+          {
+            "node": "Who To Contact",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Who To Contact": {
+      "main": [
+        [
+          {
+            "node": "Email The List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "124e2286-6873-4cc9-8fb3-73a1095b46db",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-03T15:02:28.839Z",
+      "createdAt": "2026-08-03T15:02:28.839Z",
+      "role": "workflow:owner",
+      "workflowId": "4KAh19ueZTONOcyM",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
