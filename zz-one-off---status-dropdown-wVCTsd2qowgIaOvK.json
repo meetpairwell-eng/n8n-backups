@@ -1,0 +1,134 @@
+{
+  "updatedAt": "2026-08-04T20:12:48.450Z",
+  "createdAt": "2026-08-04T20:11:20.933Z",
+  "id": "wVCTsd2qowgIaOvK",
+  "name": "ZZ ONE-OFF - Status Dropdown",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a1",
+      "name": "Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4?fields=sheets.properties",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "a2",
+      "name": "Get Meta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const sheets = $json.sheets || [];\nconst leads = sheets.find(s => s.properties && s.properties.title === 'Leads');\nif (!leads) throw new Error('Leads tab not found');\nconst vals = ['Replied','Called - No Answer','Left Voicemail','Appointment Set','Won','Lost','Dead','Do Not Contact','Unsubscribed','Bounced','Spam Complaint'];\nconst payload = { requests: [ { setDataValidation: { range: { sheetId: leads.properties.sheetId, startRowIndex: 1, endRowIndex: 2000, startColumnIndex: 16, endColumnIndex: 17 }, rule: { condition: { type: 'ONE_OF_LIST', values: vals.map(v => ({ userEnteredValue: v })) }, showCustomUi: true, strict: false } } } ] };\nreturn [{ json: { gid: leads.properties.sheetId, payload: JSON.stringify(payload) } }];"
+      },
+      "id": "a3",
+      "name": "Build Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4?ranges=Leads!Q2:Q3&fields=sheets(data(rowData(values(dataValidation))))",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "a4",
+      "name": "Apply Validation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run": {
+      "main": [
+        [
+          {
+            "node": "Get Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Meta": {
+      "main": [
+        [
+          {
+            "node": "Build Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Payload": {
+      "main": [
+        [
+          {
+            "node": "Apply Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "943f0ff7-a4ce-46e1-be17-15180753a463",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T20:11:20.933Z",
+      "createdAt": "2026-08-04T20:11:20.933Z",
+      "role": "workflow:owner",
+      "workflowId": "wVCTsd2qowgIaOvK",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
