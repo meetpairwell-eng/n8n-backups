@@ -1,0 +1,196 @@
+{
+  "updatedAt": "2026-08-04T18:23:42.274Z",
+  "createdAt": "2026-08-04T18:23:42.274Z",
+  "id": "gmpH2ubZ6Je3vZVk",
+  "name": "HM - Error Alerts (email+text Hector)",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "id": "3ad64a9a-5951-4629-943e-94e873e41b11",
+      "name": "On Any Workflow Error",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "e1cf35c2-9eb6-4b53-b0e5-d8997a5c3a01",
+      "name": "Email Hector (FAILURE)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        300,
+        -100
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      },
+      "parameters": {
+        "sendTo": "h.mezarealty@gmail.com",
+        "subject": "=⚠️ n8n FAILED: {{ $json.workflow.name }}",
+        "message": "=<p><b>Workflow:</b> {{ $json.workflow.name }}</p><p><b>Failed at node:</b> {{ $json.execution.lastNodeExecuted }}</p><p><b>Error:</b> {{ $json.execution.error && $json.execution.error.message }}</p><p><a href=\"{{ $json.execution.url }}\">Open the failed run in n8n</a></p><p>Your leads are still safe in Meta's Leads Center (~90 days). Fix the workflow and they'll flow through.</p>",
+        "options": {
+          "appendAttribution": false
+        }
+      }
+    },
+    {
+      "id": "27d87172-4b18-4666-a91f-751059f830b1",
+      "name": "Text Hector (FAILURE)",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        300,
+        100
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "twilioApi": {
+          "id": "dWisw1s0Uo0aeUz3",
+          "name": "Twilio (Hector) 2026-07"
+        }
+      },
+      "parameters": {
+        "from": "+18557748160",
+        "to": "+12146865641",
+        "message": "=⚠️ n8n FAILED: {{ $json.workflow.name }} at '{{ $json.execution.lastNodeExecuted }}'. {{ $json.execution.error && $json.execution.error.message }}. Leads safe in Meta ~90d, check n8n.",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "On Any Workflow Error": {
+      "main": [
+        [
+          {
+            "node": "Email Hector (FAILURE)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Text Hector (FAILURE)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "a0d4ec34-df60-476d-af8b-08cbfc413f36",
+  "activeVersionId": "a0d4ec34-df60-476d-af8b-08cbfc413f36",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T18:23:42.274Z",
+      "createdAt": "2026-08-04T18:23:42.274Z",
+      "role": "workflow:owner",
+      "workflowId": "gmpH2ubZ6Je3vZVk",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-08-04T18:23:42.287Z",
+    "createdAt": "2026-08-04T18:23:42.287Z",
+    "versionId": "a0d4ec34-df60-476d-af8b-08cbfc413f36",
+    "workflowId": "gmpH2ubZ6Je3vZVk",
+    "nodes": [
+      {
+        "id": "3ad64a9a-5951-4629-943e-94e873e41b11",
+        "name": "On Any Workflow Error",
+        "type": "n8n-nodes-base.errorTrigger",
+        "typeVersion": 1,
+        "position": [
+          0,
+          0
+        ],
+        "parameters": {}
+      },
+      {
+        "id": "e1cf35c2-9eb6-4b53-b0e5-d8997a5c3a01",
+        "name": "Email Hector (FAILURE)",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2,
+        "position": [
+          300,
+          -100
+        ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "bsAbfRmGUOzzryvM",
+            "name": "Gmail account"
+          }
+        },
+        "parameters": {
+          "sendTo": "h.mezarealty@gmail.com",
+          "subject": "=⚠️ n8n FAILED: {{ $json.workflow.name }}",
+          "message": "=<p><b>Workflow:</b> {{ $json.workflow.name }}</p><p><b>Failed at node:</b> {{ $json.execution.lastNodeExecuted }}</p><p><b>Error:</b> {{ $json.execution.error && $json.execution.error.message }}</p><p><a href=\"{{ $json.execution.url }}\">Open the failed run in n8n</a></p><p>Your leads are still safe in Meta's Leads Center (~90 days). Fix the workflow and they'll flow through.</p>",
+          "options": {
+            "appendAttribution": false
+          }
+        }
+      },
+      {
+        "id": "27d87172-4b18-4666-a91f-751059f830b1",
+        "name": "Text Hector (FAILURE)",
+        "type": "n8n-nodes-base.twilio",
+        "typeVersion": 1,
+        "position": [
+          300,
+          100
+        ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "twilioApi": {
+            "id": "dWisw1s0Uo0aeUz3",
+            "name": "Twilio (Hector) 2026-07"
+          }
+        },
+        "parameters": {
+          "from": "+18557748160",
+          "to": "+12146865641",
+          "message": "=⚠️ n8n FAILED: {{ $json.workflow.name }} at '{{ $json.execution.lastNodeExecuted }}'. {{ $json.execution.error && $json.execution.error.message }}. Leads safe in Meta ~90d, check n8n.",
+          "options": {}
+        }
+      }
+    ],
+    "connections": {
+      "On Any Workflow Error": {
+        "main": [
+          [
+            {
+              "node": "Email Hector (FAILURE)",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Text Hector (FAILURE)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Hector Meza",
+    "name": null,
+    "description": null
+  },
+  "tags": []
+}
