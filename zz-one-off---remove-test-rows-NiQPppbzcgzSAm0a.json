@@ -1,0 +1,137 @@
+{
+  "updatedAt": "2026-08-04T20:52:19.893Z",
+  "createdAt": "2026-08-04T20:52:03.481Z",
+  "id": "NiQPppbzcgzSAm0a",
+  "name": "ZZ ONE-OFF - Remove Test Rows",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "c1",
+      "name": "Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4?ranges=Leads!A:C&fields=sheets(properties(sheetId,title),data(rowData(values(formattedValue))))",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "c2",
+      "name": "Read Rows",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const sh = ($json.sheets||[]).find(s => s.properties && s.properties.title === 'Leads');\nif (!sh) throw new Error('Leads tab not found');\nconst gid = sh.properties.sheetId;\nconst rows = ((sh.data||[])[0]||{}).rowData || [];\nconst hits = [];\nrows.forEach(function(r, i){\n  const vals = r.values || [];\n  const firstName = (vals[1] && vals[1].formattedValue) || '';\n  if (i > 0 && String(firstName).indexOf('ZZTEST') === 0) hits.push({row: i, name: firstName});\n});\nif (hits.length === 0) throw new Error('no ZZTEST rows found');\nif (hits.length > 5) throw new Error('refusing: ' + hits.length + ' matches, expected <= 5');\nconst requests = hits.slice().sort(function(a,b){ return b.row - a.row; }).map(function(h){\n  return { deleteDimension: { range: { sheetId: gid, dimension: 'ROWS', startIndex: h.row, endIndex: h.row + 1 } } };\n});\nreturn [{ json: { found: hits, payload: JSON.stringify({ requests: requests }) } }];"
+      },
+      "id": "c3",
+      "name": "Find Test Rows",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.payload }}",
+        "options": {}
+      },
+      "id": "c4",
+      "name": "Delete Them",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run": {
+      "main": [
+        [
+          {
+            "node": "Read Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Rows": {
+      "main": [
+        [
+          {
+            "node": "Find Test Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Test Rows": {
+      "main": [
+        [
+          {
+            "node": "Delete Them",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "4fdb323a-e14c-4483-b121-da288ec55e7a",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T20:52:03.481Z",
+      "createdAt": "2026-08-04T20:52:03.481Z",
+      "role": "workflow:owner",
+      "workflowId": "NiQPppbzcgzSAm0a",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
