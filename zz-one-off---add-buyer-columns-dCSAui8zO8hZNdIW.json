@@ -1,0 +1,137 @@
+{
+  "updatedAt": "2026-08-04T15:11:04.991Z",
+  "createdAt": "2026-08-04T10:52:40.015Z",
+  "id": "dCSAui8zO8hZNdIW",
+  "name": "ZZ ONE-OFF - Add Buyer Columns",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "id": "t1",
+      "name": "Run once",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "t2",
+      "name": "Get Headers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4/values/Leads!1:1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "id": "t3",
+      "name": "Plan Columns",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "language": "javaScript",
+        "jsCode": "const vals = $input.first().json.values || [[]];\nconst headers = (vals[0] || []).map(h => String(h || '').trim());\nconst want = ['Price Range', 'Timeline', 'Financing'];\nconst missing = want.filter(w => !headers.some(h => h.toLowerCase() === w.toLowerCase()));\nif (!missing.length) return [];\nlet n = headers.length;\nwhile (n > 0 && !headers[n-1]) n--;\nconst col = i => { let s = '', x = i; while (x >= 0) { s = String.fromCharCode(65 + (x % 26)) + s; x = Math.floor(x / 26) - 1; } return s; };\nconst start = col(n), end = col(n + missing.length - 1);\nreturn [{ json: { range: start + '1:' + end + '1', headers: missing, existing: n,\n  bodyJson: JSON.stringify({ values: [missing] }) } }];"
+      }
+    },
+    {
+      "id": "t4",
+      "name": "Write Headers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4/values/Leads!{{ $json.range }}?valueInputOption=RAW",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.bodyJson }}",
+        "options": {}
+      },
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run once": {
+      "main": [
+        [
+          {
+            "node": "Get Headers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Headers": {
+      "main": [
+        [
+          {
+            "node": "Plan Columns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan Columns": {
+      "main": [
+        [
+          {
+            "node": "Write Headers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "45f07b43-8379-4ef4-9dc7-ea823785d428",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T10:52:40.015Z",
+      "createdAt": "2026-08-04T10:52:40.015Z",
+      "role": "workflow:owner",
+      "workflowId": "dCSAui8zO8hZNdIW",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
