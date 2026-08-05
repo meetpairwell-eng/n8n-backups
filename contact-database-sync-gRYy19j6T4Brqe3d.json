@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-30T17:43:26.754Z",
+  "updatedAt": "2026-08-04T22:04:21.424Z",
   "createdAt": "2026-07-20T20:17:16.735Z",
   "id": "gRYy19j6T4Brqe3d",
   "name": "Contact Database Sync",
@@ -24,7 +24,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst b = $input.first().json.body || $input.first().json;\nconst clean = v => (v === undefined || v === null) ? '' : String(v).trim();\n\nconst email = clean(b.email).toLowerCase();\n\nlet first = clean(b.firstName), last = clean(b.lastName);\nif (!first) {\n  const parts = clean(b.name).split(/\\s+/).filter(Boolean);\n  first = parts.shift() || '';\n  last = parts.join(' ');\n}\n\nconst rawPhone = clean(b.phone);\nconst d = rawPhone.replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst phone = d.length === 10 ? '(' + d.slice(0,3) + ')' + d.slice(3,6) + '-' + d.slice(6) : rawPhone;\n\nconst formName = clean(b.source);\nconst searched = clean(b.searchedAddress);\nlet leadType = 'General';\nif (/valuation|sell/i.test(formName) || searched) leadType = 'Seller';\nif (/buyer|buy/i.test(formName) || /buyer/i.test(clean(b.formName))) leadType = 'Buyer';\n\nconst utmSource = clean(b.utm_source);\nconst metaLeadId = clean(b.leadgenId || b.leadId);\nlet origin;\nif (metaLeadId) origin = 'Meta Instant Form';\nelse if (utmSource) origin = 'Paid ad: ' + utmSource;\nelse if (clean(b.referrer)) origin = 'Referral: ' + clean(b.referrer);\nelse origin = 'Website (organic/direct)';\n\nreturn [{ json: {\n  timestamp: DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd HH:mm'),\n  first, last, email, phone, leadType, origin,\n  campaign: clean(b.utm_campaign),\n  ad: clean(b.utm_content),\n  searchedAddress: searched,\n  message: clean(b.message),\n  metaLeadId,\n  onMailerList: (b.newsletterOptIn === true || clean(b.newsletterOptIn).toLowerCase() === 'true') ? 'Y' : '',\n  formName\n} }];\n"
+        "jsCode": "\nconst b = $input.first().json.body || $input.first().json;\nconst clean = v => (v === undefined || v === null) ? '' : String(v).trim();\n\nconst email = clean(b.email).toLowerCase();\n\nlet first = clean(b.firstName), last = clean(b.lastName);\nif (!first) {\n  const parts = clean(b.name).split(/\\s+/).filter(Boolean);\n  first = parts.shift() || '';\n  last = parts.join(' ');\n}\n\nconst rawPhone = clean(b.phone);\nconst d = rawPhone.replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst phone = d.length === 10 ? '(' + d.slice(0,3) + ')' + d.slice(3,6) + '-' + d.slice(6) : rawPhone;\n\nconst formName = clean(b.source);\nconst searched = clean(b.searchedAddress);\nlet leadType = 'General';\nif (/valuation|sell/i.test(formName) || searched) leadType = 'Seller';\nif (/buyer|buy/i.test(formName) || /buyer/i.test(clean(b.formName))) leadType = 'Buyer';\n\nconst utmSource = clean(b.utm_source);\nconst metaLeadId = clean(b.leadgenId || b.leadId);\nlet origin;\nif (metaLeadId) origin = 'Meta Instant Form';\nelse if (utmSource) origin = 'Paid ad: ' + utmSource;\nelse if (clean(b.referrer)) origin = 'Referral: ' + clean(b.referrer);\nelse origin = 'Website (organic/direct)';\n\n\nlet sourceLabel;\nif (metaLeadId) {\n  const fn = formName.toLowerCase();\n  sourceLabel = 'Meta lead ad' + (fn.includes('variant a') ? ' (house listing)' : fn.includes('variant b') ? ' (headshot)' : (formName ? ' - ' + formName : ''));\n} else if (/valuation|sell/i.test(formName) || searched) {\n  sourceLabel = 'Home valuation' + (searched ? ' - ' + searched : '');\n} else if (utmSource) {\n  sourceLabel = 'Paid ad: ' + (clean(b.utm_content) || utmSource);\n} else if (clean(b.referrer)) {\n  sourceLabel = 'Referral: ' + clean(b.referrer);\n} else {\n  sourceLabel = 'Website contact';\n}\n\nreturn [{ json: {\n  timestamp: DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd HH:mm'),\n  first, last, email, phone, leadType, origin, sourceLabel,\n  campaign: clean(b.utm_campaign),\n  ad: clean(b.utm_content),\n  searchedAddress: searched,\n  message: clean(b.message),\n  metaLeadId,\n    priceRange: clean(b.priceRange),\n    timeline: clean(b.timeline),\n    financing: clean(b.financing),\n  onMailerList: (b.newsletterOptIn === true || clean(b.newsletterOptIn).toLowerCase() === 'true') ? 'Y' : '',\n  formName\n} }];\n"
       },
       "id": "a2222222-2222-4222-8222-222222222222",
       "name": "Normalize Lead",
@@ -108,7 +108,11 @@
             "Already In Database": "={{ $json.alreadyInDatabase }}",
             "Meta Lead ID": "={{ $json.metaLeadId }}",
             "Notes": "={{ $json.notes }}",
-            "On Mailer List": "={{ $json.onMailerList }}"
+            "On Mailer List": "={{ $json.onMailerList }}",
+            "Price Range": "={{ $json.priceRange }}",
+            "Timeline": "={{ $json.timeline }}",
+            "Financing": "={{ $json.financing }}",
+            "Line Type": "={{ $json.lineType }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -267,6 +271,33 @@
               "type": "string",
               "canBeUsedToMatch": true,
               "removed": false
+            },
+            {
+              "id": "Price Range",
+              "displayName": "Price Range",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timeline",
+              "displayName": "Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Financing",
+              "displayName": "Financing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
             }
           ],
           "attemptToConvertTypes": false,
@@ -291,7 +322,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst lead = $('Check For Duplicate').first().json;\n\n// E.164 the phone; anything that isn't a clean 10-digit US number is skipped\nconst d = String(lead.phone || '').replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst to = d.length === 10 ? '+1' + d : '';\n\n// TCPA: no marketing texts outside 8am-9pm local. Central is Hector's market.\nconst hour = DateTime.now().setZone('America/Chicago').hour;\nconst quiet = hour < 8 || hour >= 21;\n\nconst first = (lead.first || '').trim() || 'there';\nconst addr  = String(lead.searchedAddress || '').split(',')[0].trim();\n\nconst body = addr\n  ? `Hey ${first}, it's Hector. Thanks for reaching out about ${addr}. Before I put a number together I'd like to hear a little about the home from you, so I'll give you a call in a bit. If another time is easier, just text me back and let me know.\\n\\nReply STOP to unsubscribe.`\n  : `Hey ${first}, it's Hector. Thanks for reaching out. I'll give you a call in a bit to hear more about what you're looking for and how I can help.\\n\\nReply STOP to unsubscribe.`;\n\nconst send = Boolean(to) && !quiet;\n\nreturn [{ json: {\n  to, body, send,\n  skipReason: !to ? 'no valid US mobile' : (quiet ? 'quiet hours (8am-9pm CT rule)' : ''),\n  email: lead.email,\n} }];\n"
+        "jsCode": "\nconst lead = $('Check For Duplicate').first().json;\n\n// E.164 the phone; anything that isn't a clean 10-digit US number is skipped\nconst d = String(lead.phone || '').replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst to = d.length === 10 ? '+1' + d : '';\n\n// TCPA: no marketing texts outside 8am-9pm local. Central is Hector's market.\nconst hour = DateTime.now().setZone('America/Chicago').hour;\nconst quiet = hour < 8 || hour >= 21;\n\nconst first = (lead.first || '').trim() || 'there';\nconst addr  = String(lead.searchedAddress || '').split(',')[0].trim();\n\nconst body = addr\n  ? `Hey ${first}, it's Hector. Thanks for reaching out about ${addr}. Before I put a number together I'd like to hear a little about the home from you, so I'll give you a call in a bit. If another time is easier, just text me back and let me know.\\n\\nReply STOP to unsubscribe.`\n  : `Hey ${first}, it's Hector. Thanks for reaching out. I'll give you a call in a bit to hear more about what you're looking for and how I can help.\\n\\nReply STOP to unsubscribe.`;\n\nconst metaBody = \"Hey \" + first + \", it's Hector. Saw you filled out my form about homes here in Dallas. I'll give you a call in a bit to hear more about what you're looking for and how I can help.\\n\\nReply STOP to unsubscribe.\";\nconst isMeta = String(lead.origin || \"\").indexOf(\"Meta Instant Form\") === 0;\nconst finalBody = isMeta ? metaBody : body;\n\nconst quietBody = `Hey ${first}, it's Hector. Thanks for reaching out, I got your info. Won't bug you this late, but I'll give you a call in the morning. Talk soon.\\n\\nReply STOP to unsubscribe.`;\n\nconst send = Boolean(to);\n\nreturn [{ json: {\n  to, body: quiet ? quietBody : finalBody, send,\n  skipReason: !to ? 'no valid US mobile' : '',\n  email: lead.email,\n} }];\n"
       },
       "id": "50000000-0000-4000-8000-000000000000",
       "name": "Compose Text",
@@ -357,6 +388,296 @@
         }
       },
       "onError": "continueRegularOutput"
+    },
+    {
+      "id": "101a4fdc-1018-4e4b-b538-dbf002e886e8",
+      "name": "Meta Lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        220
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b38ef97e-53ce-4e61-a65f-7d8ecc2a0ca8",
+              "leftValue": "={{ $json.origin }}",
+              "rightValue": "Meta",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "7cf8aa3c-bce4-4e98-908c-871bbc73d32a",
+      "name": "Email Hector (New Lead)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        820,
+        140
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      },
+      "parameters": {
+        "sendTo": "h.mezarealty@gmail.com",
+        "subject": "=New Buyer Lead — {{ $json.first }} {{ $json.last }}",
+        "message": "=<p>New buyer lead from your Meta ad:</p><ul><li><b>Name:</b> {{ $json.first }} {{ $json.last }}</li><li><b>Email:</b> {{ $json.email }}</li><li><b>Phone:</b> {{ $json.phone }}</li><li><b>Price range:</b> {{ $json.priceRange || '—' }}</li><li><b>Timeline:</b> {{ $json.timeline || '—' }}</li><li><b>Financing:</b> {{ $json.financing || '—' }}</li><li><b>Source:</b> {{ $json.sourceLabel }}</li></ul><p>Already saved to your Leads tab. The buyer gets an auto-text if their number is valid.</p>",
+        "options": {
+          "appendAttribution": false
+        }
+      }
+    },
+    {
+      "id": "b8ea4f0b-7789-48ee-8bf8-9cf440d1951e",
+      "name": "Text Hector (New Lead)",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        820,
+        320
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "twilioApi": {
+          "id": "dWisw1s0Uo0aeUz3",
+          "name": "Twilio (Hector) 2026-07"
+        }
+      },
+      "parameters": {
+        "from": "+18557748160",
+        "to": "+12146865641",
+        "message": "=🎯 New lead\nName: {{ $json.first }} {{ $json.last }}\nPhone: {{ $json.phone }}\nEmail: {{ $json.email }}\nType: {{ $json.leadType }}\nSource: {{ $json.sourceLabel }}{{ $json.priceRange ? '\\nPrice: ' + $json.priceRange : '' }}{{ $json.timeline ? '\\nTimeline: ' + $json.timeline : '' }}{{ $json.financing ? '\\nFinancing: ' + $json.financing : '' }}",
+        "options": {}
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const lead = $('Check For Duplicate').first().json;\nlet wb = {};\ntry { wb = $('Webhook').first().json.body || {}; } catch (e) { wb = {}; }\n\nconst origin = String(lead.origin || '');\nconst lookingTo = String(wb.lookingTo || '').trim().toLowerCase();\nconst isMeta = origin.indexOf('Meta Instant Form') === 0;\nconst isBuyer = isMeta || lookingTo === 'buy';\n\nconst email = String(lead.email || '').trim();\nconst first = String(lead.first || '').trim() || 'there';\nconst validEmail = /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email);\nconst sendEmail = isBuyer && validEmail;\n\nconst subject = 'Got your message';\n\nconst paras = [\n  'Hey ' + first + ',',\n  'Thanks for reaching out, good to hear from you.',\n  \"I'll give you a call shortly so I can hear what you're after. Once I know your area, your budget and your timing, I can start sending you places that actually fit instead of everything on the market.\",\n  'If you have any questions before then, call or text me directly at (214) 686-5641.',\n  'Talk soon.'\n];\n\nconst CPN = 'https://www.trec.texas.gov/sites/default/files/pdf-forms/CN%201-5_0.pdf';\nconst IABS = 'https://hectormeza.com/hector-meza-iabs.pdf';\n\nconst html = '<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#222;max-width:520px\">'\n  + paras.map(function(p){ return '<p style=\"margin:0 0 16px\">' + p + '</p>'; }).join('')\n  + '<div style=\"margin:24px 0 0;padding-top:16px;border-top:1px solid #ddd;font-size:14px;line-height:1.5\">'\n  + '<div style=\"font-weight:600\">Hector Meza</div>'\n  + '<div>Briggs Freeman Sotheby&rsquo;s International Realty</div>'\n  + '<div>(214) 686-5641</div>'\n  + '<div><a href=\"https://hectormeza.com\" style=\"color:#002349\">hectormeza.com</a></div>'\n  + '</div>'\n  + '<div style=\"margin-top:16px;font-size:11px;line-height:1.5;color:#888\">'\n  + '<a href=\"' + CPN + '\" style=\"color:#888\">Consumer Protection Notice</a>'\n  + ' &middot; '\n  + '<a href=\"' + IABS + '\" style=\"color:#888\">Information About Brokerage Services</a>'\n  + '</div></div>';\n\nconst headers = [\n  'From: Hector Meza <h.mezarealty@gmail.com>',\n  'Reply-To: hmeza@briggsfreeman.com',\n  'To: ' + email,\n  'Subject: ' + subject,\n  'MIME-Version: 1.0',\n  'Content-Type: text/html; charset=\"UTF-8\"'\n].join('\\r\\n');\n\nconst mime = headers + '\\r\\n\\r\\n' + html;\nconst raw = Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');\n\nreturn [{ json: { sendEmail: sendEmail, raw: raw, to: email, subject: subject, why: isMeta ? 'meta buyer form' : (lookingTo === 'buy' ? 'website contact form, buyer' : 'not a buyer') } }];"
+      },
+      "id": "be1",
+      "name": "Compose Buyer Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "be-if-1",
+              "leftValue": "={{ $json.sendEmail }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "be2",
+      "name": "Email It?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "gmailOAuth2",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "raw",
+              "value": "={{ $json.raw }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "be3",
+      "name": "Send Lead Email",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1560,
+        560
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://lookups.twilio.com/v2/PhoneNumbers/+1' + String($json.phone||'').replace(/\\D/g,'').slice(-10) + '?Fields=line_type_intelligence' }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "options": {}
+      },
+      "id": "llt",
+      "name": "Lookup Line Type",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        820,
+        -180
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "JnW2cNuAcotPSVwr",
+          "name": "Twilio REST (basic)"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const lead = $('Check For Duplicate').first().json;\nlet type = '', carrier = '';\ntry {\n  const lt = $json && $json.line_type_intelligence;\n  if (lt && lt.type) { type = String(lt.type); carrier = String(lt.carrier_name || ''); }\n} catch (e) { type = ''; }\n\n// Meta Instant Form answers arrive slugged (3_to_6_months). Make them readable.\nfunction pretty(val) {\n  let s = String(val == null ? '' : val).trim();\n  if (!s) return '';\n  if (s.indexOf('<test lead') === 0) return s;\n  s = s.replace(/_/g, ' ').replace(/\\s+/g, ' ').trim();\n  s = s.replace(/\\$(\\d+(?:\\.\\d+)?)\\s*([km])\\b/gi, function(m, n, u){ return '$' + n + u.toUpperCase(); });\n  return s.charAt(0).toUpperCase() + s.slice(1);\n}\n\nconst out = Object.assign({}, lead, {\n  lineType: type,\n  lineCarrier: carrier,\n  priceRange: pretty(lead.priceRange),\n  timeline: pretty(lead.timeline),\n  financing: pretty(lead.financing)\n});\nreturn [{ json: out }];"
+      },
+      "id": "mlt",
+      "name": "Merge Line Type",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1000,
+        -180
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "hb1",
+              "leftValue": "={{ String($('Check For Duplicate').first().json.origin || '').indexOf('Meta Instant Form') === 0 || String(($('Webhook').first().json.body || {}).lookingTo || '').toLowerCase() === 'buy' }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "hbif",
+      "name": "Buyer?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1120,
+        760
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const b = $('Webhook').first().json.body;\nconst firstName = (b.name || '').split(' ')[0];\nconst hr = DateTime.now().setZone('America/Chicago').hour;\nconst isLate = hr >= 20 || hr < 8;\nconst callPhrase = isLate ? 'give you a call first thing tomorrow morning' : 'give you a call shortly';\nconst isVal = b.source === 'Valuation Request';\nconst subject = isVal ? 'Got your home value request' : 'Got your message';\nconst para1 = isVal\n  ? `Thank you for requesting a home value on <strong>${b.searchedAddress}</strong>. I'll personally look at what's actually selling in your neighborhood and ${callPhrase} to go over a few quick details, so I can get you a real number instead of an automated guess.`\n  : `Thank you for reaching out. I'll ${callPhrase} to learn a bit more about what you're looking for and how I can help.`;\n\nconst html = `<div style=\"margin:0;padding:0;background:#eef0f3;\">\n<div style=\"max-width:600px;margin:0 auto;padding:32px 16px;font-family:Helvetica,Arial,sans-serif;\">\n<div style=\"background:#ffffff;border:1px solid #e4e7ec;border-radius:4px;overflow:hidden;\">\n<div style=\"padding:38px 42px 40px;\">\n<div style=\"text-align:center;padding-bottom:20px;\">\n<img src=\"https://hectormeza.com/hector-headshot.jpg\" alt=\"Hector Meza\" width=\"78\" height=\"78\" style=\"width:78px;height:78px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 16px;border:2px solid #002349;\" />\n<div style=\"font-family:Georgia,'Times New Roman',serif;color:#002349;font-size:25px;font-weight:700;letter-spacing:0.4px;\">Hector Meza</div>\n<div style=\"font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7a8290;font-weight:600;line-height:1.5;padding-top:8px;\">Briggs Freeman Sotheby's<br>International Realty</div>\n<div style=\"height:2px;width:44px;background:#002349;margin:20px auto 4px;font-size:0;line-height:0;\">&nbsp;</div>\n</div>\n<p style=\"color:#1c2430;font-size:15.5px;line-height:1.66;margin:0 0 19px 0;\">Hey ${firstName},</p>\n<p style=\"color:#1c2430;font-size:15.5px;line-height:1.66;margin:0 0 17px 0;\">${para1}</p>\n<p style=\"color:#1c2430;font-size:15.5px;line-height:1.66;margin:0 0 17px 0;\">If you have any questions in the meantime, feel free to call or text me directly at (214) 686-5641.</p>\n<p style=\"color:#1c2430;font-size:15.5px;line-height:1.66;margin:0 0 17px 0;\">I look forward to speaking with you.</p>\n<div style=\"margin-top:26px;\">\n<p style=\"color:#1c2430;font-size:14.5px;margin:0 0 9px 0;\">Warm regards,</p>\n<p style=\"font-family:Georgia,'Times New Roman',serif;color:#002349;font-weight:700;font-size:16px;margin:0 0 2px 0;\">Hector Meza</p>\n<p style=\"color:#7a8290;font-size:11.5px;letter-spacing:1px;text-transform:uppercase;margin:2px 0 0 0;\">Briggs Freeman Sotheby's International Realty</p>\n<p style=\"color:#7a8290;font-size:13.5px;margin:7px 0 0 0;\">(214) 686-5641<br>hmeza@briggsfreeman.com</p>\n</div>\n</div>\n</div>\n</div>\n</div>`;\n\nconst headers = [\n  'From: Hector Meza <h.mezarealty@gmail.com>',\n  'Reply-To: hmeza@briggsfreeman.com',\n  'To: ' + b.email,\n  'Subject: ' + subject,\n  'MIME-Version: 1.0',\n  'Content-Type: text/html; charset=\"UTF-8\"'\n].join('\\r\\n');\n\nconst mime = headers + '\\r\\n\\r\\n' + html;\nconst raw = Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\nreturn [{ json: { raw } }];\n"
+      },
+      "id": "cse",
+      "name": "Compose Seller Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1340,
+        900
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "addr1",
+              "leftValue": "={{ String($('Check For Duplicate').first().json.searchedAddress || '').trim().length > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "hasaddr",
+      "name": "Gave An Address?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1340,
+        1060
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const lead = $('Check For Duplicate').first().json;\nconst email = String(lead.email || '').trim();\nconst first = String(lead.first || '').trim() || 'there';\n\nconst subject = 'Got your message';\nconst paras = [\n  'Hey ' + first + ',',\n  'Thanks for reaching out, good to hear from you.',\n  \"I'll give you a call shortly to hear more about what you're looking for and how I can help.\",\n  'If you have any questions before then, call or text me directly at (214) 686-5641.',\n  'Talk soon.'\n];\n\nconst CPN = 'https://www.trec.texas.gov/sites/default/files/pdf-forms/CN%201-5_0.pdf';\nconst IABS = 'https://hectormeza.com/hector-meza-iabs.pdf';\n\nconst html = '<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#222;max-width:520px\">'\n  + paras.map(function(p){ return '<p style=\"margin:0 0 16px\">' + p + '</p>'; }).join('')\n  + '<div style=\"margin:24px 0 0;padding-top:16px;border-top:1px solid #ddd;font-size:14px;line-height:1.5\">'\n  + '<div style=\"font-weight:600\">Hector Meza</div>'\n  + '<div>Briggs Freeman Sotheby&rsquo;s International Realty</div>'\n  + '<div>(214) 686-5641</div>'\n  + '<div><a href=\"https://hectormeza.com\" style=\"color:#002349\">hectormeza.com</a></div>'\n  + '</div>'\n  + '<div style=\"margin-top:16px;font-size:11px;line-height:1.5;color:#888\">'\n  + '<a href=\"' + CPN + '\" style=\"color:#888\">Consumer Protection Notice</a>'\n  + ' &middot; '\n  + '<a href=\"' + IABS + '\" style=\"color:#888\">Information About Brokerage Services</a>'\n  + '</div></div>';\n\nconst headers = [\n  'From: Hector Meza <h.mezarealty@gmail.com>',\n  'Reply-To: hmeza@briggsfreeman.com',\n  'To: ' + email,\n  'Subject: ' + subject,\n  'MIME-Version: 1.0',\n  'Content-Type: text/html; charset=\"UTF-8\"'\n].join('\\r\\n');\nconst mime = headers + '\\r\\n\\r\\n' + html;\nconst raw = Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');\nreturn [{ json: { raw: raw, to: email, subject: subject, variant: 'neutral' } }];"
+      },
+      "id": "cne",
+      "name": "Compose Neutral Email",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1560,
+        1160
+      ]
     }
   ],
   "connections": {
@@ -397,7 +718,17 @@
       "main": [
         [
           {
-            "node": "Append To Leads Tab",
+            "node": "Lookup Line Type",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Meta Lead?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Text Hector (New Lead)",
             "type": "main",
             "index": 0
           }
@@ -409,6 +740,11 @@
         [
           {
             "node": "Compose Text",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buyer?",
             "type": "main",
             "index": 0
           }
@@ -437,6 +773,120 @@
         ],
         []
       ]
+    },
+    "Meta Lead?": {
+      "main": [
+        [
+          {
+            "node": "Email Hector (New Lead)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose Buyer Email": {
+      "main": [
+        [
+          {
+            "node": "Email It?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email It?": {
+      "main": [
+        [
+          {
+            "node": "Send Lead Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Lookup Line Type": {
+      "main": [
+        [
+          {
+            "node": "Merge Line Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Line Type": {
+      "main": [
+        [
+          {
+            "node": "Append To Leads Tab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buyer?": {
+      "main": [
+        [
+          {
+            "node": "Compose Buyer Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Gave An Address?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose Seller Email": {
+      "main": [
+        [
+          {
+            "node": "Send Lead Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gave An Address?": {
+      "main": [
+        [
+          {
+            "node": "Compose Seller Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compose Neutral Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose Neutral Email": {
+      "main": [
+        [
+          {
+            "node": "Send Lead Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -448,8 +898,8 @@
   "staticData": null,
   "meta": null,
   "pinData": {},
-  "versionId": "d35c76e6-a2f0-48ab-bb1d-a4a1ccc6de3d",
-  "activeVersionId": "d35c76e6-a2f0-48ab-bb1d-a4a1ccc6de3d",
+  "versionId": "976d9979-1d73-4b71-a25e-d55b263a9347",
+  "activeVersionId": "976d9979-1d73-4b71-a25e-d55b263a9347",
   "triggerCount": 1,
   "shared": [
     {
@@ -461,9 +911,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-30T17:44:17.353Z",
-    "createdAt": "2026-07-30T17:43:26.758Z",
-    "versionId": "d35c76e6-a2f0-48ab-bb1d-a4a1ccc6de3d",
+    "updatedAt": "2026-08-04T22:06:16.591Z",
+    "createdAt": "2026-08-04T22:04:21.441Z",
+    "versionId": "976d9979-1d73-4b71-a25e-d55b263a9347",
     "workflowId": "gRYy19j6T4Brqe3d",
     "nodes": [
       {
@@ -484,7 +934,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst b = $input.first().json.body || $input.first().json;\nconst clean = v => (v === undefined || v === null) ? '' : String(v).trim();\n\nconst email = clean(b.email).toLowerCase();\n\nlet first = clean(b.firstName), last = clean(b.lastName);\nif (!first) {\n  const parts = clean(b.name).split(/\\s+/).filter(Boolean);\n  first = parts.shift() || '';\n  last = parts.join(' ');\n}\n\nconst rawPhone = clean(b.phone);\nconst d = rawPhone.replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst phone = d.length === 10 ? '(' + d.slice(0,3) + ')' + d.slice(3,6) + '-' + d.slice(6) : rawPhone;\n\nconst formName = clean(b.source);\nconst searched = clean(b.searchedAddress);\nlet leadType = 'General';\nif (/valuation|sell/i.test(formName) || searched) leadType = 'Seller';\nif (/buyer|buy/i.test(formName) || /buyer/i.test(clean(b.formName))) leadType = 'Buyer';\n\nconst utmSource = clean(b.utm_source);\nconst metaLeadId = clean(b.leadgenId || b.leadId);\nlet origin;\nif (metaLeadId) origin = 'Meta Instant Form';\nelse if (utmSource) origin = 'Paid ad: ' + utmSource;\nelse if (clean(b.referrer)) origin = 'Referral: ' + clean(b.referrer);\nelse origin = 'Website (organic/direct)';\n\nreturn [{ json: {\n  timestamp: DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd HH:mm'),\n  first, last, email, phone, leadType, origin,\n  campaign: clean(b.utm_campaign),\n  ad: clean(b.utm_content),\n  searchedAddress: searched,\n  message: clean(b.message),\n  metaLeadId,\n  onMailerList: (b.newsletterOptIn === true || clean(b.newsletterOptIn).toLowerCase() === 'true') ? 'Y' : '',\n  formName\n} }];\n"
+          "jsCode": "\nconst b = $input.first().json.body || $input.first().json;\nconst clean = v => (v === undefined || v === null) ? '' : String(v).trim();\n\nconst email = clean(b.email).toLowerCase();\n\nlet first = clean(b.firstName), last = clean(b.lastName);\nif (!first) {\n  const parts = clean(b.name).split(/\\s+/).filter(Boolean);\n  first = parts.shift() || '';\n  last = parts.join(' ');\n}\n\nconst rawPhone = clean(b.phone);\nconst d = rawPhone.replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst phone = d.length === 10 ? '(' + d.slice(0,3) + ')' + d.slice(3,6) + '-' + d.slice(6) : rawPhone;\n\nconst formName = clean(b.source);\nconst searched = clean(b.searchedAddress);\nlet leadType = 'General';\nif (/valuation|sell/i.test(formName) || searched) leadType = 'Seller';\nif (/buyer|buy/i.test(formName) || /buyer/i.test(clean(b.formName))) leadType = 'Buyer';\n\nconst utmSource = clean(b.utm_source);\nconst metaLeadId = clean(b.leadgenId || b.leadId);\nlet origin;\nif (metaLeadId) origin = 'Meta Instant Form';\nelse if (utmSource) origin = 'Paid ad: ' + utmSource;\nelse if (clean(b.referrer)) origin = 'Referral: ' + clean(b.referrer);\nelse origin = 'Website (organic/direct)';\n\n\nlet sourceLabel;\nif (metaLeadId) {\n  const fn = formName.toLowerCase();\n  sourceLabel = 'Meta lead ad' + (fn.includes('variant a') ? ' (house listing)' : fn.includes('variant b') ? ' (headshot)' : (formName ? ' - ' + formName : ''));\n} else if (/valuation|sell/i.test(formName) || searched) {\n  sourceLabel = 'Home valuation' + (searched ? ' - ' + searched : '');\n} else if (utmSource) {\n  sourceLabel = 'Paid ad: ' + (clean(b.utm_content) || utmSource);\n} else if (clean(b.referrer)) {\n  sourceLabel = 'Referral: ' + clean(b.referrer);\n} else {\n  sourceLabel = 'Website contact';\n}\n\nreturn [{ json: {\n  timestamp: DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd HH:mm'),\n  first, last, email, phone, leadType, origin, sourceLabel,\n  campaign: clean(b.utm_campaign),\n  ad: clean(b.utm_content),\n  searchedAddress: searched,\n  message: clean(b.message),\n  metaLeadId,\n    priceRange: clean(b.priceRange),\n    timeline: clean(b.timeline),\n    financing: clean(b.financing),\n  onMailerList: (b.newsletterOptIn === true || clean(b.newsletterOptIn).toLowerCase() === 'true') ? 'Y' : '',\n  formName\n} }];\n"
         },
         "id": "a2222222-2222-4222-8222-222222222222",
         "name": "Normalize Lead",
@@ -568,7 +1018,11 @@
               "Already In Database": "={{ $json.alreadyInDatabase }}",
               "Meta Lead ID": "={{ $json.metaLeadId }}",
               "Notes": "={{ $json.notes }}",
-              "On Mailer List": "={{ $json.onMailerList }}"
+              "On Mailer List": "={{ $json.onMailerList }}",
+              "Price Range": "={{ $json.priceRange }}",
+              "Timeline": "={{ $json.timeline }}",
+              "Financing": "={{ $json.financing }}",
+              "Line Type": "={{ $json.lineType }}"
             },
             "matchingColumns": [],
             "schema": [
@@ -727,6 +1181,33 @@
                 "type": "string",
                 "canBeUsedToMatch": true,
                 "removed": false
+              },
+              {
+                "id": "Price Range",
+                "displayName": "Price Range",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Timeline",
+                "displayName": "Timeline",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
+              },
+              {
+                "id": "Financing",
+                "displayName": "Financing",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true
               }
             ],
             "attemptToConvertTypes": false,
@@ -751,7 +1232,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst lead = $('Check For Duplicate').first().json;\n\n// E.164 the phone; anything that isn't a clean 10-digit US number is skipped\nconst d = String(lead.phone || '').replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst to = d.length === 10 ? '+1' + d : '';\n\n// TCPA: no marketing texts outside 8am-9pm local. Central is Hector's market.\nconst hour = DateTime.now().setZone('America/Chicago').hour;\nconst quiet = hour < 8 || hour >= 21;\n\nconst first = (lead.first || '').trim() || 'there';\nconst addr  = String(lead.searchedAddress || '').split(',')[0].trim();\n\nconst body = addr\n  ? `Hey ${first}, it's Hector. Thanks for reaching out about ${addr}. Before I put a number together I'd like to hear a little about the home from you, so I'll give you a call in a bit. If another time is easier, just text me back and let me know.\\n\\nReply STOP to unsubscribe.`\n  : `Hey ${first}, it's Hector. Thanks for reaching out. I'll give you a call in a bit to hear more about what you're looking for and how I can help.\\n\\nReply STOP to unsubscribe.`;\n\nconst send = Boolean(to) && !quiet;\n\nreturn [{ json: {\n  to, body, send,\n  skipReason: !to ? 'no valid US mobile' : (quiet ? 'quiet hours (8am-9pm CT rule)' : ''),\n  email: lead.email,\n} }];\n"
+          "jsCode": "\nconst lead = $('Check For Duplicate').first().json;\n\n// E.164 the phone; anything that isn't a clean 10-digit US number is skipped\nconst d = String(lead.phone || '').replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst to = d.length === 10 ? '+1' + d : '';\n\n// TCPA: no marketing texts outside 8am-9pm local. Central is Hector's market.\nconst hour = DateTime.now().setZone('America/Chicago').hour;\nconst quiet = hour < 8 || hour >= 21;\n\nconst first = (lead.first || '').trim() || 'there';\nconst addr  = String(lead.searchedAddress || '').split(',')[0].trim();\n\nconst body = addr\n  ? `Hey ${first}, it's Hector. Thanks for reaching out about ${addr}. Before I put a number together I'd like to hear a little about the home from you, so I'll give you a call in a bit. If another time is easier, just text me back and let me know.\\n\\nReply STOP to unsubscribe.`\n  : `Hey ${first}, it's Hector. Thanks for reaching out. I'll give you a call in a bit to hear more about what you're looking for and how I can help.\\n\\nReply STOP to unsubscribe.`;\n\nconst metaBody = \"Hey \" + first + \", it's Hector. Saw you filled out my form about homes here in Dallas. I'll give you a call in a bit to hear more about what you're looking for and how I can help.\\n\\nReply STOP to unsubscribe.\";\nconst isMeta = String(lead.origin || \"\").indexOf(\"Meta Instant Form\") === 0;\nconst finalBody = isMeta ? metaBody : body;\n\nconst quietBody = `Hey ${first}, it's Hector. Thanks for reaching out, I got your info. Won't bug you this late, but I'll give you a call in the morning. Talk soon.\\n\\nReply STOP to unsubscribe.`;\n\nconst send = Boolean(to);\n\nreturn [{ json: {\n  to, body: quiet ? quietBody : finalBody, send,\n  skipReason: !to ? 'no valid US mobile' : '',\n  email: lead.email,\n} }];\n"
         },
         "id": "50000000-0000-4000-8000-000000000000",
         "name": "Compose Text",
@@ -817,6 +1298,296 @@
           }
         },
         "onError": "continueRegularOutput"
+      },
+      {
+        "id": "101a4fdc-1018-4e4b-b538-dbf002e886e8",
+        "name": "Meta Lead?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          560,
+          220
+        ],
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false,
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "b38ef97e-53ce-4e61-a65f-7d8ecc2a0ca8",
+                "leftValue": "={{ $json.origin }}",
+                "rightValue": "Meta",
+                "operator": {
+                  "type": "string",
+                  "operation": "contains"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        }
+      },
+      {
+        "id": "7cf8aa3c-bce4-4e98-908c-871bbc73d32a",
+        "name": "Email Hector (New Lead)",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2,
+        "position": [
+          820,
+          140
+        ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "bsAbfRmGUOzzryvM",
+            "name": "Gmail account"
+          }
+        },
+        "parameters": {
+          "sendTo": "h.mezarealty@gmail.com",
+          "subject": "=New Buyer Lead — {{ $json.first }} {{ $json.last }}",
+          "message": "=<p>New buyer lead from your Meta ad:</p><ul><li><b>Name:</b> {{ $json.first }} {{ $json.last }}</li><li><b>Email:</b> {{ $json.email }}</li><li><b>Phone:</b> {{ $json.phone }}</li><li><b>Price range:</b> {{ $json.priceRange || '—' }}</li><li><b>Timeline:</b> {{ $json.timeline || '—' }}</li><li><b>Financing:</b> {{ $json.financing || '—' }}</li><li><b>Source:</b> {{ $json.sourceLabel }}</li></ul><p>Already saved to your Leads tab. The buyer gets an auto-text if their number is valid.</p>",
+          "options": {
+            "appendAttribution": false
+          }
+        }
+      },
+      {
+        "id": "b8ea4f0b-7789-48ee-8bf8-9cf440d1951e",
+        "name": "Text Hector (New Lead)",
+        "type": "n8n-nodes-base.twilio",
+        "typeVersion": 1,
+        "position": [
+          820,
+          320
+        ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "twilioApi": {
+            "id": "dWisw1s0Uo0aeUz3",
+            "name": "Twilio (Hector) 2026-07"
+          }
+        },
+        "parameters": {
+          "from": "+18557748160",
+          "to": "+12146865641",
+          "message": "=🎯 New lead\nName: {{ $json.first }} {{ $json.last }}\nPhone: {{ $json.phone }}\nEmail: {{ $json.email }}\nType: {{ $json.leadType }}\nSource: {{ $json.sourceLabel }}{{ $json.priceRange ? '\\nPrice: ' + $json.priceRange : '' }}{{ $json.timeline ? '\\nTimeline: ' + $json.timeline : '' }}{{ $json.financing ? '\\nFinancing: ' + $json.financing : '' }}",
+          "options": {}
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "const lead = $('Check For Duplicate').first().json;\nlet wb = {};\ntry { wb = $('Webhook').first().json.body || {}; } catch (e) { wb = {}; }\n\nconst origin = String(lead.origin || '');\nconst lookingTo = String(wb.lookingTo || '').trim().toLowerCase();\nconst isMeta = origin.indexOf('Meta Instant Form') === 0;\nconst isBuyer = isMeta || lookingTo === 'buy';\n\nconst email = String(lead.email || '').trim();\nconst first = String(lead.first || '').trim() || 'there';\nconst validEmail = /^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$/.test(email);\nconst sendEmail = isBuyer && validEmail;\n\nconst subject = 'Got your message';\n\nconst paras = [\n  'Hey ' + first + ',',\n  'Thanks for reaching out, good to hear from you.',\n  \"I'll give you a call shortly so I can hear what you're after. Once I know your area, your budget and your timing, I can start sending you places that actually fit instead of everything on the market.\",\n  'If you have any questions before then, call or text me directly at (214) 686-5641.',\n  'Talk soon.'\n];\n\nconst CPN = 'https://www.trec.texas.gov/sites/default/files/pdf-forms/CN%201-5_0.pdf';\nconst IABS = 'https://hectormeza.com/hector-meza-iabs.pdf';\n\nconst html = '<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#222;max-width:520px\">'\n  + paras.map(function(p){ return '<p style=\"margin:0 0 16px\">' + p + '</p>'; }).join('')\n  + '<div style=\"margin:24px 0 0;padding-top:16px;border-top:1px solid #ddd;font-size:14px;line-height:1.5\">'\n  + '<div style=\"font-weight:600\">Hector Meza</div>'\n  + '<div>Briggs Freeman Sotheby&rsquo;s International Realty</div>'\n  + '<div>(214) 686-5641</div>'\n  + '<div><a href=\"https://hectormeza.com\" style=\"color:#002349\">hectormeza.com</a></div>'\n  + '</div>'\n  + '<div style=\"margin-top:16px;font-size:11px;line-height:1.5;color:#888\">'\n  + '<a href=\"' + CPN + '\" style=\"color:#888\">Consumer Protection Notice</a>'\n  + ' &middot; '\n  + '<a href=\"' + IABS + '\" style=\"color:#888\">Information About Brokerage Services</a>'\n  + '</div></div>';\n\nconst headers = [\n  'From: Hector Meza <h.mezarealty@gmail.com>',\n  'Reply-To: hmeza@briggsfreeman.com',\n  'To: ' + email,\n  'Subject: ' + subject,\n  'MIME-Version: 1.0',\n  'Content-Type: text/html; charset=\"UTF-8\"'\n].join('\\r\\n');\n\nconst mime = headers + '\\r\\n\\r\\n' + html;\nconst raw = Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');\n\nreturn [{ json: { sendEmail: sendEmail, raw: raw, to: email, subject: subject, why: isMeta ? 'meta buyer form' : (lookingTo === 'buy' ? 'website contact form, buyer' : 'not a buyer') } }];"
+        },
+        "id": "be1",
+        "name": "Compose Buyer Email",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1120,
+          560
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "strict",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "be-if-1",
+                "leftValue": "={{ $json.sendEmail }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "be2",
+        "name": "Email It?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1340,
+          560
+        ]
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://gmail.googleapis.com/gmail/v1/users/me/messages/send",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "gmailOAuth2",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "raw",
+                "value": "={{ $json.raw }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "id": "be3",
+        "name": "Send Lead Email",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          1560,
+          560
+        ],
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "bsAbfRmGUOzzryvM",
+            "name": "Gmail account"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "url": "={{ 'https://lookups.twilio.com/v2/PhoneNumbers/+1' + String($json.phone||'').replace(/\\D/g,'').slice(-10) + '?Fields=line_type_intelligence' }}",
+          "authentication": "genericCredentialType",
+          "genericAuthType": "httpBasicAuth",
+          "options": {}
+        },
+        "id": "llt",
+        "name": "Lookup Line Type",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          820,
+          -180
+        ],
+        "credentials": {
+          "httpBasicAuth": {
+            "id": "JnW2cNuAcotPSVwr",
+            "name": "Twilio REST (basic)"
+          }
+        },
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "const lead = $('Check For Duplicate').first().json;\nlet type = '', carrier = '';\ntry {\n  const lt = $json && $json.line_type_intelligence;\n  if (lt && lt.type) { type = String(lt.type); carrier = String(lt.carrier_name || ''); }\n} catch (e) { type = ''; }\n\n// Meta Instant Form answers arrive slugged (3_to_6_months). Make them readable.\nfunction pretty(val) {\n  let s = String(val == null ? '' : val).trim();\n  if (!s) return '';\n  if (s.indexOf('<test lead') === 0) return s;\n  s = s.replace(/_/g, ' ').replace(/\\s+/g, ' ').trim();\n  s = s.replace(/\\$(\\d+(?:\\.\\d+)?)\\s*([km])\\b/gi, function(m, n, u){ return '$' + n + u.toUpperCase(); });\n  return s.charAt(0).toUpperCase() + s.slice(1);\n}\n\nconst out = Object.assign({}, lead, {\n  lineType: type,\n  lineCarrier: carrier,\n  priceRange: pretty(lead.priceRange),\n  timeline: pretty(lead.timeline),\n  financing: pretty(lead.financing)\n});\nreturn [{ json: out }];"
+        },
+        "id": "mlt",
+        "name": "Merge Line Type",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1000,
+          -180
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "hb1",
+                "leftValue": "={{ String($('Check For Duplicate').first().json.origin || '').indexOf('Meta Instant Form') === 0 || String(($('Webhook').first().json.body || {}).lookingTo || '').toLowerCase() === 'buy' }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "hbif",
+        "name": "Buyer?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1120,
+          760
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const b = $('Webhook').first().json.body;\nconst firstName = (b.name || '').split(' ')[0];\nconst hr = DateTime.now().setZone('America/Chicago').hour;\nconst isLate = hr >= 20 || hr < 8;\nconst callPhrase = isLate ? 'give you a call first thing tomorrow morning' : 'give you a call shortly';\nconst isVal = b.source === 'Valuation Request';\nconst subject = isVal ? 'Got your home value request' : 'Got your message';\nconst para1 = isVal\n  ? `Thank you for requesting a home value on <strong>${b.searchedAddress}</strong>. I'll personally look at what's actually selling in your neighborhood and ${callPhrase} to go over a few quick details, so I can get you a real number instead of an automated guess.`\n  : `Thank you for reaching out. I'll ${callPhrase} to learn a bit more about what you're looking for and how I can help.`;\n\nconst html = `<div style=\"margin:0;padding:0;background:#eef0f3;\">\n<div style=\"max-width:600px;margin:0 auto;padding:32px 16px;font-family:Helvetica,Arial,sans-serif;\">\n<div style=\"background:#ffffff;border:1px solid #e4e7ec;border-radius:4px;overflow:hidden;\">\n<div style=\"padding:38px 42px 40px;\">\n<div style=\"text-align:center;padding-bottom:20px;\">\n<img src=\"https://hectormeza.com/hector-headshot.jpg\" alt=\"Hector Meza\" width=\"78\" height=\"78\" style=\"width:78px;height:78px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 16px;border:2px solid #002349;\" />\n<div style=\"font-family:Georgia,'Times New Roman',serif;color:#002349;font-size:25px;font-weight:700;letter-spacing:0.4px;\">Hector Meza</div>\n<div style=\"font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#7a8290;font-weight:600;line-height:1.5;padding-top:8px;\">Briggs Freeman Sotheby's<br>International Realty</div>\n<div style=\"height:2px;width:44px;background:#002349;margin:20px auto 4px;font-size:0;line-height:0;\">&nbsp;</div>\n</div>\n<p style=\"color:#1c2430;font-size:15.5px;line-height:1.66;margin:0 0 19px 0;\">Hey ${firstName},</p>\n<p style=\"color:#1c2430;font-size:15.5px;line-height:1.66;margin:0 0 17px 0;\">${para1}</p>\n<p style=\"color:#1c2430;font-size:15.5px;line-height:1.66;margin:0 0 17px 0;\">If you have any questions in the meantime, feel free to call or text me directly at (214) 686-5641.</p>\n<p style=\"color:#1c2430;font-size:15.5px;line-height:1.66;margin:0 0 17px 0;\">I look forward to speaking with you.</p>\n<div style=\"margin-top:26px;\">\n<p style=\"color:#1c2430;font-size:14.5px;margin:0 0 9px 0;\">Warm regards,</p>\n<p style=\"font-family:Georgia,'Times New Roman',serif;color:#002349;font-weight:700;font-size:16px;margin:0 0 2px 0;\">Hector Meza</p>\n<p style=\"color:#7a8290;font-size:11.5px;letter-spacing:1px;text-transform:uppercase;margin:2px 0 0 0;\">Briggs Freeman Sotheby's International Realty</p>\n<p style=\"color:#7a8290;font-size:13.5px;margin:7px 0 0 0;\">(214) 686-5641<br>hmeza@briggsfreeman.com</p>\n</div>\n</div>\n</div>\n</div>\n</div>`;\n\nconst headers = [\n  'From: Hector Meza <h.mezarealty@gmail.com>',\n  'Reply-To: hmeza@briggsfreeman.com',\n  'To: ' + b.email,\n  'Subject: ' + subject,\n  'MIME-Version: 1.0',\n  'Content-Type: text/html; charset=\"UTF-8\"'\n].join('\\r\\n');\n\nconst mime = headers + '\\r\\n\\r\\n' + html;\nconst raw = Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');\nreturn [{ json: { raw } }];\n"
+        },
+        "id": "cse",
+        "name": "Compose Seller Email",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1340,
+          900
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": false,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 3
+            },
+            "conditions": [
+              {
+                "id": "addr1",
+                "leftValue": "={{ String($('Check For Duplicate').first().json.searchedAddress || '').trim().length > 0 }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "options": {}
+        },
+        "id": "hasaddr",
+        "name": "Gave An Address?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1340,
+          1060
+        ]
+      },
+      {
+        "parameters": {
+          "jsCode": "const lead = $('Check For Duplicate').first().json;\nconst email = String(lead.email || '').trim();\nconst first = String(lead.first || '').trim() || 'there';\n\nconst subject = 'Got your message';\nconst paras = [\n  'Hey ' + first + ',',\n  'Thanks for reaching out, good to hear from you.',\n  \"I'll give you a call shortly to hear more about what you're looking for and how I can help.\",\n  'If you have any questions before then, call or text me directly at (214) 686-5641.',\n  'Talk soon.'\n];\n\nconst CPN = 'https://www.trec.texas.gov/sites/default/files/pdf-forms/CN%201-5_0.pdf';\nconst IABS = 'https://hectormeza.com/hector-meza-iabs.pdf';\n\nconst html = '<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#222;max-width:520px\">'\n  + paras.map(function(p){ return '<p style=\"margin:0 0 16px\">' + p + '</p>'; }).join('')\n  + '<div style=\"margin:24px 0 0;padding-top:16px;border-top:1px solid #ddd;font-size:14px;line-height:1.5\">'\n  + '<div style=\"font-weight:600\">Hector Meza</div>'\n  + '<div>Briggs Freeman Sotheby&rsquo;s International Realty</div>'\n  + '<div>(214) 686-5641</div>'\n  + '<div><a href=\"https://hectormeza.com\" style=\"color:#002349\">hectormeza.com</a></div>'\n  + '</div>'\n  + '<div style=\"margin-top:16px;font-size:11px;line-height:1.5;color:#888\">'\n  + '<a href=\"' + CPN + '\" style=\"color:#888\">Consumer Protection Notice</a>'\n  + ' &middot; '\n  + '<a href=\"' + IABS + '\" style=\"color:#888\">Information About Brokerage Services</a>'\n  + '</div></div>';\n\nconst headers = [\n  'From: Hector Meza <h.mezarealty@gmail.com>',\n  'Reply-To: hmeza@briggsfreeman.com',\n  'To: ' + email,\n  'Subject: ' + subject,\n  'MIME-Version: 1.0',\n  'Content-Type: text/html; charset=\"UTF-8\"'\n].join('\\r\\n');\nconst mime = headers + '\\r\\n\\r\\n' + html;\nconst raw = Buffer.from(mime, 'utf8').toString('base64').replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');\nreturn [{ json: { raw: raw, to: email, subject: subject, variant: 'neutral' } }];"
+        },
+        "id": "cne",
+        "name": "Compose Neutral Email",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1560,
+          1160
+        ]
       }
     ],
     "connections": {
@@ -857,7 +1628,17 @@
         "main": [
           [
             {
-              "node": "Append To Leads Tab",
+              "node": "Lookup Line Type",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Meta Lead?",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Text Hector (New Lead)",
               "type": "main",
               "index": 0
             }
@@ -869,6 +1650,11 @@
           [
             {
               "node": "Compose Text",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Buyer?",
               "type": "main",
               "index": 0
             }
@@ -897,11 +1683,125 @@
           ],
           []
         ]
+      },
+      "Meta Lead?": {
+        "main": [
+          [
+            {
+              "node": "Email Hector (New Lead)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Compose Buyer Email": {
+        "main": [
+          [
+            {
+              "node": "Email It?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Email It?": {
+        "main": [
+          [
+            {
+              "node": "Send Lead Email",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      },
+      "Lookup Line Type": {
+        "main": [
+          [
+            {
+              "node": "Merge Line Type",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge Line Type": {
+        "main": [
+          [
+            {
+              "node": "Append To Leads Tab",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Buyer?": {
+        "main": [
+          [
+            {
+              "node": "Compose Buyer Email",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Gave An Address?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Compose Seller Email": {
+        "main": [
+          [
+            {
+              "node": "Send Lead Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Gave An Address?": {
+        "main": [
+          [
+            {
+              "node": "Compose Seller Email",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Compose Neutral Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Compose Neutral Email": {
+        "main": [
+          [
+            {
+              "node": "Send Lead Email",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Hector Meza",
-    "name": "Version d35c76e6",
-    "description": "Add newsletter opt-in. Normalize Lead maps newsletterOptIn to onMailerList (Y or blank), Append To Leads Tab writes it to the On Mailer List column."
+    "name": "Neutral email for contact form",
+    "description": ""
   },
   "tags": []
 }
