@@ -1,0 +1,147 @@
+{
+  "updatedAt": "2026-08-04T21:30:26.422Z",
+  "createdAt": "2026-08-04T21:30:16.103Z",
+  "id": "zuQhZTNQW6Qj82Yu",
+  "name": "ZZ ONE-OFF - Prettify Answers",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "q0",
+      "name": "Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4/values/Leads!H2:J200",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "q1",
+      "name": "Read",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = ($json.values) || [];\nfunction pretty(val) {\n  let s = String(val == null ? '' : val).trim();\n  if (!s) return '';\n  if (s.indexOf('<test lead') === 0) return s;\n  s = s.replace(/_/g, ' ').replace(/\\s+/g, ' ').trim();\n  s = s.replace(/\\$(\\d+(?:\\.\\d+)?)\\s*([km])\\b/gi, function(m,n,u){ return '$' + n + u.toUpperCase(); });\n  return s.charAt(0).toUpperCase() + s.slice(1);\n}\nconst out = rows.map(function(r){ return [pretty(r[0]), pretty(r[1]), pretty(r[2])]; });\nif (!out.length) throw new Error('nothing to backfill');\nconst range = 'Leads!H2:J' + (out.length + 1);\nreturn [{ json: { range: range, count: out.length, before: rows, after: out, payload: JSON.stringify({ values: out }) } }];"
+      },
+      "id": "q2",
+      "name": "Prettify",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ 'https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4/values/' + encodeURIComponent($json.range) }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.payload }}",
+        "options": {}
+      },
+      "id": "q3",
+      "name": "Write",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run": {
+      "main": [
+        [
+          {
+            "node": "Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read": {
+      "main": [
+        [
+          {
+            "node": "Prettify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prettify": {
+      "main": [
+        [
+          {
+            "node": "Write",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "ed0cd594-a7e7-46d2-81b6-fe3166aab7f8",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T21:30:16.103Z",
+      "createdAt": "2026-08-04T21:30:16.103Z",
+      "role": "workflow:owner",
+      "workflowId": "zuQhZTNQW6Qj82Yu",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
