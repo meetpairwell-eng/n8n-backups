@@ -1,0 +1,138 @@
+{
+  "updatedAt": "2026-08-04T21:29:11.916Z",
+  "createdAt": "2026-08-04T21:29:03.918Z",
+  "id": "EyjLWDuVnP45dw0L",
+  "name": "ZZ ONE-OFF - Drop Probe Row",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "p0",
+      "name": "Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4?ranges=Leads!A:C&fields=sheets(properties(sheetId,title),data(rowData(values(formattedValue))))",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "p1",
+      "name": "Read",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const sh = ($json.sheets||[]).find(s => s.properties && s.properties.title === 'Leads');\nconst gid = sh.properties.sheetId;\nconst rows = ((sh.data||[])[0]||{}).rowData || [];\nconst hits = [];\nrows.forEach(function(r,i){\n  const v = r.values||[];\n  const fn = (v[1] && v[1].formattedValue) || '';\n  if (i > 0 && String(fn).trim() === 'ZZPROBE') hits.push(i);\n});\nif (hits.length !== 1) throw new Error('expected exactly 1 ZZPROBE row, found ' + hits.length);\nreturn [{ json: { deleting: hits, payload: JSON.stringify({ requests: [ { deleteDimension: { range: { sheetId: gid, dimension: 'ROWS', startIndex: hits[0], endIndex: hits[0]+1 } } } ] }) } }];"
+      },
+      "id": "p2",
+      "name": "Find",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.payload }}",
+        "options": {}
+      },
+      "id": "p3",
+      "name": "Delete",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run": {
+      "main": [
+        [
+          {
+            "node": "Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read": {
+      "main": [
+        [
+          {
+            "node": "Find",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find": {
+      "main": [
+        [
+          {
+            "node": "Delete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "d9b25a3b-02e5-41d1-aaca-65843a4f9982",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T21:29:03.918Z",
+      "createdAt": "2026-08-04T21:29:03.918Z",
+      "role": "workflow:owner",
+      "workflowId": "EyjLWDuVnP45dw0L",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
