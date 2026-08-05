@@ -1,0 +1,89 @@
+{
+  "updatedAt": "2026-08-04T21:00:50.883Z",
+  "createdAt": "2026-08-04T21:00:43.115Z",
+  "id": "7bN5c2CBMoqhZdUA",
+  "name": "ZZ ONE-OFF - Lead SMS Status",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "t1",
+      "name": "Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.twilio.com/2010-04-01/Accounts/TWILIO_ACCOUNT_SID_REDACTED/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "To",
+              "value": "+12142246285"
+            },
+            {
+              "name": "PageSize",
+              "value": "20"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "t2",
+      "name": "Lookup",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "JnW2cNuAcotPSVwr",
+          "name": "Twilio REST (basic)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run": {
+      "main": [
+        [
+          {
+            "node": "Lookup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "64a695a1-6a6a-4706-9b82-58202b536d9c",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T21:00:43.115Z",
+      "createdAt": "2026-08-04T21:00:43.115Z",
+      "role": "workflow:owner",
+      "workflowId": "7bN5c2CBMoqhZdUA",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
