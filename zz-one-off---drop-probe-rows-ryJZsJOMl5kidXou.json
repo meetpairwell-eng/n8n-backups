@@ -1,0 +1,138 @@
+{
+  "updatedAt": "2026-08-04T21:43:36.897Z",
+  "createdAt": "2026-08-04T21:43:29.113Z",
+  "id": "ryJZsJOMl5kidXou",
+  "name": "ZZ ONE-OFF - Drop Probe Rows",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "z0",
+      "name": "Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4?ranges=Leads!A:C&fields=sheets(properties(sheetId,title),data(rowData(values(formattedValue))))",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "z1",
+      "name": "Read",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const sh = ($json.sheets||[]).find(s => s.properties && s.properties.title === 'Leads');\nconst gid = sh.properties.sheetId;\nconst rows = ((sh.data||[])[0]||{}).rowData || [];\nconst hits = [];\nrows.forEach(function(r,i){\n  const v = r.values||[];\n  const fn = (v[1] && v[1].formattedValue) || '';\n  if (i > 0 && String(fn).trim().indexOf('ZZPROBE') === 0) hits.push({row:i, name:String(fn).trim()});\n});\nif (!hits.length) throw new Error('no ZZPROBE rows');\nif (hits.length > 6) throw new Error('refusing, found ' + hits.length);\nconst requests = hits.slice().sort(function(a,b){return b.row-a.row;}).map(function(h){\n  return { deleteDimension: { range: { sheetId: gid, dimension: 'ROWS', startIndex: h.row, endIndex: h.row+1 } } };\n});\nreturn [{ json: { removed: hits.map(function(h){return h.name;}), payload: JSON.stringify({requests: requests}) } }];"
+      },
+      "id": "z2",
+      "name": "Find",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $json.payload }}",
+        "options": {}
+      },
+      "id": "z3",
+      "name": "Delete",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        600,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run": {
+      "main": [
+        [
+          {
+            "node": "Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read": {
+      "main": [
+        [
+          {
+            "node": "Find",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find": {
+      "main": [
+        [
+          {
+            "node": "Delete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "34d91c58-a320-45b2-951e-3d89fa56db3d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T21:43:29.113Z",
+      "createdAt": "2026-08-04T21:43:29.113Z",
+      "role": "workflow:owner",
+      "workflowId": "ryJZsJOMl5kidXou",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
