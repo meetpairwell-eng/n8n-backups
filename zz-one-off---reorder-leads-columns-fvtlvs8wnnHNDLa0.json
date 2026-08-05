@@ -1,0 +1,228 @@
+{
+  "updatedAt": "2026-08-04T21:26:11.864Z",
+  "createdAt": "2026-08-04T21:20:40.191Z",
+  "id": "fvtlvs8wnnHNDLa0",
+  "name": "ZZ ONE-OFF - Reorder Leads Columns",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "r0",
+      "name": "Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4?fields=sheets.properties",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "GetMeta",
+      "name": "Get Meta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        200,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4/values/Leads!A1:W2000",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "GetValues",
+      "name": "Get Values",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const meta = $('Get Meta').first().json;\nconst sh = (meta.sheets||[]).find(s => s.properties && s.properties.title === 'Leads');\nif (!sh) throw new Error('Leads tab missing');\nconst gid = sh.properties.sheetId;\nconst rows = ($('Get Values').first().json.values) || [];\nif (!rows.length) throw new Error('no rows');\nconst header = rows[0].map(h => String(h).trim());\nconst ORDER = ['Timestamp','First Name','Last Name','Phone','Email','Status','Lead Type','Price Range','Timeline','Financing','Line Type','Searched Address','Source','Campaign','Ad','Message','Notes','Last Touch','On Mailer List','MailerLite Synced','Day 5 Email Sent','Already In Database','Meta Lead ID'];\nconst missing = ORDER.filter(n => n !== 'Line Type' && header.indexOf(n) === -1);\nif (missing.length) throw new Error('headers not found: ' + missing.join(', '));\nconst extra = header.filter(h => h && ORDER.indexOf(h) === -1);\nif (extra.length) throw new Error('unmapped existing headers: ' + extra.join(', '));\nconst idx = ORDER.map(n => header.indexOf(n));\nconst out = rows.map(function(r, i){\n  return ORDER.map(function(n, j){\n    const k = idx[j];\n    if (k === -1) return i === 0 ? n : '';\n    const v = r[k];\n    return (v === undefined || v === null) ? '' : v;\n  });\n});\nconst STOPS = ['Replied','Called - No Answer','Left Voicemail','Appointment Set','Won','Lost','Dead','Do Not Contact','Unsubscribed','Bounced','Spam Complaint'];\nconst clearOld = { setDataValidation: { range: { sheetId: gid, startRowIndex: 1, endRowIndex: 2000, startColumnIndex: 16, endColumnIndex: 17 } } };\nconst rule = { condition: { type: 'ONE_OF_LIST', values: STOPS.map(function(v){ return { userEnteredValue: v }; }) }, showCustomUi: true, strict: false };\nconst setNew = { setDataValidation: { range: { sheetId: gid, startRowIndex: 1, endRowIndex: 2000, startColumnIndex: 5, endColumnIndex: 6 }, rule: rule } };\nconst backup = JSON.stringify({ requests: [ { duplicateSheet: { sourceSheetId: gid, newSheetName: 'Leads BACKUP 0804' } } ] });\nconst values = JSON.stringify({ values: out });\nconst validation = JSON.stringify({ requests: [ clearOld, setNew ] });\nconst range = 'Leads!A1:W' + out.length;\nreturn [{ json: { range: range, gid: gid, rowCount: out.length, colCount: ORDER.length, oldHeader: header, newHeader: ORDER, backup: backup, values: values, validation: validation } }];"
+      },
+      "id": "rc",
+      "name": "Build",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4/values/{{ encodeURIComponent($('Build').item.json.range) }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": true
+            }
+          }
+        },
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $('Build').item.json.values }}"
+      },
+      "id": "wv",
+      "name": "Write Values",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1000,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendBody": true,
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": true
+            }
+          }
+        },
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ $('Build').item.json.validation }}"
+      },
+      "id": "mv",
+      "name": "Move Validation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1200,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run": {
+      "main": [
+        [
+          {
+            "node": "Get Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Meta": {
+      "main": [
+        [
+          {
+            "node": "Get Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Values": {
+      "main": [
+        []
+      ]
+    },
+    "Build": {
+      "main": [
+        [
+          {
+            "node": "Write Values",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Values": {
+      "main": [
+        [
+          {
+            "node": "Move Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "24bdac1f-d1ac-4f84-8179-88e7a4d22336",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T21:20:40.191Z",
+      "createdAt": "2026-08-04T21:20:40.191Z",
+      "role": "workflow:owner",
+      "workflowId": "fvtlvs8wnnHNDLa0",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
