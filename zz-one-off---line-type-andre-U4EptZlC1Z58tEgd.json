@@ -1,0 +1,92 @@
+{
+  "updatedAt": "2026-08-04T21:11:29.869Z",
+  "createdAt": "2026-08-04T21:11:22.131Z",
+  "id": "U4EptZlC1Z58tEgd",
+  "name": "ZZ ONE-OFF - Line Type Andre",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "l1",
+      "name": "Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://lookups.twilio.com/v2/PhoneNumbers/+12144458839",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "Fields",
+              "value": "line_type_intelligence"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "l2",
+      "name": "Andre",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "JnW2cNuAcotPSVwr",
+          "name": "Twilio REST (basic)"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run": {
+      "main": [
+        [
+          {
+            "node": "Andre",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "719ee5fe-a28d-43e7-ac69-b92ec1a4048d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T21:11:22.131Z",
+      "createdAt": "2026-08-04T21:11:22.131Z",
+      "role": "workflow:owner",
+      "workflowId": "U4EptZlC1Z58tEgd",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
