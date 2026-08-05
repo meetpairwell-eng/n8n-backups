@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-07-20T22:09:27.622Z",
+  "updatedAt": "2026-08-04T21:19:51.029Z",
   "createdAt": "2026-07-20T20:48:35.034Z",
   "id": "Gg2Yqc3cWqfAywuW",
   "name": "MailerLite Sync",
@@ -104,7 +104,7 @@
     {
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "const DRY_RUN = false;\n\nconst src = [\n  ...$('Read Master Tab').all().map(i => ({ tab: 'Updated', r: i.json })),\n  ...$('Read Leads Tab').all().map(i => ({ tab: 'Leads',   r: i.json })),\n];\nconst clean = v => String(v ?? '').trim();\nconst out = [];\nfor (const { tab, r } of src) {\n  const email = clean(r['Email']).toLowerCase();\n  if (!email || !email.includes('@')) continue;\n  if (clean(r['On Mailer List']).toUpperCase() !== 'Y') continue;   // Hector's gate\n  if (clean(r['MailerLite Synced'])) continue;                       // never re-push\n  if (clean(r['Status']).toLowerCase() === 'unsubscribed') continue;\n  out.push({ json: {\n    _tab: tab, _row: r.row_number, dryRun: DRY_RUN, email,\n    first: clean(r['First Name']), last: clean(r['Last Name']), phone: clean(r['Phone']),\n  }});\n}\nreturn out;\n"
+        "jsCode": "const DRY_RUN = false;\n\nconst src = [\n  ...$('Read Master Tab').all().map(i => ({ tab: 'Updated', r: i.json })),\n  ...$('Read Leads Tab').all().map(i => ({ tab: 'Leads',   r: i.json })),\n];\nconst clean = v => String(v ?? '').trim();\nconst out = [];\nfor (const { tab, r } of src) {\n  const email = clean(r['Email']).toLowerCase();\n  if (!email || !email.includes('@')) continue;\n  if (clean(r['On Mailer List']).toUpperCase() !== 'Y') continue;   // Hector's gate\n  const NO_MAIL = /^(unsubscribed|bounced|spam complaint|do not contact|no contact)$/i;\n  if (NO_MAIL.test(String(r['Status'] || '').trim())) continue;   // compliance stop-list\n  if (clean(r['MailerLite Synced'])) continue;                       // never re-push\n  if (clean(r['Status']).toLowerCase() === 'unsubscribed') continue;\n  out.push({ json: {\n    _tab: tab, _row: r.row_number, dryRun: DRY_RUN, email,\n    first: clean(r['First Name']), last: clean(r['Last Name']), phone: clean(r['Phone']),\n  }});\n}\nreturn out;\n"
       },
       "id": "b4444444-4444-4444-8444-444444444444",
       "name": "Pick Candidates",
@@ -377,8 +377,8 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "57e6470a-b64d-4822-8769-12e592806227",
-  "activeVersionId": "57e6470a-b64d-4822-8769-12e592806227",
+  "versionId": "1a5c8575-6622-4a6a-b067-60598bf07a10",
+  "activeVersionId": "1a5c8575-6622-4a6a-b067-60598bf07a10",
   "triggerCount": 2,
   "shared": [
     {
@@ -390,9 +390,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-07-20T22:09:27.624Z",
-    "createdAt": "2026-07-20T22:09:27.624Z",
-    "versionId": "57e6470a-b64d-4822-8769-12e592806227",
+    "updatedAt": "2026-08-04T21:32:28.833Z",
+    "createdAt": "2026-08-04T21:19:51.030Z",
+    "versionId": "1a5c8575-6622-4a6a-b067-60598bf07a10",
     "workflowId": "Gg2Yqc3cWqfAywuW",
     "nodes": [
       {
@@ -493,7 +493,7 @@
       {
         "parameters": {
           "mode": "runOnceForAllItems",
-          "jsCode": "const DRY_RUN = false;\n\nconst src = [\n  ...$('Read Master Tab').all().map(i => ({ tab: 'Updated', r: i.json })),\n  ...$('Read Leads Tab').all().map(i => ({ tab: 'Leads',   r: i.json })),\n];\nconst clean = v => String(v ?? '').trim();\nconst out = [];\nfor (const { tab, r } of src) {\n  const email = clean(r['Email']).toLowerCase();\n  if (!email || !email.includes('@')) continue;\n  if (clean(r['On Mailer List']).toUpperCase() !== 'Y') continue;   // Hector's gate\n  if (clean(r['MailerLite Synced'])) continue;                       // never re-push\n  if (clean(r['Status']).toLowerCase() === 'unsubscribed') continue;\n  out.push({ json: {\n    _tab: tab, _row: r.row_number, dryRun: DRY_RUN, email,\n    first: clean(r['First Name']), last: clean(r['Last Name']), phone: clean(r['Phone']),\n  }});\n}\nreturn out;\n"
+          "jsCode": "const DRY_RUN = false;\n\nconst src = [\n  ...$('Read Master Tab').all().map(i => ({ tab: 'Updated', r: i.json })),\n  ...$('Read Leads Tab').all().map(i => ({ tab: 'Leads',   r: i.json })),\n];\nconst clean = v => String(v ?? '').trim();\nconst out = [];\nfor (const { tab, r } of src) {\n  const email = clean(r['Email']).toLowerCase();\n  if (!email || !email.includes('@')) continue;\n  if (clean(r['On Mailer List']).toUpperCase() !== 'Y') continue;   // Hector's gate\n  const NO_MAIL = /^(unsubscribed|bounced|spam complaint|do not contact|no contact)$/i;\n  if (NO_MAIL.test(String(r['Status'] || '').trim())) continue;   // compliance stop-list\n  if (clean(r['MailerLite Synced'])) continue;                       // never re-push\n  if (clean(r['Status']).toLowerCase() === 'unsubscribed') continue;\n  out.push({ json: {\n    _tab: tab, _row: r.row_number, dryRun: DRY_RUN, email,\n    first: clean(r['First Name']), last: clean(r['Last Name']), phone: clean(r['Phone']),\n  }});\n}\nreturn out;\n"
         },
         "id": "b4444444-4444-4444-8444-444444444444",
         "name": "Pick Candidates",
@@ -754,8 +754,8 @@
       }
     },
     "authors": "Hector Meza",
-    "name": null,
-    "description": null
+    "name": "Respect compliance statuses",
+    "description": ""
   },
   "tags": []
 }
