@@ -1,0 +1,76 @@
+{
+  "updatedAt": "2026-08-04T20:52:55.892Z",
+  "createdAt": "2026-08-04T20:52:50.237Z",
+  "id": "JzzOUqxXONpRDtSs",
+  "name": "ZZ ONE-OFF - Verify Leads",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "v1",
+      "name": "Run",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4/values/Leads!A1:F50",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "v2",
+      "name": "Read",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Run": {
+      "main": [
+        [
+          {
+            "node": "Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "4dc65c49-1577-404f-adac-fc8d4bf009c4",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T20:52:50.237Z",
+      "createdAt": "2026-08-04T20:52:50.237Z",
+      "role": "workflow:owner",
+      "workflowId": "JzzOUqxXONpRDtSs",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
