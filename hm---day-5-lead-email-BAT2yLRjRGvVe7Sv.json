@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-03T15:46:54.996Z",
+  "updatedAt": "2026-08-04T21:19:08.884Z",
   "createdAt": "2026-08-03T15:19:39.730Z",
   "id": "BAT2yLRjRGvVe7Sv",
   "name": "HM - Day 5 Lead Email",
@@ -57,7 +57,7 @@
     },
     {
       "parameters": {
-        "jsCode": "\nconst GO_LIVE = '2026-08-03';                 // never touch leads created before today\nconst rows = $input.all().map(i => i.json);\nconst now = new Date();\nconst DONE = /^(replied|responded|dead|closed|won|lost|unsubscribed|do not contact|no contact)$/i;\nconst b64url = s => Buffer.from(s, 'utf8').toString('base64')\n  .replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');\nconst out = [];\nfor (const r of rows) {\n  if (DONE.test(String(r['Status']||'').trim())) continue;\n  if (String(r['Day 5 Email Sent']||'').trim()) continue;\n  const t = new Date(r['Timestamp']); if (isNaN(t)) continue;\n  if (t.toISOString().slice(0,10) < GO_LIVE) continue;        // HARD CUTOFF\n  const age = Math.floor((now - t) / 86400000);\n  if (age < 5 || age > 30) continue;\n  const email = String(r['Email']||'').trim(); if (!email) continue;\n  const first = String(r['First Name']||'').trim() || 'there';\n  const addr  = String(r['Searched Address']||'').trim();\n  const street = addr ? addr.split(',')[0] : '';\n  const subject = street ? ('Still happy to help with ' + street) : 'Still happy to help';\n  const sig = '\\n\\nHector Meza\\nBriggs Freeman Sotheby’s International Realty\\n(214) 686-5641\\nhectormeza.com';\n  const body = (street\n    ? 'Hey ' + first + ',\\n\\nI reached out last week about ' + addr + '. I would still like to put a real number together for you, I just want to hear about the house first so it actually means something.\\n\\nA quick call is easiest, but text or email works fine too. What is best for you?'\n    : 'Hey ' + first + ',\\n\\nI reached out last week and wanted to follow up. I would still like to help you find the right place, I just want to hear what you are looking for first.\\n\\nA quick call is easiest, but text or email works fine too. What is best for you?') + sig;\n  const mime = [\n    'From: Hector Meza <hello@hectormeza.com>',\n    'To: ' + email,\n    'Subject: ' + subject,\n    'MIME-Version: 1.0',\n    'Content-Type: text/plain; charset=\"UTF-8\"',\n    '', body\n  ].join('\\r\\n');\n  out.push({ json: { email, first, subject, raw: b64url(mime), stamp: now.toISOString().slice(0,10) } });\n}\nreturn out;\n"
+        "jsCode": "\nconst GO_LIVE = '2026-08-03';                 // never touch leads created before today\nconst rows = $input.all().map(i => i.json);\nconst now = new Date();\nconst DONE = /^(replied|responded|dead|closed|won|lost|unsubscribed|do not contact|no contact|appointment set|bounced|spam complaint)$/i;\nconst b64url = s => Buffer.from(s, 'utf8').toString('base64')\n  .replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');\nconst out = [];\nfor (const r of rows) {\n  if (DONE.test(String(r['Status']||'').trim())) continue;\n  if (String(r['Day 5 Email Sent']||'').trim()) continue;\n  const t = new Date(r['Timestamp']); if (isNaN(t)) continue;\n  if (t.toISOString().slice(0,10) < GO_LIVE) continue;        // HARD CUTOFF\n  const age = Math.floor((now - t) / 86400000);\n  if (age < 5 || age > 30) continue;\n  const email = String(r['Email']||'').trim(); if (!email) continue;\n  const first = String(r['First Name']||'').trim() || 'there';\n  const addr  = String(r['Searched Address']||'').trim();\n  const street = addr ? addr.split(',')[0] : '';\n  const subject = street ? ('Still happy to help with ' + street) : 'Still happy to help';\n  const sig = '\\n\\nHector Meza\\nBriggs Freeman Sotheby’s International Realty\\n(214) 686-5641\\nhectormeza.com';\n  const body = (street\n    ? 'Hey ' + first + ',\\n\\nI reached out last week about ' + addr + '. I would still like to put a real number together for you, I just want to hear about the house first so it actually means something.\\n\\nA quick call is easiest, but text or email works fine too. What is best for you?'\n    : 'Hey ' + first + ',\\n\\nI reached out last week and wanted to follow up. I would still like to help you find the right place, I just want to hear what you are looking for first.\\n\\nA quick call is easiest, but text or email works fine too. What is best for you?') + sig;\n  const mime = [\n    'From: Hector Meza <hello@hectormeza.com>',\n    'To: ' + email,\n    'Subject: ' + subject,\n    'MIME-Version: 1.0',\n    'Content-Type: text/plain; charset=\"UTF-8\"',\n    '', body\n  ].join('\\r\\n');\n  out.push({ json: { email, first, subject, raw: b64url(mime), stamp: now.toISOString().slice(0,10), row_number: r.row_number } });\n}\nreturn out;\n"
       },
       "id": "e3",
       "name": "Pick Day 5 Leads",
@@ -94,6 +94,46 @@
         }
       },
       "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Pick Day 5 Leads').item.json.row_number }}",
+            "Day 5 Email Sent": "={{ $('Pick Day 5 Leads').item.json.stamp }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ]
+        },
+        "options": {}
+      },
+      "id": "d5s1",
+      "name": "Stamp Sent",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        1400,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
     }
   ],
   "connections": {
@@ -129,6 +169,17 @@
           }
         ]
       ]
+    },
+    "Send From hello@": {
+      "main": [
+        [
+          {
+            "node": "Stamp Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -141,8 +192,8 @@
   },
   "meta": null,
   "pinData": null,
-  "versionId": "00663a95-f01b-408c-b083-a92729748d5b",
-  "activeVersionId": "00663a95-f01b-408c-b083-a92729748d5b",
+  "versionId": "3973cfa0-2516-4002-8193-df8c2781d9bb",
+  "activeVersionId": "3973cfa0-2516-4002-8193-df8c2781d9bb",
   "triggerCount": 1,
   "shared": [
     {
@@ -154,9 +205,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-03T15:50:24.719Z",
-    "createdAt": "2026-08-03T15:46:54.998Z",
-    "versionId": "00663a95-f01b-408c-b083-a92729748d5b",
+    "updatedAt": "2026-08-04T21:32:02.677Z",
+    "createdAt": "2026-08-04T21:19:08.886Z",
+    "versionId": "3973cfa0-2516-4002-8193-df8c2781d9bb",
     "workflowId": "BAT2yLRjRGvVe7Sv",
     "nodes": [
       {
@@ -210,7 +261,7 @@
       },
       {
         "parameters": {
-          "jsCode": "\nconst GO_LIVE = '2026-08-03';                 // never touch leads created before today\nconst rows = $input.all().map(i => i.json);\nconst now = new Date();\nconst DONE = /^(replied|responded|dead|closed|won|lost|unsubscribed|do not contact|no contact)$/i;\nconst b64url = s => Buffer.from(s, 'utf8').toString('base64')\n  .replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');\nconst out = [];\nfor (const r of rows) {\n  if (DONE.test(String(r['Status']||'').trim())) continue;\n  if (String(r['Day 5 Email Sent']||'').trim()) continue;\n  const t = new Date(r['Timestamp']); if (isNaN(t)) continue;\n  if (t.toISOString().slice(0,10) < GO_LIVE) continue;        // HARD CUTOFF\n  const age = Math.floor((now - t) / 86400000);\n  if (age < 5 || age > 30) continue;\n  const email = String(r['Email']||'').trim(); if (!email) continue;\n  const first = String(r['First Name']||'').trim() || 'there';\n  const addr  = String(r['Searched Address']||'').trim();\n  const street = addr ? addr.split(',')[0] : '';\n  const subject = street ? ('Still happy to help with ' + street) : 'Still happy to help';\n  const sig = '\\n\\nHector Meza\\nBriggs Freeman Sotheby’s International Realty\\n(214) 686-5641\\nhectormeza.com';\n  const body = (street\n    ? 'Hey ' + first + ',\\n\\nI reached out last week about ' + addr + '. I would still like to put a real number together for you, I just want to hear about the house first so it actually means something.\\n\\nA quick call is easiest, but text or email works fine too. What is best for you?'\n    : 'Hey ' + first + ',\\n\\nI reached out last week and wanted to follow up. I would still like to help you find the right place, I just want to hear what you are looking for first.\\n\\nA quick call is easiest, but text or email works fine too. What is best for you?') + sig;\n  const mime = [\n    'From: Hector Meza <hello@hectormeza.com>',\n    'To: ' + email,\n    'Subject: ' + subject,\n    'MIME-Version: 1.0',\n    'Content-Type: text/plain; charset=\"UTF-8\"',\n    '', body\n  ].join('\\r\\n');\n  out.push({ json: { email, first, subject, raw: b64url(mime), stamp: now.toISOString().slice(0,10) } });\n}\nreturn out;\n"
+          "jsCode": "\nconst GO_LIVE = '2026-08-03';                 // never touch leads created before today\nconst rows = $input.all().map(i => i.json);\nconst now = new Date();\nconst DONE = /^(replied|responded|dead|closed|won|lost|unsubscribed|do not contact|no contact|appointment set|bounced|spam complaint)$/i;\nconst b64url = s => Buffer.from(s, 'utf8').toString('base64')\n  .replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');\nconst out = [];\nfor (const r of rows) {\n  if (DONE.test(String(r['Status']||'').trim())) continue;\n  if (String(r['Day 5 Email Sent']||'').trim()) continue;\n  const t = new Date(r['Timestamp']); if (isNaN(t)) continue;\n  if (t.toISOString().slice(0,10) < GO_LIVE) continue;        // HARD CUTOFF\n  const age = Math.floor((now - t) / 86400000);\n  if (age < 5 || age > 30) continue;\n  const email = String(r['Email']||'').trim(); if (!email) continue;\n  const first = String(r['First Name']||'').trim() || 'there';\n  const addr  = String(r['Searched Address']||'').trim();\n  const street = addr ? addr.split(',')[0] : '';\n  const subject = street ? ('Still happy to help with ' + street) : 'Still happy to help';\n  const sig = '\\n\\nHector Meza\\nBriggs Freeman Sotheby’s International Realty\\n(214) 686-5641\\nhectormeza.com';\n  const body = (street\n    ? 'Hey ' + first + ',\\n\\nI reached out last week about ' + addr + '. I would still like to put a real number together for you, I just want to hear about the house first so it actually means something.\\n\\nA quick call is easiest, but text or email works fine too. What is best for you?'\n    : 'Hey ' + first + ',\\n\\nI reached out last week and wanted to follow up. I would still like to help you find the right place, I just want to hear what you are looking for first.\\n\\nA quick call is easiest, but text or email works fine too. What is best for you?') + sig;\n  const mime = [\n    'From: Hector Meza <hello@hectormeza.com>',\n    'To: ' + email,\n    'Subject: ' + subject,\n    'MIME-Version: 1.0',\n    'Content-Type: text/plain; charset=\"UTF-8\"',\n    '', body\n  ].join('\\r\\n');\n  out.push({ json: { email, first, subject, raw: b64url(mime), stamp: now.toISOString().slice(0,10), row_number: r.row_number } });\n}\nreturn out;\n"
         },
         "id": "e3",
         "name": "Pick Day 5 Leads",
@@ -247,6 +298,46 @@
           }
         },
         "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "operation": "update",
+          "documentId": {
+            "__rl": true,
+            "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "Leads",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "row_number": "={{ $('Pick Day 5 Leads').item.json.row_number }}",
+              "Day 5 Email Sent": "={{ $('Pick Day 5 Leads').item.json.stamp }}"
+            },
+            "matchingColumns": [
+              "row_number"
+            ]
+          },
+          "options": {}
+        },
+        "id": "d5s1",
+        "name": "Stamp Sent",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.1,
+        "position": [
+          1400,
+          0
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        }
       }
     ],
     "connections": {
@@ -282,10 +373,21 @@
             }
           ]
         ]
+      },
+      "Send From hello@": {
+        "main": [
+          [
+            {
+              "node": "Stamp Sent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Hector Meza",
-    "name": "Version 00663a95",
+    "name": "Stamp sent + stop-list fix",
     "description": ""
   },
   "tags": []
