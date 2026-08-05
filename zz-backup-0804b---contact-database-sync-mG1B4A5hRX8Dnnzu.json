@@ -1,0 +1,596 @@
+{
+  "updatedAt": "2026-08-04T20:39:13.912Z",
+  "createdAt": "2026-08-04T20:39:13.912Z",
+  "id": "mG1B4A5hRX8Dnnzu",
+  "name": "ZZ BACKUP 0804b - Contact Database Sync",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "contact-sync-hm",
+        "options": {}
+      },
+      "id": "a1111111-1111-4111-8111-111111111111",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        0
+      ],
+      "webhookId": "8f3c1d7a-45b2-4e91-a6d8-2c7b9e4f1a30"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst b = $input.first().json.body || $input.first().json;\nconst clean = v => (v === undefined || v === null) ? '' : String(v).trim();\n\nconst email = clean(b.email).toLowerCase();\n\nlet first = clean(b.firstName), last = clean(b.lastName);\nif (!first) {\n  const parts = clean(b.name).split(/\\s+/).filter(Boolean);\n  first = parts.shift() || '';\n  last = parts.join(' ');\n}\n\nconst rawPhone = clean(b.phone);\nconst d = rawPhone.replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst phone = d.length === 10 ? '(' + d.slice(0,3) + ')' + d.slice(3,6) + '-' + d.slice(6) : rawPhone;\n\nconst formName = clean(b.source);\nconst searched = clean(b.searchedAddress);\nlet leadType = 'General';\nif (/valuation|sell/i.test(formName) || searched) leadType = 'Seller';\nif (/buyer|buy/i.test(formName) || /buyer/i.test(clean(b.formName))) leadType = 'Buyer';\n\nconst utmSource = clean(b.utm_source);\nconst metaLeadId = clean(b.leadgenId || b.leadId);\nlet origin;\nif (metaLeadId) origin = 'Meta Instant Form';\nelse if (utmSource) origin = 'Paid ad: ' + utmSource;\nelse if (clean(b.referrer)) origin = 'Referral: ' + clean(b.referrer);\nelse origin = 'Website (organic/direct)';\n\n\nlet sourceLabel;\nif (metaLeadId) {\n  const fn = formName.toLowerCase();\n  sourceLabel = 'Meta lead ad' + (fn.includes('variant a') ? ' (house listing)' : fn.includes('variant b') ? ' (headshot)' : (formName ? ' - ' + formName : ''));\n} else if (/valuation|sell/i.test(formName) || searched) {\n  sourceLabel = 'Home valuation' + (searched ? ' - ' + searched : '');\n} else if (utmSource) {\n  sourceLabel = 'Paid ad: ' + (clean(b.utm_content) || utmSource);\n} else if (clean(b.referrer)) {\n  sourceLabel = 'Referral: ' + clean(b.referrer);\n} else {\n  sourceLabel = 'Website contact';\n}\n\nreturn [{ json: {\n  timestamp: DateTime.now().setZone('America/Chicago').toFormat('yyyy-LL-dd HH:mm'),\n  first, last, email, phone, leadType, origin, sourceLabel,\n  campaign: clean(b.utm_campaign),\n  ad: clean(b.utm_content),\n  searchedAddress: searched,\n  message: clean(b.message),\n  metaLeadId,\n    priceRange: clean(b.priceRange),\n    timeline: clean(b.timeline),\n    financing: clean(b.financing),\n  onMailerList: (b.newsletterOptIn === true || clean(b.newsletterOptIn).toLowerCase() === 'true') ? 'Y' : '',\n  formName\n} }];\n"
+      },
+      "id": "a2222222-2222-4222-8222-222222222222",
+      "name": "Normalize Lead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Updated",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "id": "a3333333-3333-4333-8333-333333333333",
+      "name": "Read Master Database",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        224,
+        0
+      ],
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst lead = $('Normalize Lead').first().json;\nconst rows = $input.all().map(i => i.json);\n\nconst norm = s => String(s || '').trim().toLowerCase();\nconst digits = s => String(s || '').replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst leadPhone = digits(lead.phone);\n\nlet match = null;\nfor (const r of rows) {\n  if (lead.email && norm(r['Email']) === norm(lead.email)) { match = r; break; }\n  if (!match && leadPhone.length === 10 && digits(r['Phone']) === leadPhone) { match = r; }\n}\n\nconst notes = match\n  ? ('Already in Database as ' + [match['First Name'], match['Last Name']].filter(Boolean).join(' ')\n     + ' (' + (match['Category'] || 'uncategorized') + ')').trim()\n  : '';\n\nreturn [{ json: { ...lead, alreadyInDatabase: match ? 'Y' : '', notes } }];\n"
+      },
+      "id": "a4444444-4444-4444-8444-444444444444",
+      "name": "Check For Duplicate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1KWJ26qhQNrw6aescRA3fLYVY0vqUVnynxBdFccB7Rq4",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Leads",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $json.timestamp }}",
+            "First Name": "={{ $json.first }}",
+            "Last Name": "={{ $json.last }}",
+            "Email": "={{ $json.email }}",
+            "Phone": "={{ $json.phone }}",
+            "Lead Type": "={{ $json.leadType }}",
+            "Source": "={{ $json.origin }}",
+            "Campaign": "={{ $json.campaign }}",
+            "Ad": "={{ $json.ad }}",
+            "Searched Address": "={{ $json.searchedAddress }}",
+            "Message": "={{ $json.message }}",
+            "Already In Database": "={{ $json.alreadyInDatabase }}",
+            "Meta Lead ID": "={{ $json.metaLeadId }}",
+            "Notes": "={{ $json.notes }}",
+            "On Mailer List": "={{ $json.onMailerList }}",
+            "Price Range": "={{ $json.priceRange }}",
+            "Timeline": "={{ $json.timeline }}",
+            "Financing": "={{ $json.financing }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Timestamp",
+              "displayName": "Timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Lead Type",
+              "displayName": "Lead Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Source",
+              "displayName": "Source",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Campaign",
+              "displayName": "Campaign",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Ad",
+              "displayName": "Ad",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Searched Address",
+              "displayName": "Searched Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Already In Database",
+              "displayName": "Already In Database",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Meta Lead ID",
+              "displayName": "Meta Lead ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "On Mailer List",
+              "displayName": "On Mailer List",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "MailerLite Synced",
+              "displayName": "MailerLite Synced",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Notes",
+              "displayName": "Notes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Price Range",
+              "displayName": "Price Range",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Timeline",
+              "displayName": "Timeline",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Financing",
+              "displayName": "Financing",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "a5555555-5555-4555-8555-555555555555",
+      "name": "Append To Leads Tab",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.1,
+      "position": [
+        672,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nconst lead = $('Check For Duplicate').first().json;\n\n// E.164 the phone; anything that isn't a clean 10-digit US number is skipped\nconst d = String(lead.phone || '').replace(/\\D/g, '').replace(/^1(?=\\d{10}$)/, '');\nconst to = d.length === 10 ? '+1' + d : '';\n\n// TCPA: no marketing texts outside 8am-9pm local. Central is Hector's market.\nconst hour = DateTime.now().setZone('America/Chicago').hour;\nconst quiet = hour < 8 || hour >= 21;\n\nconst first = (lead.first || '').trim() || 'there';\nconst addr  = String(lead.searchedAddress || '').split(',')[0].trim();\n\nconst body = addr\n  ? `Hey ${first}, it's Hector. Thanks for reaching out about ${addr}. Before I put a number together I'd like to hear a little about the home from you, so I'll give you a call in a bit. If another time is easier, just text me back and let me know.\\n\\nReply STOP to unsubscribe.`\n  : `Hey ${first}, it's Hector. Thanks for reaching out. I'll give you a call in a bit to hear more about what you're looking for and how I can help.\\n\\nReply STOP to unsubscribe.`;\n\nconst metaBody = \"Hey \" + first + \", it's Hector. Saw you filled out my form about homes here in Dallas. I'll give you a call in a bit to hear more about what you're looking for and how I can help.\\n\\nReply STOP to unsubscribe.\";\nconst isMeta = String(lead.origin || \"\").indexOf(\"Meta Instant Form\") === 0;\nconst finalBody = isMeta ? metaBody : body;\n\nconst send = Boolean(to) && !quiet;\n\nreturn [{ json: {\n  to, body: finalBody, send,\n  skipReason: !to ? 'no valid US mobile' : (quiet ? 'quiet hours (8am-9pm CT rule)' : ''),\n  email: lead.email,\n} }];\n"
+      },
+      "id": "50000000-0000-4000-8000-000000000000",
+      "name": "Compose Text",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "s1",
+              "leftValue": "={{ $json.send }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "51111111-1111-4111-8111-111111111111",
+      "name": "Textable?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1104,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "from": "+18557748160",
+        "to": "={{ $json.to }}",
+        "message": "={{ $json.body }}",
+        "options": {}
+      },
+      "id": "52222222-2222-4222-8222-222222222222",
+      "name": "Send Instant Text",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        -96
+      ],
+      "credentials": {
+        "twilioApi": {
+          "id": "dWisw1s0Uo0aeUz3",
+          "name": "Twilio (Hector) 2026-07"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "101a4fdc-1018-4e4b-b538-dbf002e886e8",
+      "name": "Meta Lead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        220
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b38ef97e-53ce-4e61-a65f-7d8ecc2a0ca8",
+              "leftValue": "={{ $json.origin }}",
+              "rightValue": "Meta",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "7cf8aa3c-bce4-4e98-908c-871bbc73d32a",
+      "name": "Email Hector (New Lead)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        820,
+        140
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      },
+      "parameters": {
+        "sendTo": "h.mezarealty@gmail.com",
+        "subject": "=New Buyer Lead — {{ $json.first }} {{ $json.last }}",
+        "message": "=<p>New buyer lead from your Meta ad:</p><ul><li><b>Name:</b> {{ $json.first }} {{ $json.last }}</li><li><b>Email:</b> {{ $json.email }}</li><li><b>Phone:</b> {{ $json.phone }}</li><li><b>Price range:</b> {{ $json.priceRange || '—' }}</li><li><b>Timeline:</b> {{ $json.timeline || '—' }}</li><li><b>Financing:</b> {{ $json.financing || '—' }}</li><li><b>Source:</b> {{ $json.sourceLabel }}</li></ul><p>Already saved to your Leads tab. The buyer gets an auto-text if their number is valid.</p>",
+        "options": {
+          "appendAttribution": false
+        }
+      }
+    },
+    {
+      "id": "b8ea4f0b-7789-48ee-8bf8-9cf440d1951e",
+      "name": "Text Hector (New Lead)",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        820,
+        320
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "twilioApi": {
+          "id": "dWisw1s0Uo0aeUz3",
+          "name": "Twilio (Hector) 2026-07"
+        }
+      },
+      "parameters": {
+        "from": "+18557748160",
+        "to": "+12146865641",
+        "message": "=🎯 New lead\nName: {{ $json.first }} {{ $json.last }}\nPhone: {{ $json.phone }}\nEmail: {{ $json.email }}\nType: {{ $json.leadType }}\nSource: {{ $json.sourceLabel }}{{ $json.priceRange ? '\\nPrice: ' + $json.priceRange : '' }}{{ $json.timeline ? '\\nTimeline: ' + $json.timeline : '' }}{{ $json.financing ? '\\nFinancing: ' + $json.financing : '' }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Lead": {
+      "main": [
+        [
+          {
+            "node": "Read Master Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Master Database": {
+      "main": [
+        [
+          {
+            "node": "Check For Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check For Duplicate": {
+      "main": [
+        [
+          {
+            "node": "Append To Leads Tab",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Meta Lead?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Text Hector (New Lead)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append To Leads Tab": {
+      "main": [
+        [
+          {
+            "node": "Compose Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose Text": {
+      "main": [
+        [
+          {
+            "node": "Textable?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Textable?": {
+      "main": [
+        [
+          {
+            "node": "Send Instant Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Meta Lead?": {
+      "main": [
+        [
+          {
+            "node": "Email Hector (New Lead)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "errorWorkflow": "mem3eZSwpX10Xmdr",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "d97c2490-ded7-4a11-86c4-74fd7a5ac28a",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-08-04T20:39:13.912Z",
+      "createdAt": "2026-08-04T20:39:13.912Z",
+      "role": "workflow:owner",
+      "workflowId": "mG1B4A5hRX8Dnnzu",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
