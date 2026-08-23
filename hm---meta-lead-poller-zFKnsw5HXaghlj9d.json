@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-04T18:23:43.484Z",
+  "updatedAt": "2026-08-23T02:39:38.833Z",
   "createdAt": "2026-08-04T10:56:58.317Z",
   "id": "zFKnsw5HXaghlj9d",
   "name": "HM - Meta Lead Poller",
@@ -8,7 +8,7 @@
   "nodes": [
     {
       "id": "p1",
-      "name": "Every 5 minutes",
+      "name": "Every 15 minutes",
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
@@ -20,7 +20,7 @@
           "interval": [
             {
               "field": "minutes",
-              "minutesInterval": 5
+              "minutesInterval": 15
             }
           ]
         }
@@ -46,7 +46,10 @@
           "id": "bcjd3EsQP1ZcszFm",
           "name": "Meta HM Lead Sync (System User)"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "id": "p3",
@@ -115,7 +118,10 @@
         }
       },
       "executeOnce": true,
-      "alwaysOutputData": true
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     },
     {
       "id": "p6",
@@ -153,17 +159,6 @@
     }
   ],
   "connections": {
-    "Every 5 minutes": {
-      "main": [
-        [
-          {
-            "node": "Get Page Token",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Get Page Token": {
       "main": [
         [
@@ -218,6 +213,17 @@
           }
         ]
       ]
+    },
+    "Every 15 minutes": {
+      "main": [
+        [
+          {
+            "node": "Get Page Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -228,12 +234,15 @@
   "staticData": {
     "node:Every 5 minutes": {
       "recurrenceRules": []
+    },
+    "node:Every 15 minutes": {
+      "recurrenceRules": []
     }
   },
   "meta": null,
   "pinData": null,
-  "versionId": "0919cbc6-bb46-4e22-bcdc-1dc80a51f6ad",
-  "activeVersionId": "0919cbc6-bb46-4e22-bcdc-1dc80a51f6ad",
+  "versionId": "dabbfd2c-1af0-4e42-b880-6fd21fc80c7b",
+  "activeVersionId": "dabbfd2c-1af0-4e42-b880-6fd21fc80c7b",
   "triggerCount": 1,
   "shared": [
     {
@@ -245,14 +254,14 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-04T14:24:19.127Z",
-    "createdAt": "2026-08-04T10:56:58.317Z",
-    "versionId": "0919cbc6-bb46-4e22-bcdc-1dc80a51f6ad",
+    "updatedAt": "2026-08-23T02:39:38.835Z",
+    "createdAt": "2026-08-23T02:39:38.835Z",
+    "versionId": "dabbfd2c-1af0-4e42-b880-6fd21fc80c7b",
     "workflowId": "zFKnsw5HXaghlj9d",
     "nodes": [
       {
         "id": "p1",
-        "name": "Every 5 minutes",
+        "name": "Every 15 minutes",
         "type": "n8n-nodes-base.scheduleTrigger",
         "typeVersion": 1.2,
         "position": [
@@ -264,7 +273,7 @@
             "interval": [
               {
                 "field": "minutes",
-                "minutesInterval": 5
+                "minutesInterval": 15
               }
             ]
           }
@@ -290,7 +299,10 @@
             "id": "bcjd3EsQP1ZcszFm",
             "name": "Meta HM Lead Sync (System User)"
           }
-        }
+        },
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
       },
       {
         "id": "p3",
@@ -359,7 +371,10 @@
           }
         },
         "executeOnce": true,
-        "alwaysOutputData": true
+        "alwaysOutputData": true,
+        "retryOnFail": true,
+        "maxTries": 3,
+        "waitBetweenTries": 5000
       },
       {
         "id": "p6",
@@ -397,17 +412,6 @@
       }
     ],
     "connections": {
-      "Every 5 minutes": {
-        "main": [
-          [
-            {
-              "node": "Get Page Token",
-              "type": "main",
-              "index": 0
-            }
-          ]
-        ]
-      },
       "Get Page Token": {
         "main": [
           [
@@ -462,11 +466,22 @@
             }
           ]
         ]
+      },
+      "Every 15 minutes": {
+        "main": [
+          [
+            {
+              "node": "Get Page Token",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
       }
     },
     "authors": "Hector Meza",
-    "name": "Go live - Meta lead pickup",
-    "description": ""
+    "name": null,
+    "description": null
   },
   "tags": []
 }
