@@ -1,0 +1,162 @@
+{
+  "updatedAt": "2026-08-23T03:13:43.955Z",
+  "createdAt": "2026-08-23T03:13:43.955Z",
+  "id": "qTVVNj4WSZGxOm7G",
+  "name": "ZZ ONE-OFF - Create Clicks Tab",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "mk-clicks-tab",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "t1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "mk-clicks-tab"
+    },
+    {
+      "parameters": {
+        "resource": "sheet",
+        "operation": "create",
+        "documentId": {
+          "__rl": true,
+          "value": "1VZTNVA64f2WQDLFpYIYCgYrrGFzrogI8hiQpgXB61GE",
+          "mode": "id"
+        },
+        "title": "Clicks",
+        "options": {}
+      },
+      "id": "t2",
+      "name": "Create Tab",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        220,
+        0
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1VZTNVA64f2WQDLFpYIYCgYrrGFzrogI8hiQpgXB61GE/values/Clicks!A1:E1",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"values\":[[\"Timestamp\",\"Handle\",\"Share ID\",\"Device\",\"User agent\"]]}",
+        "options": {}
+      },
+      "id": "t3",
+      "name": "Write Headers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=ok",
+        "options": {}
+      },
+      "id": "t4",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Create Tab",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Tab": {
+      "main": [
+        [
+          {
+            "node": "Write Headers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Headers": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "7552e164-fc49-444e-9382-2b31a2cbad08",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-08-23T03:13:43.955Z",
+      "createdAt": "2026-08-23T03:13:43.955Z",
+      "role": "workflow:owner",
+      "workflowId": "qTVVNj4WSZGxOm7G",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
