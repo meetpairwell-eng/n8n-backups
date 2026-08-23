@@ -1,0 +1,424 @@
+{
+  "updatedAt": "2026-08-23T03:12:26.878Z",
+  "createdAt": "2026-08-23T03:12:26.878Z",
+  "id": "0pwG1zZJCvQrqEHJ",
+  "name": "HM - IG Link Click Tracker",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "l",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "w1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "ig-link-click"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inp = $input.first().json;\nconst q = inp.query || {};\nconst headers = inp.headers || {};\nconst ua = String(headers['user-agent'] || '');\n\n// Rebuild the destination from a STRICTLY validated id. Never redirect to a\n// caller-supplied URL - that would turn this into an open redirect that anyone\n// could use to launder a phishing link through Hector's domain.\nconst shareId = String(q.i || '').trim();\nconst valid = /^[A-Za-z0-9]{4,64}$/.test(shareId);\nconst dest = valid\n  ? 'https://portal.onehome.com/en-US/share/' + shareId\n  : 'https://hectormeza.com/';\n\n// Preview CRAWLERS only - deliberately NOT 'Instagram' or 'FBAV'. Instagram's\n// link-preview fetch identifies as facebookexternalhit, while a real human\n// tapping from inside the IG app sends a UA CONTAINING 'Instagram'. Filtering\n// on 'Instagram' would silently discard every genuine click.\nconst BOTS = /(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Slack-ImgProxy|TelegramBot|Discordbot|WhatsApp\\/|SkypeUriPreview|Embedly|Iframely|redditbot|Pinterest|Applebot|Googlebot|bingbot|DuckDuckBot|YandexBot|Baiduspider|curl\\/|Wget|python-requests|python-urllib|node-fetch|axios\\/|Go-http-client|okhttp|libwww-perl|Java\\/|HeadlessChrome|PhantomJS|crawler|spider|scraper|monitoring|uptime|pingdom|statuscake|preview)/i;\nconst isBot = BOTS.test(ua) || ua === '';\n\nconst ts = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',\n  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false\n}).format(new Date()).replace(',', '');\n\nlet device = /iPhone|iPad|Android|Mobile/i.test(ua) ? 'Mobile' : 'Desktop';\nif (/Instagram/i.test(ua)) device += ' (IG app)';\n\nreturn [{ json: {\n  ts: ts,\n  dest: dest,\n  isBot: isBot,\n  shareId: shareId,\n  handle: String(q.r || '').trim(),\n  device: device,\n  ua: ua.slice(0, 300)\n} }];"
+      },
+      "id": "w2",
+      "name": "Classify",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.isBot }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "w3",
+      "name": "Real click?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1VZTNVA64f2WQDLFpYIYCgYrrGFzrogI8hiQpgXB61GE",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Clicks",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Timestamp": "={{ $json.ts }}",
+            "Handle": "={{ $json.handle }}",
+            "Share ID": "={{ $json.shareId }}",
+            "Device": "={{ $json.device }}",
+            "User agent": "={{ $json.ua }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "w4",
+      "name": "Log click",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        660,
+        -100
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "redirect",
+        "redirectURL": "={{ $('Classify').first().json.dest }}",
+        "options": {}
+      },
+      "id": "w5",
+      "name": "Redirect (human)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "redirect",
+        "redirectURL": "={{ $('Classify').first().json.dest }}",
+        "options": {}
+      },
+      "id": "w6",
+      "name": "Redirect (bot, unlogged)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        660,
+        100
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Classify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classify": {
+      "main": [
+        [
+          {
+            "node": "Real click?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Real click?": {
+      "main": [
+        [
+          {
+            "node": "Log click",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Redirect (bot, unlogged)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log click": {
+      "main": [
+        [
+          {
+            "node": "Redirect (human)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": null,
+  "versionId": "56f70381-1c46-441a-b2aa-03b909184c5c",
+  "activeVersionId": "56f70381-1c46-441a-b2aa-03b909184c5c",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-08-23T03:12:26.878Z",
+      "createdAt": "2026-08-23T03:12:26.878Z",
+      "role": "workflow:owner",
+      "workflowId": "0pwG1zZJCvQrqEHJ",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-08-23T03:12:26.889Z",
+    "createdAt": "2026-08-23T03:12:26.889Z",
+    "versionId": "56f70381-1c46-441a-b2aa-03b909184c5c",
+    "workflowId": "0pwG1zZJCvQrqEHJ",
+    "nodes": [
+      {
+        "parameters": {
+          "httpMethod": "GET",
+          "path": "l",
+          "responseMode": "responseNode",
+          "options": {}
+        },
+        "id": "w1",
+        "name": "Webhook",
+        "type": "n8n-nodes-base.webhook",
+        "typeVersion": 2.1,
+        "position": [
+          0,
+          0
+        ],
+        "webhookId": "ig-link-click"
+      },
+      {
+        "parameters": {
+          "jsCode": "const inp = $input.first().json;\nconst q = inp.query || {};\nconst headers = inp.headers || {};\nconst ua = String(headers['user-agent'] || '');\n\n// Rebuild the destination from a STRICTLY validated id. Never redirect to a\n// caller-supplied URL - that would turn this into an open redirect that anyone\n// could use to launder a phishing link through Hector's domain.\nconst shareId = String(q.i || '').trim();\nconst valid = /^[A-Za-z0-9]{4,64}$/.test(shareId);\nconst dest = valid\n  ? 'https://portal.onehome.com/en-US/share/' + shareId\n  : 'https://hectormeza.com/';\n\n// Preview CRAWLERS only - deliberately NOT 'Instagram' or 'FBAV'. Instagram's\n// link-preview fetch identifies as facebookexternalhit, while a real human\n// tapping from inside the IG app sends a UA CONTAINING 'Instagram'. Filtering\n// on 'Instagram' would silently discard every genuine click.\nconst BOTS = /(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Slack-ImgProxy|TelegramBot|Discordbot|WhatsApp\\/|SkypeUriPreview|Embedly|Iframely|redditbot|Pinterest|Applebot|Googlebot|bingbot|DuckDuckBot|YandexBot|Baiduspider|curl\\/|Wget|python-requests|python-urllib|node-fetch|axios\\/|Go-http-client|okhttp|libwww-perl|Java\\/|HeadlessChrome|PhantomJS|crawler|spider|scraper|monitoring|uptime|pingdom|statuscake|preview)/i;\nconst isBot = BOTS.test(ua) || ua === '';\n\nconst ts = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',\n  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false\n}).format(new Date()).replace(',', '');\n\nlet device = /iPhone|iPad|Android|Mobile/i.test(ua) ? 'Mobile' : 'Desktop';\nif (/Instagram/i.test(ua)) device += ' (IG app)';\n\nreturn [{ json: {\n  ts: ts,\n  dest: dest,\n  isBot: isBot,\n  shareId: shareId,\n  handle: String(q.r || '').trim(),\n  device: device,\n  ua: ua.slice(0, 300)\n} }];"
+        },
+        "id": "w2",
+        "name": "Classify",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          220,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "c1",
+                "leftValue": "={{ $json.isBot }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "false",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "id": "w3",
+        "name": "Real click?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "operation": "append",
+          "documentId": {
+            "__rl": true,
+            "value": "1VZTNVA64f2WQDLFpYIYCgYrrGFzrogI8hiQpgXB61GE",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "Clicks",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "defineBelow",
+            "value": {
+              "Timestamp": "={{ $json.ts }}",
+              "Handle": "={{ $json.handle }}",
+              "Share ID": "={{ $json.shareId }}",
+              "Device": "={{ $json.device }}",
+              "User agent": "={{ $json.ua }}"
+            },
+            "matchingColumns": [],
+            "schema": []
+          },
+          "options": {}
+        },
+        "id": "w4",
+        "name": "Log click",
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          660,
+          -100
+        ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "respondWith": "redirect",
+          "redirectURL": "={{ $('Classify').first().json.dest }}",
+          "options": {}
+        },
+        "id": "w5",
+        "name": "Redirect (human)",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          880,
+          -100
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "redirect",
+          "redirectURL": "={{ $('Classify').first().json.dest }}",
+          "options": {}
+        },
+        "id": "w6",
+        "name": "Redirect (bot, unlogged)",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          660,
+          100
+        ]
+      }
+    ],
+    "connections": {
+      "Webhook": {
+        "main": [
+          [
+            {
+              "node": "Classify",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Classify": {
+        "main": [
+          [
+            {
+              "node": "Real click?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Real click?": {
+        "main": [
+          [
+            {
+              "node": "Log click",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Redirect (bot, unlogged)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Log click": {
+        "main": [
+          [
+            {
+              "node": "Redirect (human)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "Hector Meza",
+    "name": null,
+    "description": null
+  },
+  "tags": []
+}
