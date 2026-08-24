@@ -1,0 +1,466 @@
+{
+  "updatedAt": "2026-08-23T14:15:22.225Z",
+  "createdAt": "2026-08-23T14:14:14.610Z",
+  "id": "pug0IlYWynux4Xks",
+  "name": "HM - OneHome Link Checker (daily)",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "id": "c1",
+      "name": "Daily 8am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1VZTNVA64f2WQDLFpYIYCgYrrGFzrogI8hiQpgXB61GE/values/Settings!D2:H60",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "c2",
+      "name": "Read Settings",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Settings!D2:H60 -> D=address(0) E=nickname(1) F=status(2) G=local(3) H=link(4)\nconst rows = ($input.first().json.values) || [];\nconst out = [];\nfor (const r of rows) {\n  const addr = String((r && r[0]) || '').trim();\n  const link = String((r && r[4]) || '').trim();\n  if (!addr || !link) continue;\n  const m = link.match(/\\/share\\/([A-Za-z0-9]+)/);\n  if (!m) continue;   // not a OneHome share link - nothing to check\n  out.push({ json: { addr: addr, link: link, shareId: m[1] } });\n}\nreturn out;"
+      },
+      "id": "c3",
+      "name": "Extract Links",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://services.onehome.com/api/authentication/checkShare/{{ $json.shareId }}",
+        "options": {}
+      },
+      "id": "c4",
+      "name": "Check Share",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        0
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// A LIVE share returns {\"emailToken\":\"...\"}; a DEAD one returns {} .\n// Both are HTTP 200, so the body is the only signal - status codes tell you nothing.\n// A request that errored outright is treated as UNKNOWN, not dead, so a blip in\n// OneHome or the network can't fire a false alarm about a link that is fine.\nconst src = $('Extract Links').all();\nconst resp = $input.all();\nconst dead = [];\nlet unknown = 0;\nfor (let i = 0; i < resp.length; i++) {\n  const j = (resp[i] && resp[i].json) || {};\n  const s = (src[i] && src[i].json) || {};\n  if (j.error) { unknown++; continue; }\n  const ok = typeof j.emailToken === 'string' && j.emailToken.length > 0;\n  if (!ok) dead.push({ addr: s.addr, link: s.link });\n}\nreturn [{ json: { checked: resp.length, deadCount: dead.length, unknown: unknown, dead: dead } }];"
+      },
+      "id": "c5",
+      "name": "Find Dead",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        880,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d1",
+              "leftValue": "={{ $json.deadCount }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "id": "c6",
+      "name": "Any dead?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1100,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "h.mezarealty@gmail.com",
+        "subject": "={{ $json.deadCount }} dead OneHome link{{ $json.deadCount === 1 ? '' : 's' }} in your IG tracker",
+        "message": "=<p>These OneHome links on the <b>Settings</b> tab no longer resolve. Anyone who taps them gets OneHome's \"Sorry! This page doesn't exist.\" page.</p><ul>{{ $json.dead.map(function(d){ return '<li><b>' + d.addr + '</b><br><span style=\"color:#888;font-size:12px\">' + d.link + '</span></li>'; }).join('') }}</ul><p><b>Fix:</b> generate a fresh share link in OneHome and paste it into <b>Settings column H</b> beside that address.</p><p style=\"color:#888;font-size:12px\">Checked {{ $json.checked }} link(s).{{ $json.unknown > 0 ? ' ' + $json.unknown + ' could not be reached and were skipped, not flagged.' : '' }}</p>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "c7",
+      "name": "Email Hector",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        -100
+      ],
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bsAbfRmGUOzzryvM",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Daily 8am": {
+      "main": [
+        [
+          {
+            "node": "Read Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Settings": {
+      "main": [
+        [
+          {
+            "node": "Extract Links",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Links": {
+      "main": [
+        [
+          {
+            "node": "Check Share",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Share": {
+      "main": [
+        [
+          {
+            "node": "Find Dead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Dead": {
+      "main": [
+        [
+          {
+            "node": "Any dead?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Any dead?": {
+      "main": [
+        [
+          {
+            "node": "Email Hector",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Daily 8am": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": null,
+  "versionId": "405c926f-167e-4aff-90a6-0bd0f2324dd2",
+  "activeVersionId": "405c926f-167e-4aff-90a6-0bd0f2324dd2",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-08-23T14:14:14.610Z",
+      "createdAt": "2026-08-23T14:14:14.610Z",
+      "role": "workflow:owner",
+      "workflowId": "pug0IlYWynux4Xks",
+      "projectId": "EwZFwcRPsRQcg8Kx"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-08-23T14:15:22.226Z",
+    "createdAt": "2026-08-23T14:15:22.226Z",
+    "versionId": "405c926f-167e-4aff-90a6-0bd0f2324dd2",
+    "workflowId": "pug0IlYWynux4Xks",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "field": "days",
+                "triggerAtHour": 8
+              }
+            ]
+          }
+        },
+        "id": "c1",
+        "name": "Daily 8am",
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          0,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "url": "https://sheets.googleapis.com/v4/spreadsheets/1VZTNVA64f2WQDLFpYIYCgYrrGFzrogI8hiQpgXB61GE/values/Settings!D2:H60",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleSheetsOAuth2Api",
+          "options": {}
+        },
+        "id": "c2",
+        "name": "Read Settings",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          220,
+          0
+        ],
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Settings!D2:H60 -> D=address(0) E=nickname(1) F=status(2) G=local(3) H=link(4)\nconst rows = ($input.first().json.values) || [];\nconst out = [];\nfor (const r of rows) {\n  const addr = String((r && r[0]) || '').trim();\n  const link = String((r && r[4]) || '').trim();\n  if (!addr || !link) continue;\n  const m = link.match(/\\/share\\/([A-Za-z0-9]+)/);\n  if (!m) continue;   // not a OneHome share link - nothing to check\n  out.push({ json: { addr: addr, link: link, shareId: m[1] } });\n}\nreturn out;"
+        },
+        "id": "c3",
+        "name": "Extract Links",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          440,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "url": "=https://services.onehome.com/api/authentication/checkShare/{{ $json.shareId }}",
+          "options": {}
+        },
+        "id": "c4",
+        "name": "Check Share",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          660,
+          0
+        ],
+        "onError": "continueRegularOutput"
+      },
+      {
+        "parameters": {
+          "jsCode": "// A LIVE share returns {\"emailToken\":\"...\"}; a DEAD one returns {} .\n// Both are HTTP 200, so the body is the only signal - status codes tell you nothing.\n// A request that errored outright is treated as UNKNOWN, not dead, so a blip in\n// OneHome or the network can't fire a false alarm about a link that is fine.\nconst src = $('Extract Links').all();\nconst resp = $input.all();\nconst dead = [];\nlet unknown = 0;\nfor (let i = 0; i < resp.length; i++) {\n  const j = (resp[i] && resp[i].json) || {};\n  const s = (src[i] && src[i].json) || {};\n  if (j.error) { unknown++; continue; }\n  const ok = typeof j.emailToken === 'string' && j.emailToken.length > 0;\n  if (!ok) dead.push({ addr: s.addr, link: s.link });\n}\nreturn [{ json: { checked: resp.length, deadCount: dead.length, unknown: unknown, dead: dead } }];"
+        },
+        "id": "c5",
+        "name": "Find Dead",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          880,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "d1",
+                "leftValue": "={{ $json.deadCount }}",
+                "rightValue": 0,
+                "operator": {
+                  "type": "number",
+                  "operation": "gt"
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
+          "options": {}
+        },
+        "id": "c6",
+        "name": "Any dead?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1100,
+          0
+        ]
+      },
+      {
+        "parameters": {
+          "sendTo": "h.mezarealty@gmail.com",
+          "subject": "={{ $json.deadCount }} dead OneHome link{{ $json.deadCount === 1 ? '' : 's' }} in your IG tracker",
+          "message": "=<p>These OneHome links on the <b>Settings</b> tab no longer resolve. Anyone who taps them gets OneHome's \"Sorry! This page doesn't exist.\" page.</p><ul>{{ $json.dead.map(function(d){ return '<li><b>' + d.addr + '</b><br><span style=\"color:#888;font-size:12px\">' + d.link + '</span></li>'; }).join('') }}</ul><p><b>Fix:</b> generate a fresh share link in OneHome and paste it into <b>Settings column H</b> beside that address.</p><p style=\"color:#888;font-size:12px\">Checked {{ $json.checked }} link(s).{{ $json.unknown > 0 ? ' ' + $json.unknown + ' could not be reached and were skipped, not flagged.' : '' }}</p>",
+          "options": {
+            "appendAttribution": false
+          }
+        },
+        "id": "c7",
+        "name": "Email Hector",
+        "type": "n8n-nodes-base.gmail",
+        "typeVersion": 2,
+        "position": [
+          1320,
+          -100
+        ],
+        "credentials": {
+          "gmailOAuth2": {
+            "id": "bsAbfRmGUOzzryvM",
+            "name": "Gmail account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Daily 8am": {
+        "main": [
+          [
+            {
+              "node": "Read Settings",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Settings": {
+        "main": [
+          [
+            {
+              "node": "Extract Links",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Extract Links": {
+        "main": [
+          [
+            {
+              "node": "Check Share",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Check Share": {
+        "main": [
+          [
+            {
+              "node": "Find Dead",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Find Dead": {
+        "main": [
+          [
+            {
+              "node": "Any dead?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Any dead?": {
+        "main": [
+          [
+            {
+              "node": "Email Hector",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          []
+        ]
+      }
+    },
+    "authors": "Hector Meza",
+    "name": null,
+    "description": null
+  },
+  "tags": []
+}
