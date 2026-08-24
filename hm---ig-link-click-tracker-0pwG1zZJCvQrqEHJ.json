@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-08-23T03:12:26.878Z",
+  "updatedAt": "2026-08-23T19:22:23.120Z",
   "createdAt": "2026-08-23T03:12:26.878Z",
   "id": "0pwG1zZJCvQrqEHJ",
   "name": "HM - IG Link Click Tracker",
@@ -25,7 +25,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const inp = $input.first().json;\nconst q = inp.query || {};\nconst headers = inp.headers || {};\nconst ua = String(headers['user-agent'] || '');\n\n// Rebuild the destination from a STRICTLY validated id. Never redirect to a\n// caller-supplied URL - that would turn this into an open redirect that anyone\n// could use to launder a phishing link through Hector's domain.\nconst shareId = String(q.i || '').trim();\nconst valid = /^[A-Za-z0-9]{4,64}$/.test(shareId);\nconst dest = valid\n  ? 'https://portal.onehome.com/en-US/share/' + shareId\n  : 'https://hectormeza.com/';\n\n// Preview CRAWLERS only - deliberately NOT 'Instagram' or 'FBAV'. Instagram's\n// link-preview fetch identifies as facebookexternalhit, while a real human\n// tapping from inside the IG app sends a UA CONTAINING 'Instagram'. Filtering\n// on 'Instagram' would silently discard every genuine click.\nconst BOTS = /(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Slack-ImgProxy|TelegramBot|Discordbot|WhatsApp\\/|SkypeUriPreview|Embedly|Iframely|redditbot|Pinterest|Applebot|Googlebot|bingbot|DuckDuckBot|YandexBot|Baiduspider|curl\\/|Wget|python-requests|python-urllib|node-fetch|axios\\/|Go-http-client|okhttp|libwww-perl|Java\\/|HeadlessChrome|PhantomJS|crawler|spider|scraper|monitoring|uptime|pingdom|statuscake|preview)/i;\nconst isBot = BOTS.test(ua) || ua === '';\n\nconst ts = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',\n  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false\n}).format(new Date()).replace(',', '');\n\nlet device = /iPhone|iPad|Android|Mobile/i.test(ua) ? 'Mobile' : 'Desktop';\nif (/Instagram/i.test(ua)) device += ' (IG app)';\n\nreturn [{ json: {\n  ts: ts,\n  dest: dest,\n  isBot: isBot,\n  shareId: shareId,\n  handle: String(q.r || '').trim(),\n  device: device,\n  ua: ua.slice(0, 300)\n} }];"
+        "jsCode": "// The Cloudflare Worker already filtered crawlers, stale browsers and\n// datacentre traffic before calling this. What is left here is a second line of\n// defence plus the fields the sheet records.\nconst inp = $input.first().json;\nconst q = inp.query || {};\nconst headers = inp.headers || {};\nconst ua = String(headers['user-agent'] || '');\n\nconst shareId = String(q.i || '').trim();\nconst valid = /^[A-Za-z0-9]{4,64}$/.test(shareId);\n\nconst BOTS = /(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|TelegramBot|Discordbot|WhatsApp\\/|Embedly|redditbot|Applebot|Googlebot|bingbot|curl\\/|Wget|python-requests|node-fetch|axios\\/|Go-http-client|okhttp|HeadlessChrome|crawler|spider|scraper|preview)/i;\nlet isBot = BOTS.test(ua) || ua === '' || !valid;\nlet m = ua.match(/Firefox\\/(\\d+)/i); if (m && +m[1] < 100) isBot = true;\nm = ua.match(/Chrome\\/(\\d+)/i);      if (m && +m[1] < 100) isBot = true;\n\nconst ts = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',\n  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false\n}).format(new Date()).replace(',', '');\n\nlet device = /iPhone|iPad|Android|Mobile/i.test(ua) ? 'Mobile' : 'Desktop';\nif (/Instagram/i.test(ua)) device += ' (IG app)';\n\nreturn [{ json: {\n  ts: ts,\n  dest: valid ? 'https://portal.onehome.com/en-US/share/' + shareId : 'https://hectormeza.com/',\n  isBot: isBot,\n  shareId: shareId,\n  handle: String(q.r || '').trim(),\n  net: String(q.net || '').trim(),\n  cc: String(q.cc || '').trim(),\n  device: device,\n  ua: ua.slice(0, 300)\n} }];"
       },
       "id": "w2",
       "name": "Classify",
@@ -91,7 +91,9 @@
             "Handle": "={{ $json.handle }}",
             "Share ID": "={{ $json.shareId }}",
             "Device": "={{ $json.device }}",
-            "User agent": "={{ $json.ua }}"
+            "User agent": "={{ $json.ua }}",
+            "Network": "={{ $json.net }}",
+            "Country": "={{ $json.cc }}"
           },
           "matchingColumns": [],
           "schema": []
@@ -104,7 +106,7 @@
       "typeVersion": 4.7,
       "position": [
         660,
-        -100
+        -120
       ],
       "onError": "continueRegularOutput",
       "credentials": {
@@ -116,32 +118,150 @@
     },
     {
       "parameters": {
-        "respondWith": "redirect",
-        "redirectURL": "={{ $('Classify').first().json.dest }}",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1VZTNVA64f2WQDLFpYIYCgYrrGFzrogI8hiQpgXB61GE/values/Settings!D2:H60",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
         "options": {}
       },
       "id": "w5",
-      "name": "Redirect (human)",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.1,
+      "name": "Read Settings",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
         880,
-        -100
+        -120
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/1VZTNVA64f2WQDLFpYIYCgYrrGFzrogI8hiQpgXB61GE/values/Clicks!A2:B2000",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "id": "w6",
+      "name": "Read Clicks",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        -120
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "LOY4ptTaJww2LC2j",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Decides whether this click is worth a text.\n// Throttle: one text per handle per 30 minutes. A reload or a second tap should\n// not buzz the phone twice, and the point of the alert is \"they are looking RIGHT\n// NOW\" - which the first text already said.\nconst c = $('Classify').first().json;\n\n// shareId -> street address, so the text names the house instead of an id.\nlet addr = '';\ntry {\n  const rows = ($('Read Settings').first().json.values) || [];\n  for (const r of rows) {\n    const link = String((r && r[4]) || '');\n    if (c.shareId && link.indexOf(c.shareId) >= 0) { addr = String(r[0] || '').trim(); break; }\n  }\n} catch (e) { /* address is a nicety, never block the alert on it */ }\n\n// Timestamps are written 'YYYY-MM-DD HH:MM:SS' in one timezone, so a plain\n// string compare is also a chronological compare. No date parsing needed.\nconst cutoff = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',\n  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false\n}).format(new Date(Date.now() - 30 * 60 * 1000)).replace(',', '');\n\nlet recent = 0;\ntry {\n  const rows = ($('Read Clicks').first().json.values) || [];\n  for (const r of rows) {\n    const t = String((r && r[0]) || '');\n    const h = String((r && r[1]) || '').trim();\n    if (h && c.handle && h.toLowerCase() === c.handle.toLowerCase() && t >= cutoff) recent++;\n  }\n} catch (e) { recent = 1; }\n\n// The row for THIS click is already in the sheet, so 1 means it is the first.\nconst notify = recent <= 1;\nreturn [{ json: {\n  notify: notify,\n  handle: c.handle || '(no handle)',\n  addr: addr,\n  device: c.device,\n  net: c.net,\n  recent: recent\n} }];"
+      },
+      "id": "w7",
+      "name": "Worth a text?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1320,
+        -120
       ]
     },
     {
       "parameters": {
-        "respondWith": "redirect",
-        "redirectURL": "={{ $('Classify').first().json.dest }}",
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "n1",
+              "leftValue": "={{ $json.notify }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
         "options": {}
       },
-      "id": "w6",
-      "name": "Redirect (bot, unlogged)",
+      "id": "w8",
+      "name": "First in 30m?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1540,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "from": "+18557748160",
+        "to": "+12146865641",
+        "toWhatsapp": false,
+        "message": "=👀 Link opened / @{{ $json.handle }} / {{ $json.addr ? $json.addr : 'your listing link' }} / {{ $json.device }}",
+        "options": {}
+      },
+      "id": "w9",
+      "name": "Text Hector",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        -220
+      ],
+      "onError": "continueRegularOutput",
+      "credentials": {
+        "twilioApi": {
+          "id": "dWisw1s0Uo0aeUz3",
+          "name": "Twilio (Hector) 2026-07"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=ok",
+        "options": {}
+      },
+      "id": "w10",
+      "name": "Done (human)",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1980,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=ok",
+        "options": {}
+      },
+      "id": "w11",
+      "name": "Done (bot, unlogged)",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.1,
       "position": [
         660,
-        100
+        120
       ]
     }
   ],
@@ -179,7 +299,7 @@
         ],
         [
           {
-            "node": "Redirect (bot, unlogged)",
+            "node": "Done (bot, unlogged)",
             "type": "main",
             "index": 0
           }
@@ -190,7 +310,69 @@
       "main": [
         [
           {
-            "node": "Redirect (human)",
+            "node": "Read Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Settings": {
+      "main": [
+        [
+          {
+            "node": "Read Clicks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Clicks": {
+      "main": [
+        [
+          {
+            "node": "Worth a text?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Worth a text?": {
+      "main": [
+        [
+          {
+            "node": "First in 30m?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "First in 30m?": {
+      "main": [
+        [
+          {
+            "node": "Text Hector",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Done (human)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Hector": {
+      "main": [
+        [
+          {
+            "node": "Done (human)",
             "type": "main",
             "index": 0
           }
@@ -206,8 +388,8 @@
   "staticData": null,
   "meta": null,
   "pinData": null,
-  "versionId": "56f70381-1c46-441a-b2aa-03b909184c5c",
-  "activeVersionId": "56f70381-1c46-441a-b2aa-03b909184c5c",
+  "versionId": "55cb4ce2-05fa-46ca-b002-e3c884cc1fc7",
+  "activeVersionId": "55cb4ce2-05fa-46ca-b002-e3c884cc1fc7",
   "triggerCount": 1,
   "shared": [
     {
@@ -219,9 +401,9 @@
     }
   ],
   "activeVersion": {
-    "updatedAt": "2026-08-23T03:12:26.889Z",
-    "createdAt": "2026-08-23T03:12:26.889Z",
-    "versionId": "56f70381-1c46-441a-b2aa-03b909184c5c",
+    "updatedAt": "2026-08-23T19:22:23.122Z",
+    "createdAt": "2026-08-23T19:22:23.122Z",
+    "versionId": "55cb4ce2-05fa-46ca-b002-e3c884cc1fc7",
     "workflowId": "0pwG1zZJCvQrqEHJ",
     "nodes": [
       {
@@ -243,7 +425,7 @@
       },
       {
         "parameters": {
-          "jsCode": "const inp = $input.first().json;\nconst q = inp.query || {};\nconst headers = inp.headers || {};\nconst ua = String(headers['user-agent'] || '');\n\n// Rebuild the destination from a STRICTLY validated id. Never redirect to a\n// caller-supplied URL - that would turn this into an open redirect that anyone\n// could use to launder a phishing link through Hector's domain.\nconst shareId = String(q.i || '').trim();\nconst valid = /^[A-Za-z0-9]{4,64}$/.test(shareId);\nconst dest = valid\n  ? 'https://portal.onehome.com/en-US/share/' + shareId\n  : 'https://hectormeza.com/';\n\n// Preview CRAWLERS only - deliberately NOT 'Instagram' or 'FBAV'. Instagram's\n// link-preview fetch identifies as facebookexternalhit, while a real human\n// tapping from inside the IG app sends a UA CONTAINING 'Instagram'. Filtering\n// on 'Instagram' would silently discard every genuine click.\nconst BOTS = /(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|Slack-ImgProxy|TelegramBot|Discordbot|WhatsApp\\/|SkypeUriPreview|Embedly|Iframely|redditbot|Pinterest|Applebot|Googlebot|bingbot|DuckDuckBot|YandexBot|Baiduspider|curl\\/|Wget|python-requests|python-urllib|node-fetch|axios\\/|Go-http-client|okhttp|libwww-perl|Java\\/|HeadlessChrome|PhantomJS|crawler|spider|scraper|monitoring|uptime|pingdom|statuscake|preview)/i;\nconst isBot = BOTS.test(ua) || ua === '';\n\nconst ts = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',\n  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false\n}).format(new Date()).replace(',', '');\n\nlet device = /iPhone|iPad|Android|Mobile/i.test(ua) ? 'Mobile' : 'Desktop';\nif (/Instagram/i.test(ua)) device += ' (IG app)';\n\nreturn [{ json: {\n  ts: ts,\n  dest: dest,\n  isBot: isBot,\n  shareId: shareId,\n  handle: String(q.r || '').trim(),\n  device: device,\n  ua: ua.slice(0, 300)\n} }];"
+          "jsCode": "// The Cloudflare Worker already filtered crawlers, stale browsers and\n// datacentre traffic before calling this. What is left here is a second line of\n// defence plus the fields the sheet records.\nconst inp = $input.first().json;\nconst q = inp.query || {};\nconst headers = inp.headers || {};\nconst ua = String(headers['user-agent'] || '');\n\nconst shareId = String(q.i || '').trim();\nconst valid = /^[A-Za-z0-9]{4,64}$/.test(shareId);\n\nconst BOTS = /(facebookexternalhit|Facebot|Twitterbot|LinkedInBot|Slackbot|TelegramBot|Discordbot|WhatsApp\\/|Embedly|redditbot|Applebot|Googlebot|bingbot|curl\\/|Wget|python-requests|node-fetch|axios\\/|Go-http-client|okhttp|HeadlessChrome|crawler|spider|scraper|preview)/i;\nlet isBot = BOTS.test(ua) || ua === '' || !valid;\nlet m = ua.match(/Firefox\\/(\\d+)/i); if (m && +m[1] < 100) isBot = true;\nm = ua.match(/Chrome\\/(\\d+)/i);      if (m && +m[1] < 100) isBot = true;\n\nconst ts = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',\n  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false\n}).format(new Date()).replace(',', '');\n\nlet device = /iPhone|iPad|Android|Mobile/i.test(ua) ? 'Mobile' : 'Desktop';\nif (/Instagram/i.test(ua)) device += ' (IG app)';\n\nreturn [{ json: {\n  ts: ts,\n  dest: valid ? 'https://portal.onehome.com/en-US/share/' + shareId : 'https://hectormeza.com/',\n  isBot: isBot,\n  shareId: shareId,\n  handle: String(q.r || '').trim(),\n  net: String(q.net || '').trim(),\n  cc: String(q.cc || '').trim(),\n  device: device,\n  ua: ua.slice(0, 300)\n} }];"
         },
         "id": "w2",
         "name": "Classify",
@@ -309,7 +491,9 @@
               "Handle": "={{ $json.handle }}",
               "Share ID": "={{ $json.shareId }}",
               "Device": "={{ $json.device }}",
-              "User agent": "={{ $json.ua }}"
+              "User agent": "={{ $json.ua }}",
+              "Network": "={{ $json.net }}",
+              "Country": "={{ $json.cc }}"
             },
             "matchingColumns": [],
             "schema": []
@@ -322,7 +506,7 @@
         "typeVersion": 4.7,
         "position": [
           660,
-          -100
+          -120
         ],
         "onError": "continueRegularOutput",
         "credentials": {
@@ -334,32 +518,150 @@
       },
       {
         "parameters": {
-          "respondWith": "redirect",
-          "redirectURL": "={{ $('Classify').first().json.dest }}",
+          "url": "https://sheets.googleapis.com/v4/spreadsheets/1VZTNVA64f2WQDLFpYIYCgYrrGFzrogI8hiQpgXB61GE/values/Settings!D2:H60",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleSheetsOAuth2Api",
           "options": {}
         },
         "id": "w5",
-        "name": "Redirect (human)",
-        "type": "n8n-nodes-base.respondToWebhook",
-        "typeVersion": 1.1,
+        "name": "Read Settings",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
         "position": [
           880,
-          -100
+          -120
+        ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "url": "https://sheets.googleapis.com/v4/spreadsheets/1VZTNVA64f2WQDLFpYIYCgYrrGFzrogI8hiQpgXB61GE/values/Clicks!A2:B2000",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleSheetsOAuth2Api",
+          "options": {}
+        },
+        "id": "w6",
+        "name": "Read Clicks",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.2,
+        "position": [
+          1100,
+          -120
+        ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "googleSheetsOAuth2Api": {
+            "id": "LOY4ptTaJww2LC2j",
+            "name": "Google Sheets account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "jsCode": "// Decides whether this click is worth a text.\n// Throttle: one text per handle per 30 minutes. A reload or a second tap should\n// not buzz the phone twice, and the point of the alert is \"they are looking RIGHT\n// NOW\" - which the first text already said.\nconst c = $('Classify').first().json;\n\n// shareId -> street address, so the text names the house instead of an id.\nlet addr = '';\ntry {\n  const rows = ($('Read Settings').first().json.values) || [];\n  for (const r of rows) {\n    const link = String((r && r[4]) || '');\n    if (c.shareId && link.indexOf(c.shareId) >= 0) { addr = String(r[0] || '').trim(); break; }\n  }\n} catch (e) { /* address is a nicety, never block the alert on it */ }\n\n// Timestamps are written 'YYYY-MM-DD HH:MM:SS' in one timezone, so a plain\n// string compare is also a chronological compare. No date parsing needed.\nconst cutoff = new Intl.DateTimeFormat('en-CA', {\n  timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit',\n  hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false\n}).format(new Date(Date.now() - 30 * 60 * 1000)).replace(',', '');\n\nlet recent = 0;\ntry {\n  const rows = ($('Read Clicks').first().json.values) || [];\n  for (const r of rows) {\n    const t = String((r && r[0]) || '');\n    const h = String((r && r[1]) || '').trim();\n    if (h && c.handle && h.toLowerCase() === c.handle.toLowerCase() && t >= cutoff) recent++;\n  }\n} catch (e) { recent = 1; }\n\n// The row for THIS click is already in the sheet, so 1 means it is the first.\nconst notify = recent <= 1;\nreturn [{ json: {\n  notify: notify,\n  handle: c.handle || '(no handle)',\n  addr: addr,\n  device: c.device,\n  net: c.net,\n  recent: recent\n} }];"
+        },
+        "id": "w7",
+        "name": "Worth a text?",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          1320,
+          -120
         ]
       },
       {
         "parameters": {
-          "respondWith": "redirect",
-          "redirectURL": "={{ $('Classify').first().json.dest }}",
+          "conditions": {
+            "options": {
+              "caseSensitive": true,
+              "leftValue": "",
+              "typeValidation": "loose",
+              "version": 2
+            },
+            "conditions": [
+              {
+                "id": "n1",
+                "leftValue": "={{ $json.notify }}",
+                "rightValue": "",
+                "operator": {
+                  "type": "boolean",
+                  "operation": "true",
+                  "singleValue": true
+                }
+              }
+            ],
+            "combinator": "and"
+          },
+          "looseTypeValidation": true,
           "options": {}
         },
-        "id": "w6",
-        "name": "Redirect (bot, unlogged)",
+        "id": "w8",
+        "name": "First in 30m?",
+        "type": "n8n-nodes-base.if",
+        "typeVersion": 2.2,
+        "position": [
+          1540,
+          -120
+        ]
+      },
+      {
+        "parameters": {
+          "from": "+18557748160",
+          "to": "+12146865641",
+          "toWhatsapp": false,
+          "message": "=👀 Link opened / @{{ $json.handle }} / {{ $json.addr ? $json.addr : 'your listing link' }} / {{ $json.device }}",
+          "options": {}
+        },
+        "id": "w9",
+        "name": "Text Hector",
+        "type": "n8n-nodes-base.twilio",
+        "typeVersion": 1,
+        "position": [
+          1760,
+          -220
+        ],
+        "onError": "continueRegularOutput",
+        "credentials": {
+          "twilioApi": {
+            "id": "dWisw1s0Uo0aeUz3",
+            "name": "Twilio (Hector) 2026-07"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "=ok",
+          "options": {}
+        },
+        "id": "w10",
+        "name": "Done (human)",
+        "type": "n8n-nodes-base.respondToWebhook",
+        "typeVersion": 1.1,
+        "position": [
+          1980,
+          -120
+        ]
+      },
+      {
+        "parameters": {
+          "respondWith": "text",
+          "responseBody": "=ok",
+          "options": {}
+        },
+        "id": "w11",
+        "name": "Done (bot, unlogged)",
         "type": "n8n-nodes-base.respondToWebhook",
         "typeVersion": 1.1,
         "position": [
           660,
-          100
+          120
         ]
       }
     ],
@@ -397,7 +699,7 @@
           ],
           [
             {
-              "node": "Redirect (bot, unlogged)",
+              "node": "Done (bot, unlogged)",
               "type": "main",
               "index": 0
             }
@@ -408,7 +710,69 @@
         "main": [
           [
             {
-              "node": "Redirect (human)",
+              "node": "Read Settings",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Settings": {
+        "main": [
+          [
+            {
+              "node": "Read Clicks",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Read Clicks": {
+        "main": [
+          [
+            {
+              "node": "Worth a text?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Worth a text?": {
+        "main": [
+          [
+            {
+              "node": "First in 30m?",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "First in 30m?": {
+        "main": [
+          [
+            {
+              "node": "Text Hector",
+              "type": "main",
+              "index": 0
+            }
+          ],
+          [
+            {
+              "node": "Done (human)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Text Hector": {
+        "main": [
+          [
+            {
+              "node": "Done (human)",
               "type": "main",
               "index": 0
             }
