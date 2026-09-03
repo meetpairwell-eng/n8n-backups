@@ -119,6 +119,10 @@
         "ZZ TEMP - throttle test (delete me)": {
           "last": 1787452874887,
           "suppressed": 2
+        },
+        "HM - Meta Lead Poller": {
+          "last": 1788398307831,
+          "suppressed": 0
         }
       }
     }
